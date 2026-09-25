@@ -1,29 +1,18 @@
 # Project Status
 
-## Repository bootstrap
+## Repository bootstrap and import checkpoint
 
-Status: **in progress on `chore/repository-bootstrap`**.
-
-Observed repository baseline before bootstrap:
-
-- repository: `9TEVE-O/Medical-AI`;
-- visibility: private;
-- default branch: `main`;
-- initial commit: `328091a910ff914ddff5d2d9374b9e5a8afff137`;
-- initial content: two-line `README.md` only;
-- open issues: none observed;
-- pull requests: none observed;
-- `main` branch protection: disabled at bootstrap inspection.
+PR #1 (repository governance) is merged. The observed `main` base for this import is `2796e238bce898fc165a45da6a6f138c7a215e18`. Repository governance and application source are separate milestones. Issue #2 (enforced main protection/required checks) is still open; do not infer a merge gate from a green workflow.
 
 ## Application baseline
 
 The most recent remediated application candidate produced in the Medical AI project is `v0.1.0-alpha2.1-remediation`.
 
-Its source has **not yet been imported into this GitHub repository**. Do not infer repository implementation status from external package/test reports until the exact source is committed and verified here.
+The source is staged on an import PR from the fixed ZIP recorded in `docs/IMPORT_PROVENANCE.md`. At this checkpoint the source has not been merged into `main`. Do not infer GitHub CI results from external package/test reports.
 
 Current high-level status:
 
-- engineering remediation candidate: available outside the repo;
+- engineering remediation candidate: original ZIP preserved; curated source under PR review;
 - public/commercial medical release: **NO-GO**;
 - independent high-consequence clinical verifier: not yet established;
 - live-source behavior: requires revision-bound validation in a network-capable environment;
@@ -32,6 +21,6 @@ Current high-level status:
 
 ## Next repository milestone
 
-Import the remediated application source into a dedicated branch, preserve its exact artifact provenance, run the full regression suite in GitHub CI, inspect the resulting diff, and open a PR into `main`.
+Inspect the source-import diff, run the full regression suite at the exact PR head in GitHub CI, and review the result against Issue #3. Then define the ClaimRecord contract and Evidence Fidelity benchmark for Alpha3 (Issue #4) before adding connectors or free-form synthesis.
 
 Do not mark that milestone complete merely because files were uploaded.

@@ -1,0 +1,16 @@
+version: 0.1
+high_consequence:
+  - medication_dose
+  - contraindication
+  - drug_interaction
+  - pregnancy
+  - paediatrics
+  - renal_or_hepatic_adjustment
+  - anticoagulation
+  - allergy_related_prescribing
+  - emergency_treatment
+  - toxicology
+  - diagnostic_exclusion
+  - treatment_start_or_stop
+  - cancer_therapy
+alpha2_behavior: fail_closed

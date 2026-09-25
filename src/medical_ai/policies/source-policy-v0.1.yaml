@@ -1,0 +1,13 @@
+version: 0.1
+claims:
+  biomedical_literature:
+    alpha2_allowed_sources: [pubmed_indexed_literature]
+  trial_discovery:
+    alpha2_allowed_sources: [clinicaltrials_gov_registry]
+    limitation: "registry facts do not establish treatment efficacy or safety"
+  au_regulatory_status:
+    required_source: tga
+    alpha2_behavior: abstain_no_authoritative_source
+  au_subsidy_status:
+    required_source: pbs
+    alpha2_behavior: abstain_no_authoritative_source

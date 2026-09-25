@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medical AI Evidence Workbench</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color-scheme: light dark; }
+    body { margin: 0; background: Canvas; color: CanvasText; }
+    main { max-width: 1040px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    header { margin-bottom: 1.5rem; }
+    h1 { margin-bottom: .35rem; }
+    .lede { max-width: 76ch; color: color-mix(in srgb, CanvasText 72%, transparent); }
+    .notice { border: 2px solid currentColor; padding: .9rem 1rem; border-radius: .7rem; margin: 1rem 0; }
+    form { display: grid; gap: 1rem; }
+    label { font-weight: 650; display: block; margin-bottom: .35rem; }
+    textarea, select, input, button { font: inherit; }
+    textarea, select { width: 100%; box-sizing: border-box; padding: .75rem; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: .55rem; background: Canvas; color: CanvasText; }
+    textarea { min-height: 9rem; resize: vertical; }
+    .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    button { justify-self: start; padding: .75rem 1.1rem; border-radius: .55rem; border: 2px solid currentColor; background: CanvasText; color: Canvas; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    button:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+    #status { margin: 1.5rem 0 .75rem; font-weight: 700; }
+    .panel { border: 1px solid color-mix(in srgb, CanvasText 28%, transparent); border-radius: .7rem; padding: 1rem; margin-top: 1rem; }
+    .answer { white-space: pre-wrap; line-height: 1.55; }
+    .source { padding: .8rem 0; border-top: 1px solid color-mix(in srgb, CanvasText 18%, transparent); }
+    .source:first-child { border-top: 0; }
+    .meta { font-size: .92rem; color: color-mix(in srgb, CanvasText 72%, transparent); }
+    code { overflow-wrap: anywhere; }
+    details { margin-top: 1rem; }
+    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Medical AI Evidence Workbench</h1>
+    <p class="lede">Alpha2 evidence-retrieval workbench for medical education, research and clinician evidence review. It is not validated for autonomous diagnosis, prescribing or patient-specific treatment decisions.</p>
+  </header>
+
+  <div class="notice" role="note">
+    <strong>Privacy boundary:</strong> do not enter identifying patient information. This build attempts to detect and block patient-specific or identifying wording before public evidence connectors are called, but the detector is heuristic and cannot guarantee de-identification.
+  </div>
+
+  <form id="query-form">
+    <div>
+      <label for="question">Medical evidence question</label>
+      <textarea id="question" name="question" required minlength="3" maxlength="4000" placeholder="Example: What evidence exists for exercise reducing blood pressure?"></textarea>
+    </div>
+    <div class="row">
+      <div>
+        <label for="user-mode">View</label>
+        <select id="user-mode" name="user_mode">
+          <option value="clinician">Clinician</option>
+          <option value="student">Medical student</option>
+          <option value="researcher">Researcher</option>
+        </select>
+      </div>
+      <div>
+        <label for="jurisdiction">Primary jurisdiction</label>
+        <select id="jurisdiction" name="jurisdiction">
+          <option value="AU">Australia</option>
+          <option value="INTERNATIONAL">International</option>
+          <option value="US">United States</option>
+        </select>
+      </div>
+      <div>
+        <label for="limit">Source limit</label>
+        <select id="limit" name="limit">
+          <option>3</option><option selected>5</option><option>10</option><option>20</option>
+        </select>
+      </div>
+    </div>
+    <button id="submit" type="submit">Search evidence</button>
+  </form>
+
+  <div id="status" role="status" aria-live="polite"></div>
+  <section id="result" hidden aria-labelledby="answer-heading">
+    <div class="panel">
+      <h2 id="answer-heading">Answer</h2>
+      <div id="answer" class="answer"></div>
+    </div>
+    <div class="panel">
+      <h2>Sources</h2>
+      <div id="sources"></div>
+    </div>
+    <details class="panel">
+      <summary><strong>Why this answer?</strong></summary>
+      <div id="trace" class="meta"></div>
+    </details>
+  </section>
+</main>
+<script>
+const form = document.getElementById('query-form');
+const statusEl = document.getElementById('status');
+const result = document.getElementById('result');
+const answer = document.getElementById('answer');
+const sources = document.getElementById('sources');
+const trace = document.getElementById('trace');
+const submit = document.getElementById('submit');
+
+function appendText(parent, tag, text, cls) {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  if (cls) el.className = cls;
+  parent.appendChild(el);
+  return el;
+}
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  submit.disabled = true;
+  statusEl.textContent = 'Searching approved evidence sources…';
+  result.hidden = true;
+  answer.textContent = '';
+  sources.textContent = '';
+  trace.textContent = '';
+  try {
+    const payload = {
+      question: document.getElementById('question').value,
+      user_mode: document.getElementById('user-mode').value,
+      jurisdiction: document.getElementById('jurisdiction').value,
+      limit: Number(document.getElementById('limit').value)
+    };
+    const response = await fetch('/v1/evidence/query', {
+      method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    const data = await response.json();
+    statusEl.textContent = `Result state: ${data.status}`;
+    // Render structured verified claims rather than raw Markdown text or untrusted HTML.
+    answer.textContent = '';
+    const passedClaims = (data.claims || []).filter(c => c.verification_status === 'PASS');
+    if (passedClaims.length === 0) {
+      appendText(answer, 'p', data.answer_markdown.replace(/^### Evidence-bound answer\s*/m, '').trim());
+    } else {
+      const list = document.createElement('ul');
+      const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
+      passedClaims.forEach(claim => {
+        const item = document.createElement('li');
+        item.appendChild(document.createTextNode(claim.claim_text + ' '));
+        (claim.source_ids || []).forEach((sid, idx) => {
+          const src = sourceMap.get(sid);
+          if (!src) return;
+          const link = document.createElement('a');
+          link.href = src.stable_url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+          link.textContent = src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id);
+          item.appendChild(link);
+          if (idx < claim.source_ids.length - 1) item.appendChild(document.createTextNode(' '));
+        });
+        list.appendChild(item);
+      });
+      answer.appendChild(list);
+    }
+    if (data.sources.length === 0) {
+      appendText(sources, 'p', 'No admitted source was used for this answer.');
+    } else {
+      data.sources.forEach(src => {
+        const box = document.createElement('div'); box.className = 'source';
+        const link = document.createElement('a'); link.href = src.stable_url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = src.title; box.appendChild(link);
+        appendText(box, 'div', `${src.authority} · ${src.source_type} · ${src.jurisdiction}`, 'meta');
+        appendText(box, 'div', Object.entries(src.identifiers).map(([k,v]) => `${k}: ${v}`).join(' · '), 'meta');
+        sources.appendChild(box);
+      });
+    }
+    appendText(trace, 'p', `Trace ID: ${data.trace.trace_id}`);
+    appendText(trace, 'p', `Consequence: ${data.trace.query_plan.consequence_level}; source classes: ${data.trace.query_plan.required_source_classes.join(', ')}`);
+    appendText(trace, 'p', `Connectors: ${data.trace.connectors_used.join(', ') || 'none'}; source IDs: ${data.trace.source_ids.join(', ') || 'none'}`);
+    appendText(trace, 'p', `Safety flags: ${data.trace.safety_flags.join(', ') || 'none'}`);
+    result.hidden = false;
+    document.getElementById('answer-heading').focus?.();
+  } catch (err) {
+    statusEl.textContent = `Unable to complete request: ${err.message}`;
+  } finally {
+    submit.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

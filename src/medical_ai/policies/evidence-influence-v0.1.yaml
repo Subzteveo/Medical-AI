@@ -1,0 +1,12 @@
+version: 0.1
+fundamental_rule: "A model is never evidence"
+influence_allowed_requires:
+  - evidence
+  - provenance
+  - validation
+  - safety
+  - monitoring
+alpha2:
+  generative_medical_claims: false
+  claim_mode: extractive_exact_passage
+  high_consequence_release: false

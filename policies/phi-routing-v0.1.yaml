@@ -1,0 +1,11 @@
+version: 0.1
+production_claim: false
+required_component_flags:
+  - evidence_approved
+  - phi_approved
+rule: "Patient-specific or identifying health information must never route through phi_approved=false components"
+alpha2:
+  pubmed_phi_approved: false
+  clinicaltrials_phi_approved: false
+  detected_patient_specific_behavior: block_before_connector
+  detector_completeness_claim: false
