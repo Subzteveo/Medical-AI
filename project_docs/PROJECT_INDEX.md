@@ -10,6 +10,8 @@ This file is the entry point for durable project state in GitHub.
 - `SECURITY.md` — security/privacy handling and safety-critical defect definition.
 - `project_docs/STATUS.md` — current development checkpoint and evidence state.
 - `project_docs/DEVELOPMENT_WORKFLOW.md` — branch/PR/check/release flow.
+- `project_docs/CLAIM_RECORD_EPISTEMIC_CONTRACT.md` — claim-level evidence/influence contract and model authority boundaries.
+- `project_docs/ALPHA3_EVIDENCE_FIDELITY.md` — Alpha3 milestone scope, benchmark contract, evaluation dimensions, gates, and completion evidence.
 
 ## Documents expected when application source is imported
 
@@ -18,9 +20,9 @@ The application package should bring or establish canonical owners for:
 - product requirements and intended use;
 - architecture and typed domain contracts;
 - Medical Evidence Influence Policy;
-- claim/source/consequence policies;
+- claim/source/consequence policies consistent with the ClaimRecord epistemic contract;
 - PHI routing policy;
-- validation/evaluation plan;
+- validation/evaluation plan consistent with Alpha3 Evidence Fidelity where applicable;
 - release-readiness and known-limitations records;
 - source/licensing register;
 - versioned runtime/worker prompts.
@@ -34,7 +36,9 @@ Do not duplicate the same durable fact across multiple files. Update the existin
 3. this file
 4. `project_docs/STATUS.md`
 5. `project_docs/DEVELOPMENT_WORKFLOW.md`
-6. the specific requirement/policy/architecture document affected by the requested work
+6. `project_docs/CLAIM_RECORD_EPISTEMIC_CONTRACT.md` for claim/evidence behavior
+7. `project_docs/ALPHA3_EVIDENCE_FIDELITY.md` for the current evidence milestone
+8. the specific requirement/policy/architecture document affected by the requested work
 
 ## Evidence rule
 
