@@ -3,24 +3,80 @@
 ## Repository bootstrap and import checkpoint
 
 PR #1 (repository governance) is merged. The observed `main` base for this import is `2796e238bce898fc165a45da6a6f138c7a215e18`. Repository governance and application source are separate milestones. Issue #2 (enforced main protection/required checks) is still open; do not infer a merge gate from a green workflow.
+## Repository state
+
+Status: **governance bootstrap merged; enforcement and application import pending**.
+
+Observed repository state at this checkpoint:
+
+- repository: `9TEVE-O/Medical-AI`;
+- visibility: private;
+- default branch: `main`;
+- current `main`: `2796e238bce898fc165a45da6a6f138c7a215e18`;
+- PR #1 (`chore: bootstrap Medical AI repository governance`) is merged;
+- governance files are present on `main`;
+- `main` branch protection is still not established;
+- no required CI status checks are currently established on `main`;
+- application source has not yet been imported.
+
+Issue #2 remains the repository-enforcement gate. Issue #3 remains the exact-source import and CI gate.
 
 ## Application baseline
 
-The most recent remediated application candidate produced in the Medical AI project is `v0.1.0-alpha2.1-remediation`.
+The most recent remediated application candidate produced outside this repository is `v0.1.0-alpha2.1-remediation`.
 
-The source is staged on an import PR from the fixed ZIP recorded in `docs/IMPORT_PROVENANCE.md`. At this checkpoint the source has not been merged into `main`. Do not infer GitHub CI results from external package/test reports.
+Reported artifact provenance:
 
-Current high-level status:
+- artifact SHA-256: `9f574ff4998ee11ca3ff2a77e6014312159bc96d63457e25f41702fac74f95d8`;
+- external package verification reported 63/63 deterministic tests passing from the extracted artifact;
+- those results are external artifact evidence, not yet GitHub-revision verification.
+
+The exact remediation source has **not yet been imported into this GitHub repository**. Do not reconstruct it from summaries or copy unrelated development-framework source into this repository. Import must use the exact remediation artifact/source and preserve its provenance.
+
+Current high-level state:
 
 - engineering remediation candidate: original ZIP preserved; curated source under PR review;
+- engineering remediation candidate: available outside the repository;
+- repository application implementation: not yet established;
 - public/commercial medical release: **NO-GO**;
 - independent high-consequence clinical verifier: not yet established;
 - live-source behavior: requires revision-bound validation in a network-capable environment;
 - intended-purpose/regulatory determination: unresolved for public/commercial use;
 - accessibility/runtime validation: not yet release-established.
 
-## Next repository milestone
+## Product architecture checkpoint
+
+Working product thesis:
+
+> **Medical AI is an evidence operating system with a conversational interface.**
+
+The fundamental product object is the **claim and its evidence state**, not merely an answer or retrieved document.
+
+`ClaimRecord` is to be mandatory internal infrastructure and the conceptual basis for progressively inspectable evidence. Generated prose is a view over verified state; a model does not create medical truth.
+
+The governing rule remains:
+
+> **A model is never evidence.**
+
+See `CLAIM_RECORD_EPISTEMIC_CONTRACT.md` for the current claim-influence contract.
+
+## Alpha3 direction
+
+Alpha3 is now framed as **Evidence Fidelity**, not retrieval quality alone.
+
+The milestone must establish that Medical AI can correctly construct and gate evidence state before meaningful free-form medical synthesis is allowed:
+
+`Question -> claim/intention classification -> authoritative retrieval -> authority selection -> source admissibility/rejection -> evidence extraction -> ClaimRecord -> claim/evidence verification -> applicability/conflict/freshness checks -> safety gate -> supported/qualified/abstained state`
+
+Retrieval recall@k remains an important metric, but is not sufficient evidence of milestone completion.
+
+See `ALPHA3_EVIDENCE_FIDELITY.md`.
+
+## Next repository milestones
 
 Inspect the source-import diff, run the full regression suite at the exact PR head in GitHub CI, and review the result against Issue #3. Then define the ClaimRecord contract and Evidence Fidelity benchmark for Alpha3 (Issue #4) before adding connectors or free-form synthesis.
+1. Complete Issue #2: enforce the intended PR/check protection on `main` and read back the active configuration.
+2. Complete Issue #3: import the exact `alpha2.1-remediation` source, preserve artifact provenance, and establish deterministic CI bound to the PR head.
+3. Execute Alpha3 against the imported revision using the Evidence Fidelity contract and revision-bound evaluation evidence.
 
-Do not mark that milestone complete merely because files were uploaded.
+Do not begin broad generative medical synthesis before these gates are established.
