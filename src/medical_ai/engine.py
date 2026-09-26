@@ -14,6 +14,7 @@ from .extractor import extract_evidence
 from .claims import build_claims
 from .verifier import verify_claims
 from .renderer import render_answer
+from .connectors.base import require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
 
 _TRACE_HMAC_KEY = (
@@ -38,10 +39,13 @@ class EvidenceEngine:
         if phi_policy.get("rule") is None:
             raise RuntimeError("PHI routing policy is missing its governing rule")
         if isinstance(connectors, Mapping):
-            self.connectors = dict(connectors)
+            self.connectors = {
+                source_class: require_evidence_approved(connector, source_class)
+                for source_class, connector in connectors.items()
+            }
         else:
             source_class = getattr(connectors, "source_class", "biomedical_literature")
-            self.connectors = {source_class: connectors}
+            self.connectors = {source_class: require_evidence_approved(connectors, source_class)}
         self.trace_store = trace_store
 
     async def answer(self, question: str, *, user_mode: str = "clinician", jurisdiction: str = "AU", limit: int = 5) -> EvidenceAnswer:
@@ -87,6 +91,19 @@ class EvidenceEngine:
                 digest=digest,
                 status=AnswerStatus.NO_AUTHORITATIVE_SOURCE,
                 message=f"### Evidence-bound answer\n\nNo approved {source_class} connector is configured for this workflow.",
+            )
+        try:
+            connector = require_evidence_approved(connector, source_class)
+        except ValueError as exc:
+            return self._terminal(
+                plan=plan,
+                digest=digest,
+                status=AnswerStatus.NO_AUTHORITATIVE_SOURCE,
+                message=(
+                    "### Evidence-bound answer\n\n"
+                    f"No evidence-approved {source_class} connector is configured for this workflow."
+                ),
+                safety_flags=[*plan.safety_flags, f"EVIDENCE_APPROVAL_BLOCKED:{type(exc).__name__}"],
             )
         if not getattr(connector, "phi_approved", False) and plan.patient_specific:
             return self._terminal(

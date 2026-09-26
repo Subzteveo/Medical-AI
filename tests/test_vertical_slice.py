@@ -98,6 +98,7 @@ class FailingConnector:
     name = "failing-source"
     version = "fixture-2"
     source_class = "biomedical_literature"
+    evidence_approved = True
     phi_approved = False
     async def search_and_fetch(self, query: str, limit: int = 5):
         raise OSError("simulated upstream outage")
@@ -110,3 +111,39 @@ async def test_source_outage_fails_safe_without_model_fallback():
     assert out.claims == []
     assert "not producing a medical evidence answer from memory" in out.answer_markdown
     assert any(flag.startswith("CONNECTOR_ERROR:") for flag in out.trace.safety_flags)
+
+
+class UnapprovedConnector:
+    name = "unapproved-source"
+    version = "fixture-2"
+    source_class = "biomedical_literature"
+    evidence_approved = False
+    phi_approved = False
+
+    async def search_and_fetch(self, query: str, limit: int = 5):
+        return [], []
+
+
+class MissingApprovalConnector:
+    name = "missing-approval-source"
+    version = "fixture-2"
+    source_class = "biomedical_literature"
+    phi_approved = False
+
+    async def search_and_fetch(self, query: str, limit: int = 5):
+        return [], []
+
+
+def test_unapproved_connector_is_rejected_at_admission():
+    with pytest.raises(ValueError, match="not evidence-approved"):
+        EvidenceEngine(UnapprovedConnector())
+
+
+def test_missing_approval_metadata_fails_closed_at_admission():
+    with pytest.raises(ValueError, match="not evidence-approved"):
+        EvidenceEngine(MissingApprovalConnector())
+
+
+def test_connector_selection_cannot_bypass_source_class_gate():
+    with pytest.raises(ValueError, match="source class mismatch"):
+        EvidenceEngine({"biomedical_literature": FakeTrialConnector()})

@@ -7,6 +7,7 @@ class FakePubMedConnector:
     name = "fake-pubmed"
     version = "fixture-2"
     source_class = "biomedical_literature"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self, sources=None, passages=None):
@@ -37,6 +38,7 @@ class FakeTrialConnector:
     name = "fake-clinicaltrials"
     version = "fixture-2"
     source_class = "clinical_trial_registry"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self):

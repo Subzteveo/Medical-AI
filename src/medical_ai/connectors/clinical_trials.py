@@ -32,6 +32,7 @@ class ClinicalTrialsConnector:
     name = "clinicaltrials-gov-v2"
     version = "alpha2.1-red-remediation"
     source_class = "clinical_trial_registry"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self, *, timeout: float = 20.0):

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -79,6 +81,7 @@ class RecordingConnector:
     name = "recording-pubmed"
     version = "regression"
     source_class = "biomedical_literature"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self, sources=None, passages=None):
@@ -180,6 +183,7 @@ class TrialFixture:
     name = "trial-fixture"
     version = "regression"
     source_class = "clinical_trial_registry"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self, source, passage):
@@ -309,8 +313,13 @@ def test_ui_does_not_display_answer_markdown_as_literal_text():
 
 def test_runtime_dependencies_are_exactly_pinned_for_reproducibility():
     pyproject = (Path(__file__).parents[1] / "pyproject.toml").read_text()
-    runtime_lines = [line.strip() for line in pyproject.splitlines() if line.strip().startswith(('"fastapi', '"httpx', '"pydantic', '"uvicorn'))]
+    runtime_lines = [
+        line.strip()
+        for line in pyproject.splitlines()
+        if line.strip().startswith(('"fastapi', '"httpx', '"pydantic', '"PyYAML', '"uvicorn'))
+    ]
     assert runtime_lines
+    assert any(line.startswith('"PyYAML') for line in runtime_lines)
     assert all("==" in line for line in runtime_lines)
 
 
@@ -318,6 +327,31 @@ def test_import_checksum_script_verifies_existing_manifest_instead_of_regenerati
     script = (Path(__file__).parents[1] / "scripts/verify_source_checksums.py").read_text()
     assert "write_text" not in script
     assert "SOURCE_SHA256SUMS" in script
+
+
+def test_policy_verification_script_uses_runtime_errors_not_asserts_and_survives_python_o():
+    repo_root = Path(__file__).parents[1]
+    script_path = repo_root / "scripts/verify_package_policies.py"
+    script_text = script_path.read_text()
+    assert "assert " not in script_text
+    run = subprocess.run(
+        [sys.executable, "-O", str(script_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert run.returncode == 0, run.stderr
+    assert "Installed policies match the repository policies and parse successfully." in run.stdout
+
+
+def test_release_readiness_provenance_claim_is_exact_sha_bound_and_fail_closed():
+    release_doc = (Path(__file__).parents[1] / "project_docs/RELEASE_AND_OPERATIONS.md").read_text()
+    assert "exact PR head SHA" in release_doc
+    assert "2b01946d6baf4f83a58b8ca11d1ece1cae4726e3" in release_doc
+    assert "36199969522" in release_doc
+    assert "36199966626" in release_doc
+    assert "Any newer SHA is unverified until matching CI evidence is recorded." in release_doc
 
 
 @pytest.mark.asyncio

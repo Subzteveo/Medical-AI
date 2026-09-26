@@ -24,6 +24,7 @@ class PubMedConnector:
     name = "pubmed-eutils"
     version = "alpha2.1-red-remediation"
     source_class = "biomedical_literature"
+    evidence_approved = True
     phi_approved = False
 
     def __init__(self, *, email: str | None = None, api_key: str | None = None, timeout: float = 20.0):

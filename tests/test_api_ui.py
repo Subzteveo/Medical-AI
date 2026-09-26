@@ -8,6 +8,7 @@ def test_root_serves_accessible_workbench_shell():
     assert "Medical AI Evidence Workbench" in response.text
     assert 'label for="question"' in response.text
     assert 'aria-live="polite"' in response.text
+    assert 'id="answer-heading" tabindex="-1"' in response.text
     assert "do not enter identifying patient information" in response.text
 
 
