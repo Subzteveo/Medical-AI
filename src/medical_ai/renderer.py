@@ -1,5 +1,5 @@
 from __future__ import annotations
-from urllib.parse import quote, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 from .schemas import ClaimRecord, SourceRecord, VerificationStatus
 
 
@@ -18,9 +18,9 @@ def _safe_markdown_url(value: str) -> str:
         (
             parts.scheme,
             parts.netloc,
-            quote(parts.path, safe="/:@%+-._~"),
-            quote(parts.query, safe="=&%+-._~"),
-            quote(parts.fragment, safe="%+-._~"),
+            quote(unquote(parts.path), safe="/:@%+-._~"),
+            quote(unquote(parts.query), safe="=&%+-._~"),
+            quote(unquote(parts.fragment), safe="%+-._~"),
         )
     )
 
