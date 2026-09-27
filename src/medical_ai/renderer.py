@@ -5,7 +5,7 @@ from .schemas import ClaimRecord, SourceRecord, VerificationStatus
 
 def _escape_markdown_text(value: str) -> str:
     escaped = value.replace("\\", "\\\\")
-    for ch in ("`", "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "-", ".", "!", ">", "<", "|"):
+    for ch in ("`", "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "!", ">", "<", "|"):
         escaped = escaped.replace(ch, f"\\{ch}")
     return escaped
 
