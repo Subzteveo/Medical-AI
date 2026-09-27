@@ -11,6 +11,9 @@ def _escape_markdown_text(value: str) -> str:
 
 
 def _safe_markdown_url(value: str) -> str:
+    def _encode_link_component(component: str, *, safe: str) -> str:
+        return quote(unquote(component), safe=safe).replace("(", "%28").replace(")", "%29")
+
     parts = urlsplit(value)
     if parts.scheme.lower() not in {"http", "https"}:
         return "#"
@@ -18,9 +21,9 @@ def _safe_markdown_url(value: str) -> str:
         (
             parts.scheme,
             parts.netloc,
-            quote(unquote(parts.path), safe="/:@%+-._~"),
-            quote(unquote(parts.query), safe="=&%+-._~"),
-            quote(unquote(parts.fragment), safe="%+-._~"),
+            _encode_link_component(parts.path, safe="/:@%+-._~"),
+            _encode_link_component(parts.query, safe="=&%+-._~"),
+            _encode_link_component(parts.fragment, safe="%+-._~"),
         )
     )
 

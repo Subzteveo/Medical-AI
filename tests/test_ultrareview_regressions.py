@@ -417,6 +417,33 @@ def test_renderer_escapes_untrusted_markdown_content():
     assert "javascript:alert(1))" not in out
 
 
+def test_renderer_blocks_relative_urls_fail_closed():
+    from medical_ai.renderer import render_answer
+
+    source = SourceRecord(
+        source_id="pubmed:relative",
+        authority="NLM/NCBI PubMed",
+        publisher="Journal",
+        source_type="indexed_biomedical_literature",
+        title="Relative URL source",
+        record_id="2",
+        stable_url="/local/path?q=test",
+        identifiers={"PMID": "124"},
+    )
+    claim = ClaimRecord(
+        claim_id="c2",
+        claim_text="Relative URL should be blocked.",
+        consequence_level=ConsequenceLevel.MODERATE,
+        evidence_ids=["e2"],
+        source_ids=[source.source_id],
+        verification_status=VerificationStatus.PASS,
+    )
+
+    out = render_answer([claim], [source])
+    assert "[PMID 124](#)" in out
+    assert "[Relative URL source](#)" in out
+
+
 def test_policy_file_is_operationally_bound_to_planner_categories():
     policy = (Path(__file__).parents[1] / "policies/consequence-policy-v0.1.yaml").read_text()
     categories = {
