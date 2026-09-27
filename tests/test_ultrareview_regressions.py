@@ -444,6 +444,33 @@ def test_renderer_blocks_relative_urls_fail_closed():
     assert "[Relative URL source](#)" in out
 
 
+def test_renderer_blocks_http_scheme_without_netloc():
+    from medical_ai.renderer import render_answer
+
+    source = SourceRecord(
+        source_id="pubmed:bad-http",
+        authority="NLM/NCBI PubMed",
+        publisher="Journal",
+        source_type="indexed_biomedical_literature",
+        title="Malformed URL source",
+        record_id="3",
+        stable_url="https:example.com/path",
+        identifiers={"PMID": "125"},
+    )
+    claim = ClaimRecord(
+        claim_id="c3",
+        claim_text="Malformed absolute URL should be blocked.",
+        consequence_level=ConsequenceLevel.MODERATE,
+        evidence_ids=["e3"],
+        source_ids=[source.source_id],
+        verification_status=VerificationStatus.PASS,
+    )
+
+    out = render_answer([claim], [source])
+    assert "[PMID 125](#)" in out
+    assert "[Malformed URL source](#)" in out
+
+
 def test_policy_file_is_operationally_bound_to_planner_categories():
     policy = (Path(__file__).parents[1] / "policies/consequence-policy-v0.1.yaml").read_text()
     categories = {

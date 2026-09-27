@@ -15,7 +15,7 @@ def _safe_markdown_url(value: str) -> str:
         return quote(component, safe=safe).replace("(", "%28").replace(")", "%29")
 
     parts = urlsplit(value)
-    if parts.scheme.lower() not in {"http", "https"}:
+    if parts.scheme.lower() not in {"http", "https"} or not parts.netloc:
         return "#"
     return urlunsplit(
         (
