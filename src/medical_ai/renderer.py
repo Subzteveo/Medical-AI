@@ -1,5 +1,5 @@
 from __future__ import annotations
-from urllib.parse import quote, unquote, urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 from .schemas import ClaimRecord, SourceRecord, VerificationStatus
 
 
@@ -12,7 +12,7 @@ def _escape_markdown_text(value: str) -> str:
 
 def _safe_markdown_url(value: str) -> str:
     def _encode_link_component(component: str, *, safe: str) -> str:
-        return quote(unquote(component), safe=safe).replace("(", "%28").replace(")", "%29")
+        return quote(component, safe=safe).replace("(", "%28").replace(")", "%29")
 
     parts = urlsplit(value)
     if parts.scheme.lower() not in {"http", "https"}:
