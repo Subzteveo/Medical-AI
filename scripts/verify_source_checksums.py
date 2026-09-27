@@ -41,19 +41,27 @@ def main() -> int:
             failures.append(f"Source checksum mismatch: {name}")
     if paths != sorted(set(paths)):
         failures.append("Manifest paths must be unique and sorted")
-    tracked = subprocess.run(
-        ["git", "-C", str(ROOT), "ls-files", "-z"],
-        capture_output=True,
-        check=False,
-    )
-    if tracked.returncode == 0:
-        tracked_source = {
-            name for name in tracked.stdout.decode("utf-8").split("\0") if name
-            and (name.startswith(SOURCE_PREFIXES) or name == "pyproject.toml")
-        }
-        unlisted = tracked_source - set(paths)
-        if unlisted:
-            failures.append("Unlisted tracked source: " + ", ".join(sorted(unlisted)))
+    try:
+        tracked = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "-z"],
+            capture_output=True,
+            check=False,
+        )
+    except OSError as exc:
+        failures.append(f"git ls-files failed: {exc}")
+    else:
+        if tracked.returncode != 0:
+            stderr = tracked.stderr.decode("utf-8", errors="replace").strip()
+            details = f": {stderr}" if stderr else ""
+            failures.append(f"git ls-files failed with exit {tracked.returncode}{details}")
+        else:
+            tracked_source = {
+                name for name in tracked.stdout.decode("utf-8").split("\0") if name
+                and (name.startswith(SOURCE_PREFIXES) or name == "pyproject.toml")
+            }
+            unlisted = tracked_source - set(paths)
+            if unlisted:
+                failures.append("Unlisted tracked source: " + ", ".join(sorted(unlisted)))
     for failure in failures:
         print(failure, file=sys.stderr)
     if failures:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -16,6 +17,7 @@ from medical_ai.extractor import extract_evidence
 from medical_ai.planner import plan_query
 from medical_ai.schemas import (
     AnswerStatus,
+    ClaimRecord,
     ConsequenceLevel,
     EvidenceUnit,
     Passage,
@@ -329,6 +331,23 @@ def test_import_checksum_script_verifies_existing_manifest_instead_of_regenerati
     assert "SOURCE_SHA256SUMS" in script
 
 
+def test_import_checksum_script_fails_closed_when_git_ls_files_fails(monkeypatch, capsys):
+    repo_root = Path(__file__).parents[1]
+    script_path = repo_root / "scripts/verify_source_checksums.py"
+    spec = importlib.util.spec_from_file_location("verify_source_checksums_test_module", script_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    def _failing_git_ls_files(*args, **kwargs):
+        return subprocess.CompletedProcess(args=args[0], returncode=2, stdout=b"", stderr=b"fatal: simulated git failure")
+
+    monkeypatch.setattr(module.subprocess, "run", _failing_git_ls_files)
+    assert module.main() == 1
+    captured = capsys.readouterr()
+    assert "git ls-files failed with exit 2" in captured.err
+
+
 def test_policy_verification_script_uses_runtime_errors_not_asserts_and_survives_python_o():
     repo_root = Path(__file__).parents[1]
     script_path = repo_root / "scripts/verify_package_policies.py"
@@ -348,9 +367,9 @@ def test_policy_verification_script_uses_runtime_errors_not_asserts_and_survives
 def test_release_readiness_provenance_claim_is_exact_sha_bound_and_fail_closed():
     release_doc = (Path(__file__).parents[1] / "project_docs/RELEASE_AND_OPERATIONS.md").read_text()
     assert "exact PR head SHA" in release_doc
-    assert "2b01946d6baf4f83a58b8ca11d1ece1cae4726e3" in release_doc
-    assert "36199969522" in release_doc
-    assert "36199966626" in release_doc
+    assert "e17f8b2656204f76e0a353f833e9494fbfa70311" in release_doc
+    assert "36159636815" in release_doc
+    assert "36159603463" in release_doc
     assert "Any newer SHA is unverified until matching CI evidence is recorded." in release_doc
 
 
@@ -368,6 +387,34 @@ async def test_overlapping_prompt_injection_sentence_is_not_rendered():
         "Did treatment X reduce symptom scores?"
     )
     assert "doubled" not in out.answer_markdown.lower()
+
+
+def test_renderer_escapes_untrusted_markdown_content():
+    from medical_ai.renderer import render_answer
+
+    source = SourceRecord(
+        source_id="pubmed:markdown",
+        authority="NLM/NCBI PubMed",
+        publisher="Journal",
+        source_type="indexed_biomedical_literature",
+        title="Source [title](javascript:alert(1))",
+        record_id="1",
+        stable_url="javascript:alert(1)",
+        identifiers={"PMID": "123"},
+    )
+    claim = ClaimRecord(
+        claim_id="c1",
+        claim_text="Use [click](javascript:alert(1)) *now*",
+        consequence_level=ConsequenceLevel.MODERATE,
+        evidence_ids=["e1"],
+        source_ids=[source.source_id],
+        verification_status=VerificationStatus.PASS,
+    )
+
+    out = render_answer([claim], [source])
+    assert "- Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
+    assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](#)" in out
+    assert "javascript:alert(1))" not in out
 
 
 def test_policy_file_is_operationally_bound_to_planner_categories():

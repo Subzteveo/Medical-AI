@@ -19,7 +19,7 @@ This directory is a **remediation source candidate derived from the canonical al
 | TGA intended-purpose/classification determination | Unverified; required before public/commercial launch |
 | PHI/privacy production route | Unsatisfied |
 | Browser accessibility runtime checks | Unverified |
-| GitHub/revision provenance | Conditional and fail-closed: treat as verified only when both pull-request and push CI runs succeed for the exact PR head SHA. Last verified SHA: `2b01946d6baf4f83a58b8ca11d1ece1cae4726e3` (PR run `36199969522`, push run `36199966626`). Any newer SHA is unverified until matching CI evidence is recorded. |
+| GitHub/revision provenance | Conditional and fail-closed: treat as verified only when both pull-request and push CI runs succeed for the exact PR head SHA. Last verified SHA: `e17f8b2656204f76e0a353f833e9494fbfa70311` (PR run `36159636815`, push run `36159603463`). Any newer SHA is unverified until matching CI evidence is recorded. |
 | Public deployment rollback/monitoring | Not applicable yet / not designed for deployment |
 
 **Public/external medical release: NO-GO.**
