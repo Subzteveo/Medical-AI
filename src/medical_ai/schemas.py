@@ -78,6 +78,14 @@ class InfluenceDecisionStatus(StrEnum):
     DENY = "DENY"
 
 
+class PHIClassification(BaseModel):
+    classification_id: str
+    object_id: str
+    information_class: InformationClass = InformationClass.UNKNOWN
+    contains_phi: bool | None = None
+    policy_version: str = "medical-ai-influence-v0.2"
+
+
 class SourceRecord(BaseModel):
     source_id: str
     authority: str
@@ -98,6 +106,7 @@ class SourceRecord(BaseModel):
     evidence_class: str = "primary_or_indexed_literature"
     population: str | None = None
     phi_status: str = "non_phi"
+    phi_classification: PHIClassification | None = None
     provenance_complete: bool = True
     raw_metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -207,14 +216,6 @@ class ConnectorApproval(BaseModel):
     evidence_authority: AuthorityState = AuthorityState.UNKNOWN
     information_handling_authority: AuthorityState = AuthorityState.UNKNOWN
     permitted_planes: list[DataPlane] = Field(default_factory=list)
-    policy_version: str = "medical-ai-influence-v0.2"
-
-
-class PHIClassification(BaseModel):
-    classification_id: str
-    object_id: str
-    information_class: InformationClass = InformationClass.UNKNOWN
-    contains_phi: bool | None = None
     policy_version: str = "medical-ai-influence-v0.2"
 
 

@@ -99,8 +99,10 @@ async def test_provenance_incomplete_source_is_rejected():
 
 
 @pytest.mark.asyncio
-async def test_non_public_source_cannot_bypass_information_handling_gate():
-    source = FakePubMedConnector().sources[0].model_copy(update={"phi_status": "phi"})
+async def test_unclassified_source_cannot_bypass_information_handling_gate():
+    source = FakePubMedConnector().sources[0].model_copy(
+        update={"phi_status": "non_phi", "phi_classification": None}
+    )
     connector = FakePubMedConnector([source], FakePubMedConnector().passages)
     out = await EvidenceEngine(connector).answer("What evidence shows treatment X reduces symptom scores?")
     assert out.status == AnswerStatus.INFLUENCE_DENIED

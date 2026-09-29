@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import httpx
 
 from medical_ai.retrieval_query import normalize_search_query
-from medical_ai.schemas import Passage, SourceRecord
+from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
@@ -121,6 +121,12 @@ class PubMedConnector:
                 identifiers=identifiers,
                 publication_date=publication_date,
                 superseded=retracted,
+                phi_classification=PHIClassification(
+                    classification_id=f"public:{source_id}",
+                    object_id=source_id,
+                    information_class=InformationClass.PUBLIC,
+                    contains_phi=False,
+                ),
                 provenance_complete=True,
                 raw_metadata={
                     "journal": journal,

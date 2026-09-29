@@ -18,6 +18,7 @@ from .schemas import (
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    PHIClassification,
     VerificationStatus,
 )
 from .planner import plan_query
@@ -169,7 +170,11 @@ class EvidenceEngine:
                 continue
             claim_sources = [source for source in admitted if source.source_id in claim.source_ids]
             public_non_phi = bool(claim_sources) and all(
-                source.phi_status == "non_phi" for source in claim_sources
+                isinstance(source.phi_classification, PHIClassification)
+                and source.phi_classification.object_id == source.source_id
+                and source.phi_classification.information_class == InformationClass.PUBLIC
+                and source.phi_classification.contains_phi is False
+                for source in claim_sources
             )
             subject = InfluenceSubject(
                 object_id=claim.claim_id,
