@@ -17,6 +17,11 @@ async def test_end_to_end_extracts_verifies_and_traces(fake_connector):
     assert "PMID 123" in out.answer_markdown
     assert out.claims[0].source_ids == ["pubmed:123"]
     assert out.trace.retrieval_query_digests[0].startswith("hmac-sha256:")
+    assert out.influence_decisions
+    assert all(decision.allowed for decision in out.influence_decisions)
+    assert out.trace.authorization_decision_ids == [
+        decision.decision_id for decision in out.influence_decisions
+    ]
 
 
 def test_unsupported_claim_is_rejected():
@@ -82,6 +87,18 @@ async def test_provenance_incomplete_source_is_rejected():
     out = await EvidenceEngine(FakePubMedConnector([bad], FakePubMedConnector().passages)).answer("What evidence shows treatment X reduces symptom scores?")
     assert out.status == AnswerStatus.PROVENANCE_INCOMPLETE
     assert out.sources == []
+
+
+@pytest.mark.asyncio
+async def test_non_public_source_cannot_bypass_information_handling_gate():
+    source = FakePubMedConnector().sources[0].model_copy(update={"phi_status": "phi"})
+    connector = FakePubMedConnector([source], FakePubMedConnector().passages)
+    out = await EvidenceEngine(connector).answer("What evidence shows treatment X reduces symptom scores?")
+    assert out.status == AnswerStatus.INFLUENCE_DENIED
+    assert out.claims == []
+    assert out.influence_decisions
+    assert out.influence_decisions[0].allowed is False
+    assert "INFORMATION_HANDLING_AUTHORITY_UNKNOWN" in out.influence_decisions[0].reasons
 
 
 @pytest.mark.asyncio
