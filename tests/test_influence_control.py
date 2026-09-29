@@ -1,3 +1,5 @@
+import pytest
+
 from medical_ai.influence import InfluenceController
 from medical_ai.schemas import (
     AuthorityState,
@@ -20,6 +22,7 @@ def subject(
     validation=True,
     safety=True,
     monitoring=True,
+    revision=1,
 ):
     return InfluenceSubject(
         object_id=object_id,
@@ -32,6 +35,7 @@ def subject(
         safety_passed=safety,
         monitoring_enabled=monitoring,
         version="fixture-v1",
+        revision=revision,
     )
 
 
@@ -111,6 +115,14 @@ def test_transition_source_plane_mismatch_fails_closed():
     assert "TRANSITION_NOT_ALLOWED" in decision.reasons
 
 
+def test_explicitly_empty_transition_policy_denies_all_transitions():
+    controller = InfluenceController([])
+    decision = controller.authorize(request(subject()))
+
+    assert decision.allowed is False
+    assert "TRANSITION_NOT_ALLOWED" in decision.reasons
+
+
 def test_missing_provenance_validation_safety_or_monitoring_fails_closed():
     cases = [
         (dict(provenance=False), "PROVENANCE_INCOMPLETE"),
@@ -160,6 +172,32 @@ def test_revoked_subject_cannot_bypass_gate_with_stale_approved_request():
     decision = controller.authorize(request(stale_copy, downstream="claim:second"))
     assert decision.allowed is False
     assert "EVIDENCE_AUTHORITY_REVOKED" in decision.reasons
+
+
+def test_conflicting_subject_snapshot_denies_and_requires_higher_revision_update():
+    controller = InfluenceController()
+    approved = subject()
+    assert controller.authorize(request(approved, downstream="claim:first")).allowed is True
+
+    denied = subject(evidence=AuthorityState.DENIED)
+    decision = controller.authorize(request(denied, downstream="claim:denied"))
+    assert decision.allowed is False
+    assert "SUBJECT_SNAPSHOT_CONFLICT" in decision.reasons
+    assert controller.get_subject(approved.object_id).evidence_authority == AuthorityState.DENIED
+    assert controller.get_downstream_state("claim:first").active is False
+
+    stale_decision = controller.authorize(request(approved, downstream="claim:stale"))
+    assert stale_decision.allowed is False
+    assert "SUBJECT_SNAPSHOT_CONFLICT" in stale_decision.reasons
+
+    with pytest.raises(ValueError, match="higher revision"):
+        controller.update_subject(subject(revision=1))
+
+    controller.update_subject(subject(revision=2))
+    refreshed_decision = controller.authorize(
+        request(subject(revision=2), downstream="claim:refreshed")
+    )
+    assert refreshed_decision.allowed is True
 
 
 def test_canonical_object_model_is_machine_readable():

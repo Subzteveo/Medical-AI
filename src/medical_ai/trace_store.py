@@ -53,6 +53,7 @@ class SQLiteTraceStore:
             "safety_flags": trace.safety_flags,
             "component_versions": trace.component_versions,
             "final_status": trace.final_status.value,
+            "authorization_decision_ids": trace.authorization_decision_ids,
         }
         query_digest = trace.retrieval_query_digests[0] if trace.retrieval_query_digests else None
         with self._connect() as db:

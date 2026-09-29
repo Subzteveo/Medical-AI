@@ -17,6 +17,8 @@ async def test_trace_store_does_not_persist_raw_question(tmp_path: Path):
     assert stored is not None
     assert question not in json.dumps(stored)
     assert stored["retrieval_query_digests"][0].startswith("hmac-sha256:")
+    assert stored["authorization_decision_ids"] == out.trace.authorization_decision_ids
+    assert stored["authorization_decision_ids"]
     with sqlite3.connect(db_path) as db:
         raw = db.execute("select payload_json from execution_traces").fetchone()[0]
     assert question not in raw

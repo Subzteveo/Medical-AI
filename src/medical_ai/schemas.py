@@ -250,6 +250,7 @@ class InfluenceSubject(BaseModel):
     safety_passed: bool = False
     monitoring_enabled: bool = False
     version: str
+    revision: int = Field(default=1, ge=1)
 
 
 class DataPlaneTransition(BaseModel):

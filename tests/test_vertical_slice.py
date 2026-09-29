@@ -110,6 +110,18 @@ async def test_unclassified_source_cannot_bypass_information_handling_gate():
     assert out.influence_decisions
     assert out.influence_decisions[0].allowed is False
     assert "INFORMATION_HANDLING_AUTHORITY_UNKNOWN" in out.influence_decisions[0].reasons
+    assert out.sources == []
+    assert all(
+        metadata not in out.answer_markdown
+        for metadata in (
+            source.source_id,
+            source.title,
+            source.stable_url,
+            source.authority,
+            source.record_id,
+            *source.identifiers.values(),
+        )
+    )
 
 
 @pytest.mark.asyncio

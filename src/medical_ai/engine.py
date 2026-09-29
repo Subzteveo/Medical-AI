@@ -239,6 +239,12 @@ class EvidenceEngine:
             passage for passage in admitted_passages
             if passage.passage_id in visible_passage_ids
         ]
+        authorized_source_ids = {
+            source_id for claim in authorized_claims for source_id in claim.source_ids
+        }
+        visible_sources = [
+            source for source in admitted if source.source_id in authorized_source_ids
+        ]
         unit_by_id = {unit.evidence_id: unit for unit in visible_units}
         citation_mappings = []
         for claim in authorized_claims:
@@ -275,11 +281,11 @@ class EvidenceEngine:
             status=status,
             answer_markdown=render_answer(
                 authorized_claims,
-                admitted,
+                visible_sources,
                 trial_discovery="TRIAL_QUERY" in plan.intent,
             ),
             claims=authorized_claims,
-            sources=admitted,
+            sources=visible_sources,
             evidence_objects=visible_units,
             citation_mappings=citation_mappings,
             passages=visible_passages,

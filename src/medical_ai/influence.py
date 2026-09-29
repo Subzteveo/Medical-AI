@@ -27,13 +27,15 @@ class InfluenceController:
     policy_version = "medical-ai-influence-v0.2"
 
     def __init__(self, allowed_transitions: Iterable[tuple[DataPlane, DataPlane]] | None = None):
-        self.allowed_transitions = set(allowed_transitions or {
+        defaults = {
             (DataPlane.EVIDENCE, DataPlane.EVIDENCE),
             (DataPlane.TERMINOLOGY, DataPlane.TERMINOLOGY),
             (DataPlane.CLINICAL, DataPlane.CLINICAL),
             (DataPlane.RESEARCH, DataPlane.RESEARCH),
-        })
+        }
+        self.allowed_transitions = set(defaults if allowed_transitions is None else allowed_transitions)
         self._subjects: dict[str, InfluenceSubject] = {}
+        self._conflicted_subjects: set[str] = set()
         self._decisions: dict[str, InfluenceDecision] = {}
         self._dependencies = []
         self._downstream_states: dict[str, DownstreamInfluenceState] = {}
@@ -43,11 +45,27 @@ class InfluenceController:
         return list(self._decisions.values())
 
     def authorize(self, request: InfluenceRequest) -> InfluenceDecision:
-        subject = self._subjects.setdefault(
-            request.subject.object_id,
-            request.subject.model_copy(deep=True),
-        )
+        object_id = request.subject.object_id
+        subject = self._subjects.get(object_id)
+        snapshot_conflict = False
+        if subject is None:
+            subject = request.subject.model_copy(deep=True)
+            self._subjects[object_id] = subject
+        elif subject.model_dump() != request.subject.model_dump():
+            snapshot_conflict = True
+            self._conflicted_subjects.add(object_id)
+            subject.evidence_authority = self._restrict_authority(
+                subject.evidence_authority, request.subject.evidence_authority
+            )
+            subject.information_handling_authority = self._restrict_authority(
+                subject.information_handling_authority,
+                request.subject.information_handling_authority,
+            )
+            self._invalidate_subject_dependents(object_id)
+
         reasons: list[str] = []
+        if snapshot_conflict or object_id in self._conflicted_subjects:
+            reasons.append("SUBJECT_SNAPSHOT_CONFLICT")
         transition = request.transition
 
         if subject.data_plane != transition.source_plane:
@@ -96,6 +114,37 @@ class InfluenceController:
         if allowed:
             self._record_dependencies(request)
         return decision
+
+    @staticmethod
+    def _restrict_authority(current: AuthorityState, incoming: AuthorityState) -> AuthorityState:
+        restriction = {
+            AuthorityState.APPROVED: 0,
+            AuthorityState.UNKNOWN: 1,
+            AuthorityState.DENIED: 2,
+            AuthorityState.REVOKED: 3,
+        }
+        return max((current, incoming), key=restriction.__getitem__)
+
+    def _invalidate_subject_dependents(self, object_id: str) -> None:
+        for edge in self._dependencies:
+            if edge.upstream_object_id != object_id:
+                continue
+            state = self._downstream_states.setdefault(
+                edge.downstream_object_id,
+                DownstreamInfluenceState(object_id=edge.downstream_object_id),
+            )
+            state.active = False
+            reason = f"UPSTREAM_SUBJECT_SNAPSHOT_CONFLICT:{object_id}"
+            if reason not in state.invalidation_reasons:
+                state.invalidation_reasons.append(reason)
+
+    def update_subject(self, subject: InfluenceSubject) -> None:
+        """Apply an authoritative snapshot only when its revision increases."""
+        current = self._subjects.get(subject.object_id)
+        if current is not None and subject.revision <= current.revision:
+            raise ValueError("Authoritative subject updates require a higher revision")
+        self._subjects[subject.object_id] = subject.model_copy(deep=True)
+        self._conflicted_subjects.discard(subject.object_id)
 
     def _record_dependencies(self, request: InfluenceRequest) -> None:
         from .schemas import DependencyEdge
