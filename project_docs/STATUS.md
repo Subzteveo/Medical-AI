@@ -1,5 +1,8 @@
 # Project Status
 
+## Repository bootstrap and import checkpoint
+
+PR #1 (repository governance) is merged. The observed `main` base for this import is `2796e238bce898fc165a45da6a6f138c7a215e18`. Repository governance and application source are separate milestones. Issue #2 (enforced main protection/required checks) is still open; do not infer a merge gate from a green workflow.
 ## Repository state
 
 Status: **governance bootstrap merged; enforcement and application import pending**.
@@ -32,6 +35,7 @@ The exact remediation source has **not yet been imported into this GitHub reposi
 
 Current high-level state:
 
+- engineering remediation candidate: original ZIP preserved; curated source under PR review;
 - engineering remediation candidate: available outside the repository;
 - repository application implementation: not yet established;
 - public/commercial medical release: **NO-GO**;
@@ -70,6 +74,7 @@ See `ALPHA3_EVIDENCE_FIDELITY.md`.
 
 ## Next repository milestones
 
+Inspect the source-import diff, run the full regression suite at the exact PR head in GitHub CI, and review the result against Issue #3. Then define the ClaimRecord contract and Evidence Fidelity benchmark for Alpha3 (Issue #4) before adding connectors or free-form synthesis.
 1. Complete Issue #2: enforce the intended PR/check protection on `main` and read back the active configuration.
 2. Complete Issue #3: import the exact `alpha2.1-remediation` source, preserve artifact provenance, and establish deterministic CI bound to the PR head.
 3. Execute Alpha3 against the imported revision using the Evidence Fidelity contract and revision-bound evaluation evidence.

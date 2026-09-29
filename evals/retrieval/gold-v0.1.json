@@ -1,0 +1,9 @@
+{
+  "status": "fixture-only-not-live-retrieval-validation",
+  "purpose": "Exercise retrieval metric plumbing before a clinician-reviewed authoritative-source gold set exists.",
+  "target": "The Medical Evidence Influence Policy target of >=98% authoritative-source recall@k is NOT established by these fixtures.",
+  "cases": [
+    {"case_id":"RET-FIX-001","expected_ids":["pubmed:expected-a"],"ranked_ids":["pubmed:expected-a","pubmed:other"]},
+    {"case_id":"RET-FIX-002","expected_ids":["ctgov:NCT00000001"],"ranked_ids":["ctgov:NCT00000001"]}
+  ]
+}

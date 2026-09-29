@@ -8,9 +8,9 @@ Developed by Oli and Stevie.
 
 **Pre-release development. Not approved for clinical use, diagnosis, prescribing, patient-specific treatment decisions, or public/commercial medical release.**
 
-The repository is being bootstrapped before application source is imported. The latest remediated application artifact has passed its bounded automated/package verification, but live-source, regulatory/intended-purpose, independent high-consequence verification, accessibility, and public-release gates remain separate evidence requirements.
+The alpha2.1 remediation source is being brought into GitHub through an import pull request. The original package passed bounded historical automated/package checks; GitHub CI for the imported tree must be evaluated at the exact PR head before merge. Live-source, regulatory/intended-purpose, independent high-consequence verification, accessibility, and public-release gates remain separate evidence requirements.
 
-See [`project_docs/PROJECT_INDEX.md`](project_docs/PROJECT_INDEX.md) for the source-of-truth map and [`project_docs/STATUS.md`](project_docs/STATUS.md) for the current development checkpoint.
+See [`project_docs/PROJECT_INDEX.md`](project_docs/PROJECT_INDEX.md) for the source-of-truth map, [`project_docs/STATUS.md`](project_docs/STATUS.md) for the current development checkpoint, and [`docs/IMPORT_PROVENANCE.md`](docs/IMPORT_PROVENANCE.md) for the exact import boundary.
 
 ## Engineering principles
 

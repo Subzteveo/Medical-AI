@@ -1,0 +1,373 @@
+Yes. I’ve started treating this as an **architecture due-diligence pass**, not another discovery list. The governing rule remains your Medical Evidence Influence Policy: a component only gets production influence when **Evidence ∧ Provenance ∧ Validation ∧ Safety ∧ Monitoring** all pass, and models themselves are never treated as evidence.
+
+## Deep-pass result: the first integration classes
+
+I’d now classify candidates into six dispositions: **Integrate directly**, **Wrap with our MCP**, **Infrastructure only**, **Evaluate as model**, **Defer**, and **Reject/quarantine**. This distinction matters because a mature API without MCP is often substantially more valuable than a young repository advertising itself as a “medical MCP.”
+
+| Candidate | Authority / maturity | Version & provenance | AU relevance | PHI posture | Disposition |
+|---|---|---|---|---|---|
+| Google Healthcare MCP Servers | Google examples over NIH/FDA/CMS/NLM | Good upstream IDs; repo itself is very young | Medium | Public data, but queries may contain PHI | **Fork/audit, then integrate selected servers** |
+| PubMed/PMC | NLM/NIH | Excellent PMID/PMCID/version metadata | High | Avoid PHI in search queries | **Direct core integration** |
+| ClinicalTrials.gov | US government | Stable trial identifiers + structured records | International | Usually non-PHI retrieval | **Direct core integration** |
+| RxNorm | NLM | Strong identifiers + current/historical concepts | Useful crosswalk layer | Usually non-PHI | **Direct + MCP wrapper** |
+| openFDA | FDA | Structured regulatory datasets | International comparison | Queries can become sensitive | **Direct + MCP wrapper** |
+| UMLS | NLM | Excellent terminology crosswalk capability | High | Licence/account requirements | **Integrate behind controlled terminology service** |
+| SNOMED CT-AU / AMT | ADHA/NCTS | Excellent explicit release versions | **Critical** | Terminology itself non-PHI | **First-class AU integration** |
+| CSIRO Ontoserver | CSIRO/AEHRC | Multi-version terminology + syndication | **Critical** | Can sit inside protected infrastructure | **Core terminology infrastructure** |
+| PBS API | Australian Government | Monthly versioned Schedule | **Critical** | Public dataset | **Direct AU integration** |
+| SMART on FHIR | Established interoperability ecosystem | FHIR resource/version semantics | **Critical later** | Explicit PHI boundary | **Infrastructure, not evidence** |
+| OMOP CDM | OHDSI | Versioned schema | High for research | Potentially PHI-bearing | **Research/data infrastructure** |
+
+### 1. Google Healthcare MCP: useful accelerator, not something to trust wholesale
+
+The repository is more interesting after inspection, but also more clearly an **accelerator rather than our medical backbone**.
+
+It currently contains 10 MCP servers spanning PubMed, ClinicalTrials.gov, RxNorm, UMLS, FDA safety, ICD-10, CMS coverage, NPI, MedlinePlus and drug datasets. It is Apache-2.0, containerized, includes caching/rate-limiting/retries, and keeps deployment within the customer's tenant. ([github.com](https://github.com/GoogleCloudPlatform/hcls-mcp-servers?utm_source=chatgpt.com))
+
+However, the repository currently shows only **four commits**, which is far too little history for us to infer long-term maintenance maturity. ([github.com](https://github.com/GoogleCloudPlatform/hcls-mcp-servers?utm_source=chatgpt.com))
+
+So my disposition changes slightly from the earlier excavation:
+
+**Do not make `hcls-mcp-servers` a dependency of Medical AI.**
+
+Instead:
+
+> Fork/reference its implementations → audit each upstream API → extract useful connector patterns → write our own version-controlled adapters where necessary.
+
+That keeps Google code replaceable.
+
+---
+
+## 2. PubMed/PMC should be a foundational evidence adapter
+
+This one survives deep inspection extremely well.
+
+NCBI's E-utilities are a stable programmatic interface to PubMed and the wider Entrez ecosystem; NCBI also provides PMC APIs and bulk-download mechanisms. ([ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/home/develop/api/?utm_source=chatgpt.com))
+
+More importantly for our architecture, PubMed provides an annual baseline plus **daily update files containing new, revised and deleted citations**. That lets us build genuine freshness/version monitoring rather than merely rerunning searches periodically. ([pubmed.ncbi.nlm.nih.gov](https://pubmed.ncbi.nlm.nih.gov/download/?utm_source=chatgpt.com))
+
+I would therefore build our own:
+
+```text id="00zutk"
+literature.search
+literature.fetch
+literature.related
+literature.citations
+literature.fulltext
+literature.version
+literature.retractions
+literature.updated_since
+```
+
+returning a normalized evidence object containing PMID, PMCID where applicable, DOI, publication type, dates, MeSH, source provenance and exact retrieved passages.
+
+**Disposition: CORE v0.1.**
+
+---
+
+## 3. Australia should have its own terminology plane
+
+This has become one of the strongest architectural conclusions.
+
+SNOMED CT-AU is being released with explicit version identifiers and includes AMT and FHIR artifacts. The NCTS release history demonstrates active, regular releases; for example the August 2026 edition identifies its precise SNOMED version URI and the associated AMT/FHIR content. ([healthterminologies.gov.au](https://www.healthterminologies.gov.au/category/news-and-events/?utm_source=chatgpt.com))
+
+Licensing cannot be ignored. Australian implementers using SNOMED CT-AU/AMT must comply with the relevant SNOMED CT Affiliate and Australian terminology licence obligations. ([healthterminologies.gov.au](https://www.healthterminologies.gov.au/library/Clinical-Terminology-Implementation-Process-Checklist.pdf?utm_source=chatgpt.com))
+
+CSIRO Ontoserver is particularly compelling because it already exposes exactly the primitives we need through FHIR terminology operations: CodeSystem, ValueSet, ConceptMap, version handling, validation, lookup, mappings and terminology syndication. ([ontoserver.csiro.au](https://www.ontoserver.csiro.au/site/technical-documentation/ontoserver-technical-documentation/fhir-api/?utm_source=chatgpt.com))
+
+Ontoserver itself is licensed software, although CSIRO states that it is free for Australian use by registered Australian Digital Health Agency licence holders under the relevant arrangement. ([ontoserver.csiro.au](https://ontoserver.csiro.au/docs/7.1.0/overview.html?utm_source=chatgpt.com))
+
+Therefore I would **not reinvent a terminology engine**.
+
+Our MCP becomes an abstraction over it:
+
+```text id="ssv0qw"
+terminology.search()
+terminology.lookup()
+terminology.validate()
+terminology.expand()
+terminology.translate()
+terminology.history()
+terminology.version()
+terminology.normalize()
+```
+
+with:
+
+```text id="eagor1"
+                    Terminology MCP
+                         │
+                  Terminology Router
+                         │
+        ┌────────────────┼────────────────┐
+        ▼                ▼                ▼
+     NCTS/AU           UMLS              WHO
+        │                │                │
+ Ontoserver           Metathesaurus      ICD-11
+        │
+ ┌──────┼──────┐
+ ▼      ▼      ▼
+SCT-AU  AMT   LOINC
+```
+
+**Disposition: CORE v0.1.**
+
+---
+
+## 4. PBS API is considerably better than a scraped medicines database
+
+The deeper inspection turned up an unusually useful property: the Australian Government has explicitly designed the new PBS API for software consumption.
+
+It exposes the complete PBS Schedule using REST/JSON/CSV, retains the latest 12 months of effective schedules, provides schedule metadata and updates on the first day of every month. ([data.pbs.gov.au](https://data.pbs.gov.au/document/91327.html?utm_source=chatgpt.com))
+
+The API isn't intended as a high-volume transactional lookup service. The public endpoint is limited to one request per 20 seconds, with the architecture encouraging clients to download and maintain local copies. ([data.pbs.gov.au](https://data.pbs.gov.au/document/91327.html?utm_source=chatgpt.com))
+
+That's actually ideal for us.
+
+We should build:
+
+```text id="jq7exm"
+PBS API
+   ↓ monthly ingest
+Immutable raw snapshot
+   ↓
+Validated normalized tables
+   ↓
+AMT mapping
+   ↓
+Local indexed store
+   ↓
+pbs_mcp
+```
+
+not hammer the government API for every user question.
+
+**Disposition: CORE AU v0.1.**
+
+---
+
+## 5. RxNorm is useful—but it exposed an important trap
+
+RxNorm itself is strong: NLM maintains the API, current and historical concepts are available, and almost all RxNorm API use requires no licence. ([lhncbc.nlm.nih.gov](https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html?utm_source=chatgpt.com))
+
+It also supports a locally installable **RxNav-in-a-Box**, which becomes attractive if we eventually need predictable performance or higher throughput. NLM currently limits the public APIs to 20 requests/sec/IP and recommends caching. ([lhncbc.nlm.nih.gov](https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html?utm_source=chatgpt.com))
+
+But the excavation caught something important:
+
+> **RxNav discontinued its drug-drug interaction feature in January 2024.**
+
+NLM identifies the previous underlying sources but no longer provides that interaction service. ([lhncbc.nlm.nih.gov](https://lhncbc.nlm.nih.gov/RxNav/information/FAQs.html?utm_source=chatgpt.com))
+
+So:
+
+```text id="nz9jgc"
+RxNorm ≠ drug interaction engine
+```
+
+That prevents a dangerous architectural assumption.
+
+Drug interaction evidence needs its **own source investigation and licensing track**.
+
+**Disposition: CORE terminology/normalisation; NOT interaction authority.**
+
+---
+
+## 6. openFDA belongs in the regulatory plane, not generic medical search
+
+openFDA is mature enough for direct integration and supports API access plus downloadable datasets. For larger ingestion jobs, FDA explicitly supports downloading endpoint data rather than relying solely on live queries. ([open.fda.gov](https://open.fda.gov/apis/downloads/?utm_source=chatgpt.com))
+
+The API supports 120,000 calls/day/key under its standard authenticated limits. ([open.fda.gov](https://open.fda.gov/apis/authentication/?utm_source=chatgpt.com))
+
+It includes substantially more than FAERS: drug adverse events, labels, NDC, Drugs@FDA, Orange Book, shortages, enforcement plus numerous medical-device datasets. ([open.fda.gov](https://open.fda.gov/about/statistics/?utm_source=chatgpt.com))
+
+But we must maintain epistemic distinctions:
+
+```text id="ik7acj"
+FAERS signal
+      ≠
+causation
+
+FDA label
+      ≠
+Australian PI
+
+FDA approval
+      ≠
+TGA approval
+```
+
+Therefore every returned regulatory object needs:
+
+```text id="go2zro"
+jurisdiction: US
+authority: FDA
+dataset
+record_id
+product_id
+effective_date
+retrieval_timestamp
+source_version
+```
+
+**Disposition: CORE international regulatory adapter.**
+
+---
+
+# 7. SMART/FHIR and OMOP belong below the evidence layer
+
+This distinction is becoming essential.
+
+SMART on FHIR's JavaScript library is mature, Apache-2.0 and supports browser and server-side FHIR connections. ([github.com](https://github.com/smart-on-fhir/client-js?utm_source=chatgpt.com))
+
+OHDSI's OMOP CDM is also mature, but the project itself currently recommends **CDM 5.5 rather than 6.0** because 6.0 is not fully supported across the OHDSI tool ecosystem. ([github.com](https://github.com/OHDSI/commondatamodel?utm_source=chatgpt.com))
+
+Neither is evidence.
+
+They are:
+
+**FHIR → exchange/interoperability**
+
+**SMART → authorization/application integration**
+
+**OMOP → normalized observational data model**
+
+This gives us an important architectural separation:
+
+```text id="d0l5kv"
+EVIDENCE PLANE
+PubMed / guidelines / regulators / trials
+
+TERMINOLOGY PLANE
+SNOMED / AMT / UMLS / ICD / LOINC
+
+CLINICAL DATA PLANE
+FHIR / SMART / EHR
+
+RESEARCH DATA PLANE
+OMOP / cohorts / analytics
+```
+
+An LLM should never confuse information in a patient's FHIR record with generalizable clinical evidence.
+
+---
+
+# 8. PHI needs an architectural firewall
+
+The Google MCP repository itself makes an important point: even though its underlying datasets are public, **queries can become PHI when placed in patient context**. ([github.com](https://github.com/GoogleCloudPlatform/hcls-mcp-servers?utm_source=chatgpt.com))
+
+Therefore every connector needs two independent statuses:
+
+```text id="8hzvdw"
+evidence_approved = true/false
+phi_approved      = true/false
+```
+
+Exactly as your Evidence Influence Policy anticipates.
+
+For example, OpenAI currently documents BAA-eligible API arrangements and retention controls including Zero Data Retention/Modified Abuse Monitoring, but endpoint-specific eligibility still matters. ([developers.openai.com](https://developers.openai.com/api/docs/guides/your-data?article_id=8510&utm_source=chatgpt.com))
+
+Anthropic likewise says BAA coverage is limited to qualifying HIPAA-eligible services/configurations; ordinary Claude consumer products and some features are excluded. ([support.anthropic.com](https://support.anthropic.com/en/articles/8114513-business-associate-agreements-baa-for-commercial-customers?utm_source=chatgpt.com))
+
+So model routing eventually needs:
+
+```text id="tw26y8"
+task
+ │
+ ├─ contains PHI? ───────── YES
+ │                       ↓
+ │              PHI-approved route only
+ │
+ └─ NO
+      ↓
+ broader approved model pool
+```
+
+For Australian deployment we'd separately map Australian Privacy Act, APPs, health-record requirements, state requirements and hosting/vendor contracts rather than treating HIPAA compliance as sufficient.
+
+---
+
+# Medical Evidence MCP Gateway v0.1
+
+The deeper excavation now supports a much more concrete specification.
+
+```text id="szn8d5"
+                 MEDICAL AI APPLICATION
+                         │
+                    Query Router
+                         │
+               ┌─────────▼─────────┐
+               │ Evidence Gateway │
+               └─────────┬─────────┘
+                         │
+       ┌─────────────────┼─────────────────┐
+       │                 │                 │
+   EVIDENCE          TERMINOLOGY       REGULATORY
+       │                 │                 │
+   PubMed/PMC        SNOMED CT-AU          TGA
+ ClinicalTrials          AMT               FDA
+  Guidelines             UMLS              EMA
+ Systematic rev.         ICD               MHRA
+       │                 LOINC              │
+       │                 │                  │
+       └─────────────────┼──────────────────┘
+                         │
+                 NORMALIZED EVIDENCE
+                         │
+               ┌─────────▼─────────┐
+               │ Provenance Store │
+               └─────────┬─────────┘
+                         │
+                   Claim Builder
+                         │
+                Claim ↔ Evidence
+                   Verification
+                         │
+                 Conflict/Freshness
+                      Gate
+                         │
+                    Model Router
+                         │
+             Evidence-bound synthesis
+                         │
+                      ANSWER
+```
+
+### Every tool response should carry an envelope
+
+```json id="egqho8"
+{
+  "source_id": "...",
+  "authority": "...",
+  "jurisdiction": "AU",
+  "source_type": "regulator",
+  "record_id": "...",
+  "version": "...",
+  "effective_date": "...",
+  "retrieved_at": "...",
+  "superseded": false,
+  "licence_class": "...",
+  "evidence_class": "...",
+  "passages": [],
+  "identifiers": {},
+  "phi_status": "non_phi",
+  "provenance_complete": true
+}
+```
+
+The generator receives **these objects**, not uncontrolled search snippets.
+
+---
+
+# v0.1 integration sequence
+
+I would now make the first implementation tranche:
+
+**PubMed/PMC → ClinicalTrials.gov → NCTS/SNOMED CT-AU/AMT/Ontoserver → PBS → RxNorm → UMLS → openFDA → TGA regulatory ingestion.**
+
+Then add guidelines/systematic reviews and the missing medicines/drug-interaction authority.
+
+FHIR/SMART should be designed into the interfaces now but **kept outside the v1 evidence product's normal data path**. OMOP belongs later when research/cohort functionality arrives.
+
+Google's MCP implementations can accelerate several of those connectors, but our gateway should own the schemas, provenance contract, version registry, security policy and validation tests.
+
+And this reveals the next major excavation target: **guidelines + systematic reviews + Australian TGA data + drug interactions**. Those four areas are now more important than finding another 50 generic “medical MCP” repositories, because they determine whether the system can progress from impressive retrieval to genuinely evidence-bound medical synthesis.
