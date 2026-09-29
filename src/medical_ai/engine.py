@@ -10,6 +10,7 @@ from typing import Mapping
 from .schemas import (
     AnswerStatus,
     AuthorityState,
+    CitationMapping,
     DataPlane,
     DataPlaneTransition,
     EvidenceAnswer,
@@ -218,6 +219,38 @@ class EvidenceEngine:
         else:
             status = AnswerStatus.EVIDENCE_INSUFFICIENT
 
+        authorized_evidence_ids = {
+            evidence_id
+            for claim in authorized_claims
+            for evidence_id in claim.evidence_ids
+        }
+        visible_units = [unit for unit in units if unit.evidence_id in authorized_evidence_ids]
+        visible_passage_ids = {
+            passage_id
+            for unit in visible_units
+            for passage_id in unit.passage_ids
+        }
+        visible_passages = [
+            passage for passage in admitted_passages
+            if passage.passage_id in visible_passage_ids
+        ]
+        unit_by_id = {unit.evidence_id: unit for unit in visible_units}
+        citation_mappings = []
+        for claim in authorized_claims:
+            for evidence_id in claim.evidence_ids:
+                unit = unit_by_id.get(evidence_id)
+                if unit is None:
+                    continue
+                citation_mappings.append(CitationMapping(
+                    mapping_id=f"{claim.claim_id}:{evidence_id}",
+                    claim_id=claim.claim_id,
+                    evidence_id=evidence_id,
+                    source_id=unit.source_id,
+                    passage_ids=list(unit.passage_ids),
+                    entailment_status=claim.entailment_status,
+                    verified=claim.verification_status == VerificationStatus.PASS,
+                ))
+
         trace = ExecutionTrace(
             trace_id=str(uuid.uuid4()),
             query_plan=plan,
@@ -242,7 +275,9 @@ class EvidenceEngine:
             ),
             claims=authorized_claims,
             sources=admitted,
-            passages=[],
+            evidence_objects=visible_units,
+            citation_mappings=citation_mappings,
+            passages=visible_passages,
             trace=trace,
             influence_decisions=influence_decisions,
         )

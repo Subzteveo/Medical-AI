@@ -313,6 +313,8 @@ class EvidenceAnswer(BaseModel):
     answer_markdown: str
     claims: list[ClaimRecord]
     sources: list[SourceRecord]
+    evidence_objects: list[EvidenceUnit] = Field(default_factory=list)
+    citation_mappings: list[CitationMapping] = Field(default_factory=list)
     passages: list[Passage] = Field(default_factory=list)
     trace: ExecutionTrace
     influence_decisions: list[InfluenceDecision] = Field(default_factory=list)

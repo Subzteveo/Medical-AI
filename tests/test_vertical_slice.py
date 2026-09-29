@@ -22,6 +22,15 @@ async def test_end_to_end_extracts_verifies_and_traces(fake_connector):
     assert out.trace.authorization_decision_ids == [
         decision.decision_id for decision in out.influence_decisions
     ]
+    assert out.evidence_objects
+    assert out.citation_mappings
+    mapping = out.citation_mappings[0]
+    evidence = next(item for item in out.evidence_objects if item.evidence_id == mapping.evidence_id)
+    source = next(item for item in out.sources if item.source_id == mapping.source_id)
+    assert mapping.claim_id == out.claims[0].claim_id
+    assert evidence.source_id == source.source_id
+    assert mapping.passage_ids
+    assert all(any(p.passage_id == passage_id for p in out.passages) for passage_id in mapping.passage_ids)
 
 
 def test_unsupported_claim_is_rejected():

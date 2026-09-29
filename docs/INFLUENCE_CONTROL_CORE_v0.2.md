@@ -49,6 +49,8 @@ Any failed or unknown required state yields a `DENY` decision. Every call emits 
 
 The evidence engine authorizes each verified claim before it is passed to the renderer. Claims denied by the influence controller are not included in user-visible claim output.
 
+For authorized claims, the returned evidence answer also carries the corresponding `EvidenceObject` records, verified `CitationMapping` records, and supporting `Passage` records. Together with the returned `Source`/`SourceRecord` objects, this preserves a machine-readable `claim → evidence → passage/source` provenance chain through downstream processing without promoting denied claims into user-visible medical output.
+
 ## Dependency and revocation semantics
 
 Dependencies are typed by authority/gate dimension. `revoke_authority()` changes only the selected authority dimension and invalidates only downstream states with an edge on that dimension.
