@@ -20,7 +20,9 @@ from medical_ai.schemas import (
     ClaimRecord,
     ConsequenceLevel,
     EvidenceUnit,
+    InformationClass,
     Passage,
+    PHIClassification,
     SourceRecord,
     VerificationStatus,
 )
@@ -97,6 +99,12 @@ class RecordingConnector:
             record_id="regression",
             stable_url="https://pubmed.ncbi.nlm.nih.gov/1/",
             identifiers={"PMID": "1"},
+            phi_classification=PHIClassification(
+                classification_id="public:pubmed:regression",
+                object_id="pubmed:regression",
+                information_class=InformationClass.PUBLIC,
+                contains_phi=False,
+            ),
         )]
         self.passages = passages if passages is not None else [Passage(
             passage_id="p-regression",

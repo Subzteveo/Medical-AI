@@ -17,6 +17,20 @@ async def test_end_to_end_extracts_verifies_and_traces(fake_connector):
     assert "PMID 123" in out.answer_markdown
     assert out.claims[0].source_ids == ["pubmed:123"]
     assert out.trace.retrieval_query_digests[0].startswith("hmac-sha256:")
+    assert out.influence_decisions
+    assert all(decision.allowed for decision in out.influence_decisions)
+    assert out.trace.authorization_decision_ids == [
+        decision.decision_id for decision in out.influence_decisions
+    ]
+    assert out.evidence_objects
+    assert out.citation_mappings
+    mapping = out.citation_mappings[0]
+    evidence = next(item for item in out.evidence_objects if item.evidence_id == mapping.evidence_id)
+    source = next(item for item in out.sources if item.source_id == mapping.source_id)
+    assert mapping.claim_id == out.claims[0].claim_id
+    assert evidence.source_id == source.source_id
+    assert mapping.passage_ids
+    assert all(any(p.passage_id == passage_id for p in out.passages) for passage_id in mapping.passage_ids)
 
 
 def test_unsupported_claim_is_rejected():
@@ -82,6 +96,32 @@ async def test_provenance_incomplete_source_is_rejected():
     out = await EvidenceEngine(FakePubMedConnector([bad], FakePubMedConnector().passages)).answer("What evidence shows treatment X reduces symptom scores?")
     assert out.status == AnswerStatus.PROVENANCE_INCOMPLETE
     assert out.sources == []
+
+
+@pytest.mark.asyncio
+async def test_unclassified_source_cannot_bypass_information_handling_gate():
+    source = FakePubMedConnector().sources[0].model_copy(
+        update={"phi_status": "non_phi", "phi_classification": None}
+    )
+    connector = FakePubMedConnector([source], FakePubMedConnector().passages)
+    out = await EvidenceEngine(connector).answer("What evidence shows treatment X reduces symptom scores?")
+    assert out.status == AnswerStatus.INFLUENCE_DENIED
+    assert out.claims == []
+    assert out.influence_decisions
+    assert out.influence_decisions[0].allowed is False
+    assert "INFORMATION_HANDLING_AUTHORITY_UNKNOWN" in out.influence_decisions[0].reasons
+    assert out.sources == []
+    assert all(
+        metadata not in out.answer_markdown
+        for metadata in (
+            source.source_id,
+            source.title,
+            source.stable_url,
+            source.authority,
+            source.record_id,
+            *source.identifiers.values(),
+        )
+    )
 
 
 @pytest.mark.asyncio

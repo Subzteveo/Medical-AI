@@ -1,6 +1,6 @@
 from __future__ import annotations
 import pytest
-from medical_ai.schemas import Passage, SourceRecord
+from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
 
 
 class FakePubMedConnector:
@@ -22,6 +22,12 @@ class FakePubMedConnector:
             stable_url="https://pubmed.ncbi.nlm.nih.gov/123/",
             identifiers={"PMID":"123"},
             publication_date="2026",
+            phi_classification=PHIClassification(
+                classification_id="public:pubmed:123",
+                object_id="pubmed:123",
+                information_class=InformationClass.PUBLIC,
+                contains_phi=False,
+            ),
         )]
         self.passages = passages if passages is not None else [Passage(
             passage_id="p1", source_id="pubmed:123", section="RESULTS",
@@ -53,6 +59,12 @@ class FakeTrialConnector:
             stable_url="https://clinicaltrials.gov/study/NCT00000001",
             identifiers={"NCT":"NCT00000001"},
             evidence_class="trial_registry_record",
+            phi_classification=PHIClassification(
+                classification_id="public:ctgov:NCT00000001",
+                object_id="ctgov:NCT00000001",
+                information_class=InformationClass.PUBLIC,
+                contains_phi=False,
+            ),
         )]
         self.passages = [Passage(
             passage_id="tp1", source_id="ctgov:NCT00000001", section="REGISTRY_FACT",

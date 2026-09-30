@@ -7,7 +7,20 @@ import secrets
 import uuid
 from typing import Mapping
 
-from .schemas import AnswerStatus, EvidenceAnswer, ExecutionTrace, VerificationStatus
+from .schemas import (
+    AnswerStatus,
+    AuthorityState,
+    CitationMapping,
+    DataPlane,
+    DataPlaneTransition,
+    EvidenceAnswer,
+    ExecutionTrace,
+    InfluenceRequest,
+    InfluenceSubject,
+    InformationClass,
+    PHIClassification,
+    VerificationStatus,
+)
 from .planner import plan_query
 from .source_policy import qualify_source
 from .extractor import extract_evidence
@@ -16,6 +29,7 @@ from .verifier import verify_claims
 from .renderer import render_answer
 from .connectors.base import require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
+from .influence import InfluenceController
 
 _TRACE_HMAC_KEY = (
     os.getenv("MEDICAL_AI_TRACE_HMAC_KEY", "").encode("utf-8")
@@ -28,9 +42,9 @@ def _digest_query(text: str) -> str:
 
 
 class EvidenceEngine:
-    version = "0.1.0-alpha2.1-remediation"
+    version = "0.2.0-influence-control-core"
 
-    def __init__(self, connectors: Mapping[str, object] | object, trace_store=None):
+    def __init__(self, connectors: Mapping[str, object] | object, trace_store=None, influence_controller=None):
         # Load and enforce packaged runtime policies rather than treating YAML as documentation only.
         phi_policy = phi_routing_policy()
         evidence_policy = evidence_influence_policy()
@@ -47,6 +61,7 @@ class EvidenceEngine:
             source_class = getattr(connectors, "source_class", "biomedical_literature")
             self.connectors = {source_class: require_evidence_approved(connectors, source_class)}
         self.trace_store = trace_store
+        self.influence_controller = influence_controller or InfluenceController()
 
     async def answer(self, question: str, *, user_mode: str = "clinician", jurisdiction: str = "AU", limit: int = 5) -> EvidenceAnswer:
         plan = plan_query(question, user_mode=user_mode, jurisdiction=jurisdiction)
@@ -147,12 +162,58 @@ class EvidenceEngine:
         units = extract_evidence(question, admitted, admitted_passages)
         claims = build_claims(units, plan)
         verified = verify_claims(claims, units, admitted_passages, high_consequence_supported=False)
-        passed = [c for c in verified if c.verification_status == VerificationStatus.PASS]
+
+        influence_decisions = []
+        authorized_claims = []
+        for claim in verified:
+            if claim.verification_status != VerificationStatus.PASS:
+                continue
+            claim_sources = [source for source in admitted if source.source_id in claim.source_ids]
+            public_non_phi = bool(claim_sources) and all(
+                isinstance(source.phi_classification, PHIClassification)
+                and source.phi_classification.object_id == source.source_id
+                and source.phi_classification.information_class == InformationClass.PUBLIC
+                and source.phi_classification.contains_phi is False
+                for source in claim_sources
+            )
+            subject = InfluenceSubject(
+                object_id=claim.claim_id,
+                object_type="ClaimRecord",
+                data_plane=DataPlane.EVIDENCE,
+                evidence_authority=AuthorityState.APPROVED,
+                information_handling_authority=(
+                    AuthorityState.APPROVED if public_non_phi else AuthorityState.UNKNOWN
+                ),
+                provenance_complete=bool(claim_sources) and all(
+                    source.provenance_complete for source in claim_sources
+                ),
+                validation_passed=True,
+                safety_passed=claim.consequence_level.value != "HIGH",
+                # Every answer creates an ExecutionTrace with component versions and gate outcomes.
+                monitoring_enabled=True,
+                version=self.version,
+            )
+            decision = self.influence_controller.authorize(InfluenceRequest(
+                subject=subject,
+                proposition_id=f"user-output:{claim.claim_id}",
+                transition=DataPlaneTransition(
+                    source_plane=DataPlane.EVIDENCE,
+                    target_plane=DataPlane.EVIDENCE,
+                    information_class=(
+                        InformationClass.PUBLIC if public_non_phi else InformationClass.UNKNOWN
+                    ),
+                ),
+            ))
+            influence_decisions.append(decision)
+            if decision.allowed:
+                authorized_claims.append(claim)
 
         if any(c.consequence_level.value == "HIGH" for c in verified):
             status = AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
-        elif passed:
+        elif authorized_claims:
             status = AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+        elif influence_decisions and any(not decision.allowed for decision in influence_decisions):
+            status = AnswerStatus.INFLUENCE_DENIED
         elif not admitted:
             if any(s.superseded for s in sources):
                 status = AnswerStatus.SOURCE_OUTDATED
@@ -162,6 +223,44 @@ class EvidenceEngine:
                 status = AnswerStatus.NO_AUTHORITATIVE_SOURCE
         else:
             status = AnswerStatus.EVIDENCE_INSUFFICIENT
+
+        authorized_evidence_ids = {
+            evidence_id
+            for claim in authorized_claims
+            for evidence_id in claim.evidence_ids
+        }
+        visible_units = [unit for unit in units if unit.evidence_id in authorized_evidence_ids]
+        visible_passage_ids = {
+            passage_id
+            for unit in visible_units
+            for passage_id in unit.passage_ids
+        }
+        visible_passages = [
+            passage for passage in admitted_passages
+            if passage.passage_id in visible_passage_ids
+        ]
+        authorized_source_ids = {
+            source_id for claim in authorized_claims for source_id in claim.source_ids
+        }
+        visible_sources = [
+            source for source in admitted if source.source_id in authorized_source_ids
+        ]
+        unit_by_id = {unit.evidence_id: unit for unit in visible_units}
+        citation_mappings = []
+        for claim in authorized_claims:
+            for evidence_id in claim.evidence_ids:
+                unit = unit_by_id.get(evidence_id)
+                if unit is None:
+                    continue
+                citation_mappings.append(CitationMapping(
+                    mapping_id=f"{claim.claim_id}:{evidence_id}",
+                    claim_id=claim.claim_id,
+                    evidence_id=evidence_id,
+                    source_id=unit.source_id,
+                    passage_ids=list(unit.passage_ids),
+                    entailment_status=claim.entailment_status,
+                    verified=claim.verification_status == VerificationStatus.PASS,
+                ))
 
         trace = ExecutionTrace(
             trace_id=str(uuid.uuid4()),
@@ -175,15 +274,23 @@ class EvidenceEngine:
             safety_flags=plan.safety_flags,
             component_versions=self._versions(connector),
             final_status=status,
+            authorization_decision_ids=[decision.decision_id for decision in influence_decisions],
         )
         self._persist(trace)
         return EvidenceAnswer(
             status=status,
-            answer_markdown=render_answer(verified, admitted, trial_discovery="TRIAL_QUERY" in plan.intent),
-            claims=verified,
-            sources=admitted,
-            passages=[],
+            answer_markdown=render_answer(
+                authorized_claims,
+                visible_sources,
+                trial_discovery="TRIAL_QUERY" in plan.intent,
+            ),
+            claims=authorized_claims,
+            sources=visible_sources,
+            evidence_objects=visible_units,
+            citation_mappings=citation_mappings,
+            passages=visible_passages,
             trace=trace,
+            influence_decisions=influence_decisions,
         )
 
     def _terminal(self, *, plan, digest, status, message, connectors_used=None, safety_flags=None) -> EvidenceAnswer:
@@ -211,5 +318,6 @@ class EvidenceEngine:
             "extractor": "alpha2.1-extractive-safety-filtered",
             "claim_builder": "alpha2.1-claim-consequence",
             "verifier": "alpha2.1-exact-passage-high-consequence",
+            "influence_controller": self.influence_controller.policy_version,
             "renderer": "alpha2.1",
         }

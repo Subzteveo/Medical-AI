@@ -6,7 +6,7 @@ from typing import Any
 import httpx
 
 from medical_ai.retrieval_query import normalize_search_query
-from medical_ai.schemas import Passage, SourceRecord
+from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
 
 API_BASE = "https://clinicaltrials.gov/api/v2/studies"
 
@@ -85,6 +85,12 @@ class ClinicalTrialsConnector:
                 identifiers={"NCT": nct_id},
                 updated_date=last_update,
                 evidence_class="trial_registry_record",
+                phi_classification=PHIClassification(
+                    classification_id=f"public:ctgov:{nct_id}",
+                    object_id=f"ctgov:{nct_id}",
+                    information_class=InformationClass.PUBLIC,
+                    contains_phi=False,
+                ),
                 provenance_complete=True,
                 raw_metadata={
                     "overall_status": overall_status,
