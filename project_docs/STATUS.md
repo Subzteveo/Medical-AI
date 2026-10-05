@@ -1,82 +1,103 @@
 # Project Status
 
-## Repository bootstrap and import checkpoint
+**Checkpoint date:** 5 October 2026  
+**Repository:** `Subzteveo/Medical-AI`  
+**Current observed `main`:** `c5bd93b4f8c8234f83dfa88efdf656cc92b60d16`  
+**Stage:** engineering alpha / evidence-control architecture  
+**Release posture:** **NO-GO for clinical use or public/commercial medical deployment**
 
-PR #1 (repository governance) is merged. The observed `main` base for this import is `2796e238bce898fc165a45da6a6f138c7a215e18`. Repository governance and application source are separate milestones. Issue #2 (enforced main protection/required checks) is still open; do not infer a merge gate from a green workflow.
-## Repository state
+## Current repository state
 
-Status: **governance bootstrap merged; enforcement and application import pending**.
+The exact alpha2.1 remediation application source has been imported into GitHub and merged. The repository now contains executable application source, deterministic tests/CI, evidence policies, provenance records and the v0.2 evidence-influence control core.
 
-Observed repository state at this checkpoint:
+PR #10 (`feat: add v0.2 evidence influence control core`) is merged into `main`.
 
-- repository: `9TEVE-O/Medical-AI`;
-- visibility: private;
-- default branch: `main`;
-- current `main`: `2796e238bce898fc165a45da6a6f138c7a215e18`;
-- PR #1 (`chore: bootstrap Medical AI repository governance`) is merged;
-- governance files are present on `main`;
-- `main` branch protection is still not established;
-- no required CI status checks are currently established on `main`;
-- application source has not yet been imported.
+The final PR head (`0c8ee71b08f9514d76a715f3f48a82c44f346b7a`) had revision-bound deterministic CI evidence including:
 
-Issue #2 remains the repository-enforcement gate. Issue #3 remains the exact-source import and CI gate.
+- exact-SHA checkout: passed;
+- 76 source checksums verified;
+- 93 tracked files passed targeted hygiene checks;
+- exact-pinned install: passed;
+- complete deterministic pytest suite: **85 passed, 1 dependency deprecation warning**;
+- compile/import: passed; and
+- installed policy parity/parse: passed.
 
-## Application baseline
+These results establish bounded engineering assertions for that revision. They do not establish clinical safety, production readiness, regulatory compliance or real-world evidence accuracy.
 
-The most recent remediated application candidate produced outside this repository is `v0.1.0-alpha2.1-remediation`.
+## Canonical product direction
 
-Reported artifact provenance:
+The long-term product direction is defined in `project_docs/NORTH_STAR.md`:
 
-- artifact SHA-256: `9f574ff4998ee11ca3ff2a77e6014312159bc96d63457e25f41702fac74f95d8`;
-- external package verification reported 63/63 deterministic tests passing from the extracted artifact;
-- those results are external artifact evidence, not yet GitHub-revision verification.
+> **Medical AI is an Australian-first, globally extensible, evidence-bound medical learning and research platform that is Google-simple on the surface and medical-evidence infrastructure underneath.**
 
-The exact remediation source has **not yet been imported into this GitHub repository**. Do not reconstruct it from summaries or copy unrelated development-framework source into this repository. Import must use the exact remediation artifact/source and preserve its provenance.
+The product goal is to turn authoritative medical, regulatory, legal and public-health information into a fast, understandable and traceable evidence experience without allowing an AI model to become the source of medical truth.
 
-Current high-level state:
+This north star is direction, not release authority. The current validated/intended scope remains bounded by `docs/INTENDED_USE.md`, `project_docs/PRODUCT_FOUNDATION.md`, implementation state and validation evidence.
 
-- engineering remediation candidate: original ZIP preserved; curated source under PR review;
-- engineering remediation candidate: available outside the repository;
-- repository application implementation: not yet established;
-- public/commercial medical release: **NO-GO**;
-- independent high-consequence clinical verifier: not yet established;
-- live-source behavior: requires revision-bound validation in a network-capable environment;
-- intended-purpose/regulatory determination: unresolved for public/commercial use;
-- accessibility/runtime validation: not yet release-established.
+## Implemented architectural baseline
 
-## Product architecture checkpoint
-
-Working product thesis:
-
-> **Medical AI is an evidence operating system with a conversational interface.**
-
-The fundamental product object is the **claim and its evidence state**, not merely an answer or retrieved document.
-
-`ClaimRecord` is to be mandatory internal infrastructure and the conceptual basis for progressively inspectable evidence. Generated prose is a view over verified state; a model does not create medical truth.
-
-The governing rule remains:
+The central rule remains:
 
 > **A model is never evidence.**
 
-See `CLAIM_RECORD_EPISTEMIC_CONTRACT.md` for the current claim-influence contract.
+Medical AI v0.2 now includes a machine-enforced influence-control layer with:
 
-## Alpha3 direction
+- canonical typed objects for sources, evidence, claims, citations, connector approval, PHI classification, workflow runs and verification results;
+- separate evidence-authority and information-handling/PHI authority states;
+- explicit `EVIDENCE`, `TERMINOLOGY`, `CLINICAL` and `RESEARCH` planes;
+- fail-closed typed transition policy;
+- inspectable authorization artefacts before a verified claim may render;
+- dependency tracking and authority-dimension-selective revocation/invalidation;
+- stale approved-state replay protection; and
+- execution-trace retention of authorization decisions.
 
-Alpha3 is now framed as **Evidence Fidelity**, not retrieval quality alone.
+The application remains a bounded engineering alpha, not a production medical assistant.
 
-The milestone must establish that Medical AI can correctly construct and gate evidence state before meaningful free-form medical synthesis is allowed:
+## Current evidence path
 
-`Question -> claim/intention classification -> authoritative retrieval -> authority selection -> source admissibility/rejection -> evidence extraction -> ClaimRecord -> claim/evidence verification -> applicability/conflict/freshness checks -> safety gate -> supported/qualified/abstained state`
+The current high-level path remains:
 
-Retrieval recall@k remains an important metric, but is not sufficient evidence of milestone completion.
+`Question -> request validation -> deterministic query planning -> consequence/jurisdiction routing -> approved source connector -> source/passages -> evidence units -> claims -> claim/evidence verification -> influence authorization -> fail-closed renderer -> answer state + trace`
 
-See `ALPHA3_EVIDENCE_FIDELITY.md`.
+The current source layer supports PubMed and ClinicalTrials.gov for bounded purposes. They are not substitutes for Australian regulators, current medicines authority, or a high-consequence clinical verification path.
 
-## Next repository milestones
+## Current release blockers / unproven areas
 
-Inspect the source-import diff, run the full regression suite at the exact PR head in GitHub CI, and review the result against Issue #3. Then define the ClaimRecord contract and Evidence Fidelity benchmark for Alpha3 (Issue #4) before adding connectors or free-form synthesis.
-1. Complete Issue #2: enforce the intended PR/check protection on `main` and read back the active configuration.
-2. Complete Issue #3: import the exact `alpha2.1-remediation` source, preserve artifact provenance, and establish deterministic CI bound to the PR head.
-3. Execute Alpha3 against the imported revision using the Evidence Fidelity contract and revision-bound evaluation evidence.
+Still unproven, incomplete or outside the present validated scope include:
 
-Do not begin broad generative medical synthesis before these gates are established.
+- clinically reviewed authoritative-source retrieval benchmarks and the proposed release-scale recall targets;
+- release-scale citation-entailment/correctness evidence;
+- statistically meaningful critical-safety evaluation;
+- genuinely independent high-consequence verification;
+- complete PHI detection and a PHI-approved production processing route;
+- authentication, authorization and multi-user tenancy;
+- production monitoring, incident response, rollback and operational SLOs;
+- TGA and PBS authority integration;
+- SNOMED CT-AU / AMT / NCTS terminology integration;
+- Australian privacy and health-data compliance implementation/evidence;
+- final Australian intended-purpose / medical-device regulatory determination;
+- live external-source validation on a release candidate;
+- subgroup evaluation;
+- real browser, keyboard, screen-reader and mobile accessibility validation;
+- complete web/iOS/Android product experience;
+- production-grade analytics, onboarding, pricing and commercial operations.
+
+Passing the current test suite does not resolve those blockers.
+
+## Current product boundaries
+
+The current product remains intended for education, evidence retrieval, literature/trial discovery, research support and clinician-facing evidence inspection.
+
+It is not currently validated for autonomous diagnosis, prescribing, treatment selection, emergency triage or patient-specific clinical decision support. Patient-identifying data must not be routed through non-PHI-approved public evidence connectors.
+
+## Immediate development direction
+
+The next build tranches should preserve the working v0.2 control core while moving toward the north star in evidence-backed increments:
+
+1. **Evidence Fidelity:** clinically reviewed benchmarks for source authority, retrieval recall, citation entailment, applicability, freshness, conflict and abstention.
+2. **Australian authority foundation:** TGA, PBS and SNOMED CT-AU/AMT/NCTS as first-class jurisdiction/terminology infrastructure, subject to licensing and validation.
+3. **Evidence experience:** evolve the browser product from an engineering workbench toward a progressively inspectable, simple evidence experience without hiding uncertainty or provenance.
+4. **Privacy and identity:** production-grade authentication/authorization plus enforceable PHI/data-plane boundaries before any patient-context expansion.
+5. **Lifecycle assurance:** monitoring, rollback, change control, accessibility and operational evidence before release claims.
+
+Do not begin broad patient-specific or autonomous clinical functionality merely because the infrastructure can technically support it.
