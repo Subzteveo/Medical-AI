@@ -7,10 +7,23 @@ This repository contains the Medical AI application. It must remain separate fro
 ## Read first
 
 1. `README.md`
-2. `project_docs/PROJECT_INDEX.md`
-3. `project_docs/STATUS.md`
-4. `project_docs/DEVELOPMENT_WORKFLOW.md`
-5. Relevant requirement, policy, architecture, and validation documents once application source is imported.
+2. `project_docs/NORTH_STAR.md`
+3. `project_docs/PROJECT_INDEX.md`
+4. `project_docs/STATUS.md`
+5. `project_docs/DEVELOPMENT_WORKFLOW.md`
+6. Relevant requirement, policy, architecture, intended-use, and validation documents.
+
+## Product alignment
+
+`project_docs/NORTH_STAR.md` is the canonical long-term product direction. It does not expand the current validated capability or intended use.
+
+When proposing or implementing work:
+
+- preserve the Australian-first, globally extensible product direction;
+- optimize for a simple, inspectable evidence experience rather than a chatbot-first product;
+- make source authority, jurisdiction, provenance, evidence state and limitations inspectable;
+- preserve the separation between long-term product ambition and the current validated/release scope;
+- treat any movement toward patient-specific decision support, diagnosis, prescribing, treatment selection or autonomous triage as an explicit intended-purpose and validation boundary, not an incremental UI feature.
 
 ## Evidence vocabulary
 
@@ -28,6 +41,8 @@ Do not call generated code executed, a passing command feature verification, or 
 - Do not let registry narrative establish treatment efficacy or safety.
 - Do not use retracted or superseded evidence as current support.
 - Do not send detected patient-identifying text to connectors that are not PHI-approved.
+- Evidence authority and information-handling/PHI authority are separate controls.
+- Evidence, terminology, clinical-data and research-data planes remain explicitly separated.
 - Do not put PHI or secrets into GitHub issues, PRs, logs, fixtures, or Actions artifacts.
 
 ## Repository workflow
