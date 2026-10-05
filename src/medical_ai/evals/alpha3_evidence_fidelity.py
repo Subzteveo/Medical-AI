@@ -18,10 +18,30 @@ from medical_ai.retrieval_query import normalize_search_query
 from medical_ai.schemas import AnswerStatus, Passage, SourceRecord
 
 
-RUNNER_VERSION = "alpha3-evidence-fidelity-harness-v0.1"
+RUNNER_VERSION = "alpha3-evidence-fidelity-harness-v0.2"
 FIXTURE_LABEL = "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CASE_SET_PATH = REPO_ROOT / "evals/evidence_fidelity/alpha3-engineering-v0.1.json"
+
+
+BASELINE_EXECUTION_IDS = frozenset({
+    'ALPHA3-FIX-001-SUPPORTED',
+    'ALPHA3-FIX-002-PROVENANCE-INCOMPLETE',
+    'ALPHA3-FIX-003-SOURCE-UNAVAILABLE',
+    'ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED',
+    'ALPHA3-FIX-005-CONFLICT-BLOCKED',
+    'ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED',
+})
+BASELINE_REQUIRED_PASS_IDS = frozenset({
+    'ALPHA3-FIX-001-SUPPORTED',
+    'ALPHA3-FIX-002-PROVENANCE-INCOMPLETE',
+    'ALPHA3-FIX-003-SOURCE-UNAVAILABLE',
+    'ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED',
+})
+METRIC_BOUNDARY = (
+    "Synthetic fixture source order after pipeline admission, as recorded in trace.source_ids; "
+    "not live retrieval or ranking performance. Normalization is observed in the fixture connector."
+)
 
 
 class ExpectationTier(StrEnum):
@@ -82,7 +102,8 @@ class Alpha3CaseSet(BaseModel):
     case_set_id: str
     case_set_version: str
     runner_version: str = RUNNER_VERSION
-    required_case_ids: list[str]
+    execution_case_ids: list[str]
+    required_pass_case_ids: list[str]
     cases: list[Alpha3Case]
 
     @model_validator(mode="after")
@@ -92,9 +113,22 @@ class Alpha3CaseSet(BaseModel):
         case_ids = [case.case_id for case in self.cases]
         if len(case_ids) != len(set(case_ids)):
             raise ValueError("Duplicate case_id values are not allowed")
-        missing_required = sorted(set(self.required_case_ids) - set(case_ids))
+        if set(self.execution_case_ids) != BASELINE_EXECUTION_IDS:
+            raise ValueError("execution_case_ids must preserve the six-case engineering baseline")
+        if set(self.required_pass_case_ids) != BASELINE_REQUIRED_PASS_IDS:
+            raise ValueError("required_pass_case_ids must preserve the four required baseline cases")
+        if len(self.execution_case_ids) != len(set(self.execution_case_ids)) or len(self.required_pass_case_ids) != len(set(self.required_pass_case_ids)):
+            raise ValueError("Duplicate policy case IDs are not allowed")
+        if self.runner_version != RUNNER_VERSION:
+            raise ValueError("runner_version does not match the executing runner")
+        required_tier_ids = {case.case_id for case in self.cases if case.expectation_tier == ExpectationTier.REQUIRED}
+        if required_tier_ids != BASELINE_REQUIRED_PASS_IDS:
+            raise ValueError("Required expectation tiers cannot be downgraded or removed")
+        if any(case.expectation_tier != ExpectationTier.BLOCKED for case in self.cases if case.case_id not in BASELINE_REQUIRED_PASS_IDS):
+            raise ValueError("Unresolved baseline cases must remain BLOCKED")
+        missing_required = sorted(set(self.execution_case_ids) - set(case_ids))
         if missing_required:
-            raise ValueError(f"required_case_ids missing from cases: {', '.join(missing_required)}")
+            raise ValueError(f"execution_case_ids missing from cases: {', '.join(missing_required)}")
         wrong_version = [case.case_id for case in self.cases if case.case_set_version != self.case_set_version]
         if wrong_version:
             raise ValueError(
@@ -135,7 +169,7 @@ class Alpha3CaseResult(BaseModel):
 
 
 class Alpha3HarnessReport(BaseModel):
-    report_version: str = "alpha3-evidence-fidelity-report-v0.1"
+    report_version: str = "alpha3-evidence-fidelity-report-v0.2"
     generated_at: datetime
     repository_commit_sha: str
     case_set_id: str
@@ -149,6 +183,8 @@ class Alpha3HarnessReport(BaseModel):
     unproven_checks: list[str]
     unavailable_checks: list[str]
     counts: dict[str, int]
+    metric_boundary: str = METRIC_BOUNDARY
+    evaluation_scope: str = FIXTURE_LABEL
 
 
 class FixtureConnector:
@@ -371,9 +407,11 @@ async def evaluate_case_set(
     *,
     required_case_ids: set[str] | None = None,
 ) -> Alpha3HarnessReport:
+    # Revalidate mutable models so programmatic callers cannot silently downgrade policy.
+    case_set = Alpha3CaseSet.model_validate(case_set.model_dump())
     case_results = [await _run_case(case) for case in case_set.cases]
     observed_case_ids = {result.case_id for result in case_results}
-    required_ids = set(required_case_ids) if required_case_ids is not None else set(case_set.required_case_ids)
+    required_ids = set(case_set.execution_case_ids) | set(required_case_ids or ())
     missing_required_ids = sorted(required_ids - observed_case_ids)
     harness_failures = []
     if missing_required_ids:
@@ -386,6 +424,7 @@ async def evaluate_case_set(
     required_failed = [result for result in required_results if result.outcome == CaseOutcome.FAIL]
     blocked_checks = [result.case_id for result in case_results if result.outcome == CaseOutcome.BLOCKED]
     unproven_checks = [result.case_id for result in case_results if result.outcome == CaseOutcome.UNPROVEN]
+    unproven_checks.extend(["current_pipeline_live_retrieval_recall", "live_source_ranking", "clinical_claim_to_passage_entailment"])
     unavailable_checks = [result.case_id for result in case_results if result.outcome == CaseOutcome.UNAVAILABLE]
     case_failures = [
         f"{result.case_id}: {failure}"
@@ -427,6 +466,8 @@ async def evaluate_case_set(
 def _render_human_report(report: Alpha3HarnessReport) -> str:
     lines = [
         "Alpha3 Evidence Fidelity Harness",
+        f"scope: {report.evaluation_scope}",
+        f"metric_boundary: {report.metric_boundary}",
         f"commit_sha: {report.repository_commit_sha}",
         f"case_set: {report.case_set_id} @ {report.case_set_version}",
         f"runner: {report.runner_version}",
@@ -493,14 +534,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--required-case-id",
         action="append",
         default=[],
-        help="Optional case IDs that must be executed; may be provided more than once.",
+        help="Additional execution requirements; cannot replace baseline membership or required-pass policy.",
     )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
-    case_set = load_case_set(args.case_set)
+    try:
+        case_set = load_case_set(args.case_set)
+    except (ValueError, OSError) as exc:
+        print(f"Invalid case set: {exc}", file=sys.stderr)
+        return 1
     required_case_ids = set(args.required_case_id) if args.required_case_id else None
     report = asyncio.run(
         evaluate_case_set(case_set, required_case_ids=required_case_ids)

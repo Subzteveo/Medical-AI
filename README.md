@@ -42,6 +42,18 @@ Run the bounded Alpha3 evidence-fidelity engineering harness:
 python -m medical_ai.evals.alpha3_evidence_fidelity --json-out /tmp/alpha3-evidence-fidelity.json
 ```
 
+The default evaluation requires all six cases to execute and four fixed cases to pass;
+conflict and population mismatch remain **BLOCKED**, never counted as passes.
+`--required-case-id` only adds execution requirements. Case-set policy cannot remove
+baseline cases or downgrade required tiers. Invalid policy exits non-zero.
+
+Recall and first-authoritative rank describe synthetic fixture source order after
+pipeline admission (`trace.source_ids`), not measured live retrieval/ranking.
+Normalization is observed in the fixture connector. Current-pipeline live recall,
+clinical entailment and live-source ranking remain unproven.
+
+See [the coverage map](docs/ALPHA3_ENGINEERING_HARNESS.md) for remaining Issue #4 gaps.
+
 Run focused harness tests:
 
 ```bash

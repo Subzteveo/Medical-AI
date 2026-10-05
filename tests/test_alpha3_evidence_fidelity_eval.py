@@ -68,9 +68,103 @@ async def test_alpha3_harness_fails_when_expected_failure_code_differs():
 @pytest.mark.asyncio
 async def test_alpha3_harness_fails_when_required_case_is_not_executed():
     case_set = load_case_set(default_case_set_path())
-    required_case_ids = set(case_set.required_case_ids)
+    required_case_ids = set(case_set.execution_case_ids)
     required_case_ids.add("ALPHA3-FIX-999-MISSING")
 
     report = await evaluate_case_set(case_set, required_case_ids=required_case_ids)
     assert report.counts["harness_failures"] == 1
     assert "required case IDs were not executed: ALPHA3-FIX-999-MISSING" in report.harness_failures[0]
+
+
+def _cli(tmp_path, payload, *extra_args):
+    import json
+    import subprocess
+    import sys
+
+    case_path = tmp_path / 'cases.json'
+    report_path = tmp_path / 'report.json'
+    case_path.write_text(json.dumps(payload), encoding='utf-8')
+    completed = subprocess.run(
+        [sys.executable, '-m', 'medical_ai.evals.alpha3_evidence_fidelity',
+         '--case-set', str(case_path), '--json-out', str(report_path), *extra_args],
+        capture_output=True, text=True,
+    )
+    report = json.loads(report_path.read_text()) if report_path.exists() else None
+    return completed, report
+
+
+def _payload():
+    return load_case_set().model_dump(mode='json')
+
+
+def test_cli_required_expectation_mismatch_exits_nonzero(tmp_path):
+    payload = _payload()
+    payload['cases'][0]['expected_terminal_state'] = 'PROVENANCE_INCOMPLETE'
+    completed, report = _cli(tmp_path, payload)
+    assert completed.returncode == 1
+    assert report['counts']['required_failed'] == 1
+    assert report['counts']['blocked_checks'] == 2
+
+
+def test_cli_missing_extra_execution_requirement_exits_nonzero(tmp_path):
+    completed, report = _cli(tmp_path, _payload(), '--required-case-id', 'MISSING')
+    assert completed.returncode == 1
+    assert report['harness_failures'] == ['required case IDs were not executed: MISSING']
+
+
+@pytest.mark.parametrize('mutation', ['duplicate', 'missing', 'empty', 'zero_required', 'remove_policy'])
+def test_cli_rejects_invalid_membership_and_policy(tmp_path, mutation):
+    payload = _payload()
+    if mutation == 'duplicate':
+        payload['cases'][1] = payload['cases'][0]
+    elif mutation == 'missing':
+        payload['cases'].pop(0)
+    elif mutation == 'empty':
+        payload['cases'] = []
+    elif mutation == 'zero_required':
+        for case in payload['cases']:
+            case['expectation_tier'] = 'BLOCKED'
+        payload['required_pass_case_ids'] = []
+    else:
+        payload['execution_case_ids'] = payload['execution_case_ids'][1:]
+        payload['required_pass_case_ids'] = payload['required_pass_case_ids'][1:]
+        payload['cases'].pop(0)
+    completed, report = _cli(tmp_path, payload, '--required-case-id', payload['execution_case_ids'][-1])
+    assert completed.returncode == 1
+    assert 'Invalid case set:' in completed.stderr
+    assert report is None
+
+
+@pytest.mark.parametrize('tier', ['BLOCKED', 'UNPROVEN', 'UNAVAILABLE'])
+def test_cli_cannot_downgrade_required_case(tmp_path, tier):
+    payload = _payload()
+    payload['cases'][0]['expectation_tier'] = tier
+    completed, _ = _cli(tmp_path, payload)
+    assert completed.returncode == 1
+    assert 'cannot be downgraded' in completed.stderr
+
+
+@pytest.mark.asyncio
+async def test_programmatic_override_cannot_replace_baseline_membership(monkeypatch):
+    import medical_ai.evals.alpha3_evidence_fidelity as harness
+
+    original = harness._run_case
+
+    async def mislabeled_result(case):
+        result = await original(case)
+        if case.case_id == 'ALPHA3-FIX-001-SUPPORTED':
+            result.case_id = 'SILENTLY-REPLACED'
+        return result
+
+    monkeypatch.setattr(harness, '_run_case', mislabeled_result)
+    report = await evaluate_case_set(load_case_set(), required_case_ids={'ALPHA3-FIX-003-SOURCE-UNAVAILABLE'})
+    assert any('ALPHA3-FIX-001-SUPPORTED' in failure for failure in report.harness_failures)
+
+
+def test_cli_baseline_reports_bounded_success(tmp_path):
+    completed, report = _cli(tmp_path, _payload())
+    assert completed.returncode == 0
+    assert report['counts']['required_passed'] == 4
+    assert report['counts']['blocked_checks'] == 2
+    assert 'not live retrieval' in report['metric_boundary']
+    assert 'current_pipeline_live_retrieval_recall' in report['unproven_checks']

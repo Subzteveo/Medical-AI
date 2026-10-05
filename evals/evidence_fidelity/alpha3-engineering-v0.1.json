@@ -1,15 +1,7 @@
 {
   "case_set_id": "alpha3-evidence-fidelity-engineering-fixtures",
   "case_set_version": "v0.1.0",
-  "runner_version": "alpha3-evidence-fidelity-harness-v0.1",
-  "required_case_ids": [
-    "ALPHA3-FIX-001-SUPPORTED",
-    "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
-    "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
-    "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED",
-    "ALPHA3-FIX-005-CONFLICT-BLOCKED",
-    "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED"
-  ],
+  "runner_version": "alpha3-evidence-fidelity-harness-v0.2",
   "cases": [
     {
       "case_id": "ALPHA3-FIX-001-SUPPORTED",
@@ -22,7 +14,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
       "expected_failure_code": null,
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "REQUIRED",
       "expected_authoritative_source_ids": [
         "pubmed:alpha3-supported-001"
@@ -85,7 +77,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "PROVENANCE_INCOMPLETE",
       "expected_failure_code": "PROVENANCE_INCOMPLETE",
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "REQUIRED",
       "expected_query_normalization": "treatment X reduces symptom scores",
       "scenario": {
@@ -137,7 +129,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "SOURCE_UNAVAILABLE",
       "expected_failure_code": "CONNECTOR_ERROR:OSError",
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "REQUIRED",
       "expected_query_normalization": "exists treatment X",
       "scenario": {
@@ -159,7 +151,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
       "expected_failure_code": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "REQUIRED",
       "expected_authoritative_source_ids": [
         "pubmed:alpha3-high-risk-004"
@@ -215,7 +207,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "EVIDENCE_CONFLICTING",
       "expected_failure_code": "EVIDENCE_CONFLICTING",
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "BLOCKED",
       "expectation_note": "Current pipeline has no distinct EVIDENCE_CONFLICTING terminal state.",
       "expected_authoritative_source_ids": [
@@ -300,7 +292,7 @@
       "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
       "expected_terminal_state": "POPULATION_MISMATCH",
       "expected_failure_code": "POPULATION_MISMATCH",
-      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
       "expectation_tier": "BLOCKED",
       "expectation_note": "Current pipeline does not emit POPULATION_MISMATCH for older-adult applicability gaps.",
       "expected_authoritative_source_ids": [
@@ -347,5 +339,19 @@
         ]
       }
     }
+  ],
+  "execution_case_ids": [
+    "ALPHA3-FIX-001-SUPPORTED",
+    "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
+    "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
+    "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED",
+    "ALPHA3-FIX-005-CONFLICT-BLOCKED",
+    "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED"
+  ],
+  "required_pass_case_ids": [
+    "ALPHA3-FIX-001-SUPPORTED",
+    "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
+    "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
+    "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED"
   ]
 }
