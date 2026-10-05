@@ -53,6 +53,12 @@ Live PubMed/ClinicalTrials checks should be a separate explicit job or controlle
 
 Do not merge when required checks are failed, skipped, stale, absent, or bound to a different head SHA.
 
+## Main protection recovery
+
+Routine administrator bypass of `main` protection is not permitted. Emergency bypass or temporary ruleset modification is allowed only for deliberate repository recovery when the normal pull-request path cannot safely restore service or repository integrity.
+
+Record the recovery reason, actor, affected rule, time window, and resulting commits or changes. Restore the normal protections immediately after recovery and verify their active state.
+
 ## Release gate
 
 Merge to `main` is not release approval. Packaging, public distribution, clinical intended-purpose approval, deployment, and observed operation remain separate gates.
