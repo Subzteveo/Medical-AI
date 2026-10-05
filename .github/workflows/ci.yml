@@ -32,6 +32,15 @@ jobs:
         run: python -m pip install -e '.[dev]'
       - name: Run deterministic regression suite
         run: python -m pytest
+      - name: Run Alpha3 engineering harness CLI
+        run: python -m medical_ai.evals.alpha3_evidence_fidelity --json-out /tmp/alpha3-evidence-fidelity.json
+      - name: Preserve revision-bound Alpha3 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha3-evidence-fidelity-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/alpha3-evidence-fidelity.json
+          if-no-files-found: error
       - name: Compile, import and compare installed policies
         run: |
           python -m compileall -q src

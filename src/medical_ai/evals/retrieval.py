@@ -10,6 +10,15 @@ def recall_at_k(expected_ids: set[str], ranked_ids: list[str], k: int) -> float:
     return len(found) / len(expected_ids)
 
 
+def first_authoritative_rank(expected_ids: set[str], ranked_ids: list[str]) -> int | None:
+    if not expected_ids:
+        raise ValueError("expected_ids must not be empty")
+    for idx, source_id in enumerate(ranked_ids, start=1):
+        if source_id in expected_ids:
+            return idx
+    return None
+
+
 def evaluate_cases(cases: list[dict], k: int) -> dict[str, float]:
     values = [recall_at_k(set(case["expected_ids"]), list(case["ranked_ids"]), k) for case in cases]
     return {
