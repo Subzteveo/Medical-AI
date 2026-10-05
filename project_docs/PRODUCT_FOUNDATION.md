@@ -1,8 +1,16 @@
 # Product Foundation — Medical AI Evidence Workbench
 
+## Relationship to the product north star
+
+This document is the **current bounded product/MVP contract** for the engineering alpha. The broader canonical long-term direction lives in `project_docs/NORTH_STAR.md`.
+
+The north star does not expand this document's validated scope. Current intended use and release authority remain bounded by `docs/INTENDED_USE.md`, implementation state, validation evidence, and release gates.
+
 ## Objective
 
 Provide medical students, clinicians and researchers with a transparent evidence-retrieval workbench whose substantive medical claims are traceable to admitted source passages and whose unsupported/high-consequence outputs fail closed.
+
+This bounded objective is the first implementation slice of the longer-term Australian-first, globally extensible evidence platform defined by the north star.
 
 ## Primary users
 
