@@ -1,5 +1,5 @@
 import pytest
-from medical_ai.evals.retrieval import recall_at_k, evaluate_cases
+from medical_ai.evals.retrieval import first_authoritative_rank, recall_at_k, evaluate_cases
 
 
 def test_recall_at_k():
@@ -19,3 +19,8 @@ def test_evaluate_cases_reports_mean_and_min():
     ], k=1)
     assert out["mean_recall_at_k"] == 0.5
     assert out["min_recall_at_k"] == 0.0
+
+
+def test_first_authoritative_rank():
+    assert first_authoritative_rank({"pubmed:2"}, ["pubmed:1", "pubmed:2"]) == 2
+    assert first_authoritative_rank({"pubmed:3"}, ["pubmed:1", "pubmed:2"]) is None

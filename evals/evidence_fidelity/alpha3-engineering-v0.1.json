@@ -1,0 +1,351 @@
+{
+  "case_set_id": "alpha3-evidence-fidelity-engineering-fixtures",
+  "case_set_version": "v0.1.0",
+  "runner_version": "alpha3-evidence-fidelity-harness-v0.1",
+  "required_case_ids": [
+    "ALPHA3-FIX-001-SUPPORTED",
+    "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
+    "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
+    "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED",
+    "ALPHA3-FIX-005-CONFLICT-BLOCKED",
+    "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED"
+  ],
+  "cases": [
+    {
+      "case_id": "ALPHA3-FIX-001-SUPPORTED",
+      "case_set_version": "v0.1.0",
+      "question": "What evidence shows treatment X reduces symptom scores?",
+      "intended_claim_type": "treatment_efficacy_extractable",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "adult evidence is directly represented in supporting passage text",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "expected_failure_code": null,
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-supported-001"
+      ],
+      "authoritative_recall_k": 5,
+      "expected_query_normalization": "treatment X reduces symptom scores",
+      "required_assertions": {
+        "require_claim_ids": true,
+        "require_evidence_ids": true,
+        "require_citation_linkage": true,
+        "require_provenance_complete": true,
+        "require_influence_authorized": true
+      },
+      "scenario": {
+        "connector_name": "alpha3-fixture-supported",
+        "source_class": "biomedical_literature",
+        "behavior": "return_fixture",
+        "sources": [
+          {
+            "source_id": "pubmed:alpha3-supported-001",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Evidence about treatment X",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900001",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900001/",
+            "identifiers": {
+              "PMID": "900001"
+            },
+            "publication_date": "2026",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-supported-001",
+              "object_id": "pubmed:alpha3-supported-001",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": true
+          }
+        ],
+        "passages": [
+          {
+            "passage_id": "alpha3-supported-p1",
+            "source_id": "pubmed:alpha3-supported-001",
+            "section": "RESULTS",
+            "text": "Treatment X reduced symptom scores compared with placebo in the studied adult population.",
+            "locator": "AbstractText[0]"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
+      "case_set_version": "v0.1.0",
+      "question": "What evidence shows treatment X reduces symptom scores?",
+      "intended_claim_type": "treatment_efficacy_extractable",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "not applicable because provenance must fail closed",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "PROVENANCE_INCOMPLETE",
+      "expected_failure_code": "PROVENANCE_INCOMPLETE",
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "REQUIRED",
+      "expected_query_normalization": "treatment X reduces symptom scores",
+      "scenario": {
+        "connector_name": "alpha3-fixture-provenance-incomplete",
+        "source_class": "biomedical_literature",
+        "behavior": "return_fixture",
+        "sources": [
+          {
+            "source_id": "pubmed:alpha3-provenance-002",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Incomplete provenance record",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900002",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900002/",
+            "identifiers": {
+              "PMID": "900002"
+            },
+            "publication_date": "2026",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-provenance-002",
+              "object_id": "pubmed:alpha3-provenance-002",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": false
+          }
+        ],
+        "passages": [
+          {
+            "passage_id": "alpha3-provenance-p1",
+            "source_id": "pubmed:alpha3-provenance-002",
+            "section": "RESULTS",
+            "text": "Treatment X reduced symptom scores compared with placebo in adults.",
+            "locator": "AbstractText[0]"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
+      "case_set_version": "v0.1.0",
+      "question": "What evidence exists for treatment X?",
+      "intended_claim_type": "evidence_lookup",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "not applicable because source retrieval is unavailable",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "SOURCE_UNAVAILABLE",
+      "expected_failure_code": "CONNECTOR_ERROR:OSError",
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "REQUIRED",
+      "expected_query_normalization": "exists treatment X",
+      "scenario": {
+        "connector_name": "alpha3-fixture-source-unavailable",
+        "source_class": "biomedical_literature",
+        "behavior": "raise_error",
+        "error_type": "OSError",
+        "error_message": "simulated upstream outage"
+      }
+    },
+    {
+      "case_id": "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED",
+      "case_set_version": "v0.1.0",
+      "question": "What dose of treatment X should be started?",
+      "intended_claim_type": "medication_dose",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "adult evidence only",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "expected_failure_code": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-high-risk-004"
+      ],
+      "authoritative_recall_k": 5,
+      "expected_query_normalization": "dose treatment X should be started",
+      "scenario": {
+        "connector_name": "alpha3-fixture-high-consequence",
+        "source_class": "biomedical_literature",
+        "behavior": "return_fixture",
+        "sources": [
+          {
+            "source_id": "pubmed:alpha3-high-risk-004",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Dose discussion for treatment X",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900004",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900004/",
+            "identifiers": {
+              "PMID": "900004"
+            },
+            "publication_date": "2026",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-high-risk-004",
+              "object_id": "pubmed:alpha3-high-risk-004",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": true
+          }
+        ],
+        "passages": [
+          {
+            "passage_id": "alpha3-dose-p1",
+            "source_id": "pubmed:alpha3-high-risk-004",
+            "section": "RESULTS",
+            "text": "A starting dose of treatment X is 5 mg daily for adults with condition Y.",
+            "locator": "AbstractText[0]"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "ALPHA3-FIX-005-CONFLICT-BLOCKED",
+      "case_set_version": "v0.1.0",
+      "question": "Does treatment X reduce symptom scores compared with placebo?",
+      "intended_claim_type": "treatment_efficacy_conflict_detection",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "adult evidence with explicit disagreement should be represented as conflict",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "EVIDENCE_CONFLICTING",
+      "expected_failure_code": "EVIDENCE_CONFLICTING",
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "BLOCKED",
+      "expectation_note": "Current pipeline has no distinct EVIDENCE_CONFLICTING terminal state.",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-conflict-pos-005",
+        "pubmed:alpha3-conflict-neg-005"
+      ],
+      "authoritative_recall_k": 5,
+      "scenario": {
+        "connector_name": "alpha3-fixture-conflict",
+        "source_class": "biomedical_literature",
+        "behavior": "return_fixture",
+        "sources": [
+          {
+            "source_id": "pubmed:alpha3-conflict-pos-005",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal A",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Positive result for treatment X",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900005A",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900005A/",
+            "identifiers": {
+              "PMID": "900005A"
+            },
+            "publication_date": "2026",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-conflict-pos-005",
+              "object_id": "pubmed:alpha3-conflict-pos-005",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": true
+          },
+          {
+            "source_id": "pubmed:alpha3-conflict-neg-005",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal B",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Negative result for treatment X",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900005B",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900005B/",
+            "identifiers": {
+              "PMID": "900005B"
+            },
+            "publication_date": "2026",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-conflict-neg-005",
+              "object_id": "pubmed:alpha3-conflict-neg-005",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": true
+          }
+        ],
+        "passages": [
+          {
+            "passage_id": "alpha3-conflict-pos-p1",
+            "source_id": "pubmed:alpha3-conflict-pos-005",
+            "section": "RESULTS",
+            "text": "Treatment X reduced symptom scores compared with placebo in adults.",
+            "locator": "AbstractText[0]"
+          },
+          {
+            "passage_id": "alpha3-conflict-neg-p1",
+            "source_id": "pubmed:alpha3-conflict-neg-005",
+            "section": "RESULTS",
+            "text": "Treatment X did not reduce symptom scores compared with placebo in adults.",
+            "locator": "AbstractText[0]"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED",
+      "case_set_version": "v0.1.0",
+      "question": "What evidence shows treatment X reduces symptom scores in adults over 80 years old?",
+      "intended_claim_type": "population_applicability_check",
+      "expected_authority_or_source_class": "biomedical_literature",
+      "jurisdiction": "AU",
+      "population_or_applicability_expectation": "question asks for older-adult applicability",
+      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "expected_terminal_state": "POPULATION_MISMATCH",
+      "expected_failure_code": "POPULATION_MISMATCH",
+      "review_classification": "ENGINEERING FIXTURE — NOT CLINICALLY REVIEWED",
+      "expectation_tier": "BLOCKED",
+      "expectation_note": "Current pipeline does not emit POPULATION_MISMATCH for older-adult applicability gaps.",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-population-006"
+      ],
+      "authoritative_recall_k": 5,
+      "expected_query_normalization": "treatment X reduces symptom scores adults over 80 years old",
+      "scenario": {
+        "connector_name": "alpha3-fixture-population-mismatch",
+        "source_class": "biomedical_literature",
+        "behavior": "return_fixture",
+        "sources": [
+          {
+            "source_id": "pubmed:alpha3-population-006",
+            "authority": "NLM/NCBI PubMed",
+            "publisher": "Example Journal",
+            "source_type": "indexed_biomedical_literature",
+            "title": "Adult-only treatment X outcomes",
+            "jurisdiction": "INTERNATIONAL",
+            "record_id": "900006",
+            "stable_url": "https://pubmed.ncbi.nlm.nih.gov/900006/",
+            "identifiers": {
+              "PMID": "900006"
+            },
+            "publication_date": "2026",
+            "population": "adults",
+            "phi_classification": {
+              "classification_id": "public:pubmed:alpha3-population-006",
+              "object_id": "pubmed:alpha3-population-006",
+              "information_class": "PUBLIC",
+              "contains_phi": false
+            },
+            "provenance_complete": true
+          }
+        ],
+        "passages": [
+          {
+            "passage_id": "alpha3-population-p1",
+            "source_id": "pubmed:alpha3-population-006",
+            "section": "RESULTS",
+            "text": "Treatment X reduced symptom scores compared with placebo in adults aged 40 to 65; adults older than 80 were not evaluated.",
+            "locator": "AbstractText[0]"
+          }
+        ]
+      }
+    }
+  ]
+}

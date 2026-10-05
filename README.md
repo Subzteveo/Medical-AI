@@ -34,6 +34,20 @@ See [`project_docs/NORTH_STAR.md`](project_docs/NORTH_STAR.md) for the canonical
 
 `main` is the stable integration branch. Development happens on short-lived branches and enters `main` through reviewed pull requests. Do not push feature work directly to `main`.
 
+## Alpha3 deterministic harness (engineering fixtures)
+
+Run the bounded Alpha3 evidence-fidelity engineering harness:
+
+```bash
+python -m medical_ai.evals.alpha3_evidence_fidelity --json-out /tmp/alpha3-evidence-fidelity.json
+```
+
+Run focused harness tests:
+
+```bash
+python -m pytest tests/test_alpha3_evidence_fidelity_eval.py -q
+```
+
 ## Privacy
 
 Do **not** place real patient identifiers, Medicare numbers, medical-record data, secrets, access tokens, or other sensitive information in issues, pull requests, commits, fixtures, screenshots, logs, or CI artifacts.
