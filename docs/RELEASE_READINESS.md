@@ -57,6 +57,21 @@ The decision above remains in force until the assessment and approval are comple
 record owns the assessment references, unresolved conditions and final disposition.
 Do not create a second competing intended-purpose statement here.
 
+### Operating boundary decisions — 6 October 2026
+
+Steven Lees has supplied: individual operator **Steven Lees**, proposed **Australian
+hosting**, and **invited adults in Australia**, for general education/research with
+no patient-identifying data or patient-specific care. The five audience groups,
+invitation-only access and 1 November target remain as recorded. These decisions
+are planning scope, not release approval or evidence of configured hosting.
+
+The [operating boundary and professional review brief](PILOT_OPERATING_BOUNDARY_AND_REVIEW_BRIEF.md)
+records those answers, binds the updated source candidate to `a12567dedb5fa70c11ff757f7ff7bd0a74aa059b`,
+identifies operational gaps and prepares a quote enquiry for qualified Australian
+review. Provider selection, overseas data-flow review, appointment, fees, professional
+findings and release disposition remain unresolved. No outreach or paid engagement
+has been performed by this documentation change.
+
 ### Missing decisions
 
 The audience, access model and target date supplied by Steven Lees on 6 October
@@ -68,9 +83,9 @@ coordination suggestions, not evidence that someone has accepted the task.
 
 | Decision | Current evidence/state | Evidence required before disposition | Proposed action owner |
 | --- | --- | --- | --- |
-| Assessed release identity | Source candidate `197134ba22510f902c033f55d39ed33c5af22857` assessed; final artifact/configuration and release approval absent | Exact commit, package identity/hash where applicable, assessed feature list and evidence links | Maintainer prepares; Steven Lees confirms scope |
+| Assessed release identity | Historical assessment at `197134ba22510f902c033f55d39ed33c5af22857`; updated review brief binds `a12567dedb5fa70c11ff757f7ff7bd0a74aa059b`; final artifact/configuration and approval absent | Exact commit, package identity/hash where applicable, assessed feature list and evidence links | Maintainer prepares; Steven Lees confirms scope |
 | Purpose versus actual capabilities | Developer statement mapped to frozen source candidate in linked assessment; operational/clinical validation incomplete | Link each intended function and excluded use to actual UI/API behavior and limitations at the assessed revision | Maintainer prepares; Steven Lees reviews |
-| Audience and distribution | Proposed medical students, GPs, health professionals, universities and researchers; invitation-only pilot; geography, patient/public boundary approval and terms unresolved | Explicit users, patient/public-access inclusion or exclusion, access controls, geography, distribution channel and pricing/public-access decision | Steven Lees |
+| Audience and distribution | Five audience groups; invitation-only adults in Australia, general education/research, no patient-identifying data or patient-specific care; operator Steven Lees; terms/duration/cap and implementation evidence unresolved | Explicit users, patient/public-access inclusion or exclusion, access controls, geography, distribution channel and pricing/public-access decision | Steven Lees |
 | Assessment date boundary | Target pilot date 1 November 2026; preliminary assessment 6 October 2026; pre-supply refresh and approval required | Planned release date/window, assessment date and rules effective on that date; refresh trigger if date or scope changes | Steven Lees supplies dates; assessor reviews |
 | Australian regulatory position | Fresh primary-source preliminary assessment linked above; final qualified product-specific determination unresolved | Dated product-specific assessment, primary-source links/access dates, reasoning, reviewer identity/role and unresolved conditions | Steven Lees arranges appropriately qualified review |
 | November amendment applicability | Authorised instrument commencement, amended criteria and earlier-build application inspected in linked assessment; product exemption not established | Verify the cited instrument/current guidance and explain applicability to the assessed purpose and release date; record pre/post-commencement treatment if relevant | Assessor, once appointed |
@@ -141,10 +156,9 @@ separate evidence and authorization; closing this issue alone cannot authorize l
 
 ### Smallest next action
 
-Review the exact-head PR/CI evidence for the invitation gate, then verify its runtime
-configuration and direct-origin behavior in the eventual deployment environment.
-In parallel, Steven Lees resolves the remaining participant/operator/hosting boundaries
-and arranges qualified Australian review of the
-[frozen candidate assessment](PILOT_CANDIDATE_ASSESSMENT.md).
+Select a reviewer and request a scoped quote using the
+[professional review brief](PILOT_OPERATING_BOUNDARY_AND_REVIEW_BRIEF.md).
+Supply the selected hosting/data-flow configuration for review before any external
+pilot; the source candidate has an access gate but no observed deployment.
 
 No external pilot, public/commercial release or deployment is authorised.
