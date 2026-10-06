@@ -34,8 +34,8 @@ A remediation regression suite has since been added and passes in the current wo
 **Status:** assessment and approval incomplete; public/commercial release **NO-GO**
 **Related issue:** [Issue #5](https://github.com/Subzteveo/Medical-AI/issues/5)
 
-This section records unresolved decisions and the evidence needed to resolve them.
-It does not perform a legal assessment, appoint an adviser, approve an audience or
+This section records decisions, unresolved conditions and the evidence needed to resolve them.
+It does not perform a legal assessment, appoint an adviser, grant release approval or
 change the intended purpose. Merging this documentation does not authorize release.
 The decision above remains in force until the assessment and approval are complete.
 
@@ -59,24 +59,29 @@ Do not create a second competing intended-purpose statement here.
 
 ### Missing decisions
 
-Every unresolved field below remains **UNRESOLVED**. Proposed action owners are
+The audience, access model and target date supplied by Steven Lees on 6 October
+2026 are recorded in the [frozen candidate assessment](PILOT_CANDIDATE_ASSESSMENT.md).
+That assessment binds source revision, capability mapping and preliminary regulatory
+findings; it is not final professional sign-off. Every remaining unresolved field
+below remains **UNRESOLVED**. Proposed action owners are
 coordination suggestions, not evidence that someone has accepted the task.
 
 | Decision | Current evidence/state | Evidence required before disposition | Proposed action owner |
 | --- | --- | --- | --- |
-| Assessed release identity | No release candidate approved for this assessment | Exact commit, package identity/hash where applicable, assessed feature list and evidence links | Maintainer prepares; Steven Lees confirms scope |
-| Purpose versus actual capabilities | Developer statement exists; release-revision mapping incomplete | Link each intended function and excluded use to actual UI/API behavior and limitations at the assessed revision | Maintainer prepares; Steven Lees reviews |
-| Audience and distribution | Students, clinicians and researchers named; public/commercial access deferred | Explicit users, patient/public-access inclusion or exclusion, access controls, geography, distribution channel and pricing/public-access decision | Steven Lees |
-| Assessment date boundary | Launch date and governing assessment date unresolved | Planned release date/window, assessment date and rules effective on that date; refresh trigger if date or scope changes | Steven Lees supplies dates; assessor reviews |
-| Australian regulatory position | Historical research in intended-use document; no final product-specific determination established | Dated product-specific assessment, primary-source links/access dates, reasoning, reviewer identity/role and unresolved conditions | Steven Lees arranges appropriately qualified review |
-| November amendment applicability | Repository mentions an amendment commencing 1 November 2026; not independently reverified by this record | Verify the cited instrument/current guidance and explain applicability to the assessed purpose and release date; record pre/post-commencement treatment if relevant | Assessor, once appointed |
+| Assessed release identity | Source candidate `197134ba22510f902c033f55d39ed33c5af22857` assessed; final artifact/configuration and release approval absent | Exact commit, package identity/hash where applicable, assessed feature list and evidence links | Maintainer prepares; Steven Lees confirms scope |
+| Purpose versus actual capabilities | Developer statement mapped to frozen source candidate in linked assessment; operational/clinical validation incomplete | Link each intended function and excluded use to actual UI/API behavior and limitations at the assessed revision | Maintainer prepares; Steven Lees reviews |
+| Audience and distribution | Proposed medical students, GPs, health professionals, universities and researchers; invitation-only pilot; geography, patient/public boundary approval and terms unresolved | Explicit users, patient/public-access inclusion or exclusion, access controls, geography, distribution channel and pricing/public-access decision | Steven Lees |
+| Assessment date boundary | Target pilot date 1 November 2026; preliminary assessment 6 October 2026; pre-supply refresh and approval required | Planned release date/window, assessment date and rules effective on that date; refresh trigger if date or scope changes | Steven Lees supplies dates; assessor reviews |
+| Australian regulatory position | Fresh primary-source preliminary assessment linked above; final qualified product-specific determination unresolved | Dated product-specific assessment, primary-source links/access dates, reasoning, reviewer identity/role and unresolved conditions | Steven Lees arranges appropriately qualified review |
+| November amendment applicability | Authorised instrument commencement, amended criteria and earlier-build application inspected in linked assessment; product exemption not established | Verify the cited instrument/current guidance and explain applicability to the assessed purpose and release date; record pre/post-commencement treatment if relevant | Assessor, once appointed |
 | Advice required | Product-specific advice recommended; engagement and questions unresolved | Advice questions, appointed adviser/reviewer, evidence location, outcomes and conditions; keep confidential advice out of public repository text | Steven Lees |
 | Claims and notice alignment | Core documents broadly agree; UI contains historical “Alpha2” wording; no completed surface comparison established | Compare UI, README, intended use, release notes, privacy notice and proposed marketing against the determined boundary; link fixes or explicitly mark absent surfaces | Maintainer prepares; Steven Lees approves wording |
 | Final disposition | Public/commercial release NO-GO; no release approval recorded | Dated Steven Lees approval or continued NO-GO, exact assessed revision, permitted audience/distribution, evidence references and all remaining conditions | Steven Lees |
 
-The legal statements in the existing intended-use document are historical repository
-material. Mentioning them here does not freshly verify the law, establish an exemption
-or determine regulatory classification.
+The legal statements in the existing intended-use document remain historical
+repository material. Fresh primary-source findings and their limits are recorded
+in the linked candidate assessment; neither record establishes an exemption or
+final regulatory classification.
 
 ### Closure rule
 
@@ -102,7 +107,7 @@ separate evidence and authorization; closing this issue alone cannot authorize l
 
 ### Smallest next action
 
-Steven Lees supplies the proposed release audience/distribution and date window;
-the maintainer then binds the capability/purpose comparison to an exact revision.
-Use those facts to scope the product-specific assessment. No new legal research or
-release activity is performed by this documentation change.
+Steven Lees resolves the remaining participant/operator/hosting boundaries and
+arranges qualified Australian review of the [frozen candidate assessment](PILOT_CANDIDATE_ASSESSMENT.md).
+The maintainer supplies an enforceable invitation/access design and its evidence.
+No external pilot, public/commercial release or deployment is authorised.
