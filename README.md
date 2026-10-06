@@ -60,6 +60,54 @@ Run focused harness tests:
 python -m pytest tests/test_alpha3_evidence_fidelity_eval.py -q
 ```
 
+
+## Invitation-only pilot access gate — engineering candidate
+
+Branch candidate revision `523ab64fd180ab7550c8565dae1cb366c506f159` adds an application-level, deny-by-default
+access boundary for the proposed invitation-only pilot. This is engineering work only;
+it does not authorize deployment, pilot invitations, clinical use, public release or
+commercial release.
+
+Runtime configuration is external to the repository:
+
+- `MEDICAL_AI_PILOT_ACCESS_JSON` contains the explicit participant allowlist. Each
+  participant has a stable `participant_id`, rotatable `credential_id`, SHA-256 digest
+  of a high-entropy invite token, timezone-aware expiry and revocation flag.
+- `MEDICAL_AI_PILOT_SESSION_SECRET` is an out-of-repository secret used to HMAC-sign
+  browser sessions and must contain at least 32 bytes.
+- `MEDICAL_AI_PILOT_SESSION_TTL_SECONDS` is optional, defaults to 28,800 seconds
+  (8 hours), and is bounded to 300-43,200 seconds.
+- `MEDICAL_AI_PILOT_COOKIE_SECURE` defaults to `true`. Setting it to `false` is
+  for controlled local/test HTTP only, not an external pilot.
+
+Do not commit invite tokens, session secrets or environment files. Generate and deliver
+invite tokens out of band; only token digests belong in the runtime allowlist. Expiry
+and revocation are checked on every protected request, including already-issued
+browser sessions.
+
+Route boundary in this candidate:
+
+- `/` is a public access shell until a valid session exists; the workbench itself is
+  served only after authentication.
+- `/access/session` is the credential exchange endpoint and never places credentials
+  in the URL.
+- `/v1/evidence/query`, `/docs` and `/openapi.json` require an active participant.
+- Direct API clients may use the invite token as a Bearer credential; the same
+  allowlist, expiry and revocation checks apply.
+- `/health` remains intentionally public for liveness/version checks and exposes no
+  participant or medical query data.
+
+The `student`, `clinician` and `researcher` values remain presentation modes.
+They are not identity proof, professional credential verification or authorization
+roles. The authenticated participant ID is attached to request state for the active
+request; it is not currently written into the medical execution trace.
+
+Regression tests are included for fail-closed configuration, unauthenticated and
+invalid access, valid direct API access, expiry, revocation, existing-session
+invalidation, browser entry, protected API documentation, request-body identity
+override attempts and raw credential echo/logging. PR/CI evidence remains the
+authority for whether those tests actually pass at the final head.
+
 ## Privacy
 
 Do **not** place real patient identifiers, Medicare numbers, medical-record data, secrets, access tokens, or other sensitive information in issues, pull requests, commits, fixtures, screenshots, logs, or CI artifacts.
