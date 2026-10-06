@@ -35,7 +35,8 @@ Key document owners:
 - `docs/INFLUENCE_CONTROL_CORE_v0.2.md` — machine-enforced influence-control implementation contract;
 - `policies/` — source, consequence, PHI routing and evidence influence policies; `src/medical_ai/policies/` is the identical packaged copy;
 - `docs/VALIDATION_PLAN.md` and `project_docs/VALIDATION_AND_EVIDENCE.md` — validation;
-- `docs/RELEASE_READINESS.md` and `docs/KNOWN_LIMITATIONS.md` — release boundaries;
+- `docs/RELEASE_READINESS.md` — release boundary, Issue #5 assessment/decision record, unresolved conditions and final disposition;
+- `docs/KNOWN_LIMITATIONS.md` — bounded capability and verification limitations;
 - `docs/LICENCE_REGISTER.md` and `docs/SOURCE_MAP.md` — licensing and source mapping;
 - `prompts/` — versioned runtime and worker prompts.
 
