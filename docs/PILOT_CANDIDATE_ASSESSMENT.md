@@ -189,3 +189,36 @@ instrument status and guidance immediately before the final release disposition.
    dated disposition with qualified review references and residual conditions.
 
 Issue #5 remains open. External pilot and public/commercial release remain **NO-GO**.
+
+## Engineering delta after the frozen assessment — 6 October 2026
+
+The frozen assessment above remains a historical finding about commit
+`197134ba22510f902c033f55d39ed33c5af22857`. It must not be rewritten as though
+that candidate contained access control.
+
+A later engineering candidate at `523ab64fd180ab7550c8565dae1cb366c506f159` implements an application-level
+invitation gate on branch `fix/issue5-pilot-access-gate`:
+
+- explicit server-side participant allowlist with stable participant and credential IDs;
+- high-entropy invite-token verification by stored SHA-256 digest;
+- timezone-aware participant expiry and explicit revocation;
+- short-lived HMAC-signed HTTP-only browser session cookies, with `Secure` on by default
+  and `SameSite=Strict`;
+- revocation, expiry and credential rotation rechecked on every protected request;
+- direct `/v1/evidence/query`, `/docs` and `/openapi.json` protection;
+- a public access shell at `/` that does not serve the workbench until authentication;
+- `/health` intentionally public for bounded liveness/version information;
+- presentation modes kept separate from authenticated participant identity; and
+- raw invite credentials kept out of URL parameters, response bodies, cookies and the
+  medical execution-trace input path.
+
+This materially reduces the application-level access-control blocker identified in
+the frozen assessment. It does **not** establish deployed origin protection, secret
+custody, hosting configuration, account-operation procedures, privacy compliance,
+professional credential verification, tenancy, rate limiting, qualified Australian
+regulatory review or release approval. CI/test evidence for the final PR head must be
+reviewed separately.
+
+Issue #5 therefore remains open and the external pilot/public/commercial disposition
+remains **NO-GO**.
+
