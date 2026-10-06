@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -34,6 +36,18 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
+
+@app.exception_handler(RequestValidationError)
+async def credential_validation_error(request: Request, exc: RequestValidationError):
+    # Default validation responses include rejected input values, which can be credentials.
+    if request.url.path == "/access/session":
+        return JSONResponse(
+            status_code=422,
+            content={"detail": "Invalid pilot credential request"},
+            headers={"Cache-Control": "no-store"},
+        )
+    return await request_validation_exception_handler(request, exc)
+
 
 ACCESS_PAGE = """<!doctype html>
 <html lang="en">

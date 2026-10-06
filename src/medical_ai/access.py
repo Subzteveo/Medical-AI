@@ -33,7 +33,7 @@ class PilotParticipant:
     credential_id: str
     token_sha256: str
     expires_at: datetime
-    revoked: bool = False
+    revoked: bool
 
 
 @dataclass(frozen=True)
@@ -70,6 +70,15 @@ def _parse_expiry(value: object) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
+def _unique_json_object(pairs: list[tuple[str, object]]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise AccessConfigurationError("duplicate pilot configuration field")
+        result[key] = value
+    return result
+
+
 def load_access_config() -> PilotAccessConfig:
     raw = os.getenv(ACCESS_CONFIG_ENV, "")
     secret = os.getenv(SESSION_SECRET_ENV, "")
@@ -79,10 +88,11 @@ def load_access_config() -> PilotAccessConfig:
         raise AccessConfigurationError(f"{SESSION_SECRET_ENV} must contain at least 32 bytes")
 
     try:
-        document = json.loads(raw)
+        document = json.loads(raw, object_pairs_hook=_unique_json_object)
     except json.JSONDecodeError as exc:
         raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} must be valid JSON") from exc
-    if not isinstance(document, dict) or not isinstance(document.get("participants"), list):
+    if (not isinstance(document, dict) or set(document) != {"participants"}
+            or not isinstance(document.get("participants"), list)):
         raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} must contain a participants array")
     if not document["participants"]:
         raise AccessConfigurationError("pilot participant allowlist must not be empty")
@@ -94,10 +104,12 @@ def load_access_config() -> PilotAccessConfig:
     for item in document["participants"]:
         if not isinstance(item, dict):
             raise AccessConfigurationError("each participant entry must be an object")
+        if set(item) != {"participant_id", "credential_id", "token_sha256", "expires_at", "revoked"}:
+            raise AccessConfigurationError("participant fields must be explicit and contain no unknown keys")
         participant_id = item.get("participant_id")
         credential_id = item.get("credential_id")
         token_sha256 = item.get("token_sha256")
-        revoked = item.get("revoked", False)
+        revoked = item["revoked"]
         if not isinstance(participant_id, str) or not _IDENTIFIER_RE.fullmatch(participant_id):
             raise AccessConfigurationError("participant_id must use 1-128 safe identifier characters")
         if not isinstance(credential_id, str) or not _IDENTIFIER_RE.fullmatch(credential_id):
@@ -157,6 +169,8 @@ def _active_participant(
 def authenticate_invite_token(
     token: str, config: PilotAccessConfig, *, now: datetime | None = None
 ) -> PilotParticipant | None:
+    if not isinstance(token, str) or not 20 <= len(token) <= 512:
+        return None
     supplied_digest = token_digest(token)
     matched: PilotParticipant | None = None
     for participant in config.participants:
@@ -216,6 +230,8 @@ def authenticate_session_token(
     *,
     now: datetime | None = None,
 ) -> PilotParticipant | None:
+    if len(session_token) > 4096:
+        return None
     try:
         encoded_payload, encoded_signature = session_token.split(".", 1)
         supplied_signature = _b64url_decode(encoded_signature)
@@ -225,7 +241,7 @@ def authenticate_session_token(
         if not hmac.compare_digest(supplied_signature, expected_signature):
             return None
         payload = json.loads(_b64url_decode(encoded_payload))
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError, binascii.Error):
+    except (ValueError, UnicodeError, binascii.Error):
         return None
 
     if not isinstance(payload, dict) or payload.get("v") != 1:
@@ -233,9 +249,10 @@ def authenticate_session_token(
     participant_id = payload.get("participant_id")
     credential_id = payload.get("credential_id")
     expiry = payload.get("exp")
-    if not isinstance(participant_id, str) or not isinstance(credential_id, str):
+    if (not isinstance(participant_id, str) or not _IDENTIFIER_RE.fullmatch(participant_id)
+            or not isinstance(credential_id, str) or not _IDENTIFIER_RE.fullmatch(credential_id)):
         return None
-    if not isinstance(expiry, int):
+    if type(expiry) is not int:
         return None
 
     current = now or datetime.now(timezone.utc)

@@ -222,3 +222,17 @@ reviewed separately.
 Issue #5 therefore remains open and the external pilot/public/commercial disposition
 remains **NO-GO**.
 
+
+### Access-gate review corrections
+
+PR #18 review tightens the later engineering candidate, without changing the frozen
+assessment: explicit revocation and exact/unique configuration keys fail closed;
+Bearer and browser credentials share a 20-512 character bound; credential-validation
+errors suppress submitted input. Regression coverage includes malformed/non-ASCII
+cookies, tampered payload/signature, credential rotation, session lifetime, logout
+and cookie security attributes. Non-ASCII decoding errors were already covered by
+the original ValueError handler; their regression is preventive coverage.
+
+Eight new regression cases failed against the pre-review implementation. The final
+PR head and its exact-head CI, rather than the older code checkpoint, own the merge
+evidence for these corrections. No deployed access or release approval is implied.

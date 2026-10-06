@@ -80,6 +80,14 @@ Runtime configuration is external to the repository:
 - `MEDICAL_AI_PILOT_COOKIE_SECURE` defaults to `true`. Setting it to `false` is
   for controlled local/test HTTP only, not an external pilot.
 
+Allowlist JSON has exactly one top-level field, `participants`. Every entry must
+contain exactly `participant_id`, `credential_id`, `token_sha256`, `expires_at` and
+an explicit boolean `revoked`. Missing, unexpected or duplicate fields fail closed.
+Invite credentials must be 20-512 characters on both Bearer and browser paths;
+operators must generate high-entropy values, since length alone does not prove entropy.
+Rotate both the token digest and `credential_id` to invalidate previous invitations
+and their existing sessions. Credential-validation errors never echo submitted input.
+
 Do not commit invite tokens, session secrets or environment files. Generate and deliver
 invite tokens out of band; only token digests belong in the runtime allowlist. Expiry
 and revocation are checked on every protected request, including already-issued

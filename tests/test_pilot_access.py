@@ -45,7 +45,7 @@ def configured_access(monkeypatch):
     monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_JSON", json.dumps(_access_document()))
     monkeypatch.setenv("MEDICAL_AI_PILOT_SESSION_SECRET", SESSION_SECRET)
     monkeypatch.setenv("MEDICAL_AI_PILOT_COOKIE_SECURE", "false")
-    monkeypatch.setattr(api, "build_engine", lambda: StubEngine())
+    monkeypatch.setattr(api, "build_engine", StubEngine)
 
 
 def _query_payload(**extra):
@@ -193,3 +193,139 @@ def test_health_is_intentionally_public(configured_access):
     response = TestClient(api.app).get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+@pytest.mark.parametrize('defect', ['missing_revoked', 'misspelt_revoked', 'extra_field', 'root_field', 'duplicate_key'])
+def test_malformed_allowlist_invalidates_invites_and_sessions(configured_access, monkeypatch, defect):
+    client = TestClient(api.app)
+    assert client.post('/access/session', json={'token': VALID_TOKEN}).status_code == 200
+    document = _access_document()
+    entry = document['participants'][0]
+    if defect == 'missing_revoked':
+        del entry['revoked']
+    elif defect == 'misspelt_revoked':
+        del entry['revoked']
+        entry['revokd'] = True
+    elif defect == 'extra_field':
+        entry['revokd'] = True
+    elif defect == 'root_field':
+        document['particpants'] = []
+    raw = json.dumps(document)
+    if defect == 'duplicate_key':
+        raw = raw.replace('"revoked": false', '"revoked": true, "revoked": false')
+    monkeypatch.setenv('MEDICAL_AI_PILOT_ACCESS_JSON', raw)
+    assert client.post('/v1/evidence/query', json=_query_payload()).status_code == 503
+    assert client.post('/v1/evidence/query', json=_query_payload(),
+                       headers={'Authorization': f'Bearer {VALID_TOKEN}'}).status_code == 503
+
+
+@pytest.mark.parametrize('token', ['tiny', 'X' * 513])
+def test_invalid_length_token_cannot_use_bearer_or_exchange(configured_access, monkeypatch, token):
+    document = _access_document()
+    document['participants'][0]['token_sha256'] = hashlib.sha256(token.encode()).hexdigest()
+    monkeypatch.setenv('MEDICAL_AI_PILOT_ACCESS_JSON', json.dumps(document))
+    client = TestClient(api.app)
+    assert client.post('/v1/evidence/query', json=_query_payload(),
+                       headers={'Authorization': f'Bearer {token}'}).status_code == 401
+    response = client.post('/access/session', json={'token': token})
+    assert response.status_code == 422
+    assert token not in response.text
+
+
+@pytest.mark.parametrize('cookie', ['é.AA', 'AA.é'])
+def test_non_ascii_session_cookie_is_rejected(configured_access, cookie):
+    from http.cookies import SimpleCookie
+    jar = SimpleCookie()
+    jar['medical_ai_pilot_session'] = cookie
+    response = TestClient(api.app).get('/docs', headers={'Cookie': jar.output(header='').strip()})
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize('segment', [0, 1])
+def test_tampered_session_is_rejected_on_protected_routes(configured_access, segment):
+    client = TestClient(api.app)
+    assert client.post('/access/session', json={'token': VALID_TOKEN}).status_code == 200
+    parts = client.cookies.get('medical_ai_pilot_session').split('.')
+    parts[segment] = ('A' if parts[segment][0] != 'A' else 'B') + parts[segment][1:]
+    client.cookies.clear()
+    client.cookies.set('medical_ai_pilot_session', '.'.join(parts))
+    assert client.get('/docs').status_code == 401
+    assert client.get('/openapi.json').status_code == 401
+    assert client.post('/v1/evidence/query', json=_query_payload()).status_code == 401
+
+
+def test_credential_rotation_invalidates_existing_session(configured_access, monkeypatch):
+    client = TestClient(api.app)
+    assert client.post('/access/session', json={'token': VALID_TOKEN}).status_code == 200
+    assert client.get('/docs').status_code == 200
+    document = _access_document()
+    document['participants'][0]['credential_id'] = 'credential-002'
+    replacement = 'replacement-invite-' + 'Z' * 40
+    document['participants'][0]['token_sha256'] = hashlib.sha256(replacement.encode()).hexdigest()
+    monkeypatch.setenv('MEDICAL_AI_PILOT_ACCESS_JSON', json.dumps(document))
+    assert client.get('/docs').status_code == 401
+    assert client.post('/v1/evidence/query', json=_query_payload(),
+                       headers={'Authorization': f'Bearer {VALID_TOKEN}'}).status_code == 401
+    assert client.post('/access/session', json={'token': replacement}).status_code == 200
+    assert client.get('/docs').status_code == 200
+
+
+def test_default_session_cookie_security_and_logout(configured_access, monkeypatch):
+    from http.cookies import SimpleCookie
+    monkeypatch.delenv('MEDICAL_AI_PILOT_COOKIE_SECURE', raising=False)
+    client = TestClient(api.app, base_url='https://testserver')
+    response = client.post('/access/session', json={'token': VALID_TOKEN})
+    assert response.status_code == 200
+    jar = SimpleCookie()
+    jar.load(response.headers['set-cookie'])
+    cookie = jar['medical_ai_pilot_session']
+    assert cookie['httponly']
+    assert cookie['secure']
+    assert cookie['samesite'].lower() == 'strict'
+    assert cookie['path'] == '/'
+    assert 0 < int(cookie['max-age']) <= 28800
+    assert client.get('/docs').status_code == 200
+    assert client.post('/access/logout').status_code == 200
+    assert client.get('/docs').status_code == 401
+
+
+def test_session_ttl_is_enforced_independently_of_participant_expiry(configured_access):
+    from medical_ai.access import authenticate_session_token, create_session_token, load_access_config
+    config = load_access_config()
+    now = datetime.now(timezone.utc)
+    token, _ = create_session_token(config.participants[0], config, now=now)
+    assert authenticate_session_token(token, config, now=now) is not None
+    assert authenticate_session_token(token, config, now=now + timedelta(seconds=config.session_ttl_seconds)) is None
+
+
+def test_validation_errors_never_echo_credentials(configured_access):
+    client = TestClient(api.app)
+    for payload in [{'token': VALID_TOKEN, 'extra': VALID_TOKEN}, {'token': {'secret': VALID_TOKEN}}]:
+        response = client.post('/access/session', json=payload)
+        assert response.status_code == 422
+        assert VALID_TOKEN not in response.text
+    response = client.post('/access/session', content='{"token":"' + VALID_TOKEN,
+                           headers={'Content-Type': 'application/json'})
+    assert response.status_code == 422
+    assert VALID_TOKEN not in response.text
+
+
+@pytest.mark.parametrize('change', [{'participant_id': 'é'}, {'credential_id': 'é'}, {'exp': True}])
+def test_signed_malformed_session_payload_is_rejected(configured_access, change):
+    import base64
+    import hmac
+    payload = {'v': 1, 'participant_id': 'pilot-001', 'credential_id': 'credential-001',
+               'exp': int((datetime.now(timezone.utc) + timedelta(hours=1)).timestamp())}
+    payload.update(change)
+    encoded = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip('=')
+    signature = hmac.new(SESSION_SECRET.encode(), encoded.encode(), hashlib.sha256).digest()
+    token = encoded + '.' + base64.urlsafe_b64encode(signature).decode().rstrip('=')
+    client = TestClient(api.app)
+    client.cookies.set('medical_ai_pilot_session', token)
+    assert client.get('/docs').status_code == 401
+
+
+def test_oversized_session_cookie_is_rejected(configured_access):
+    client = TestClient(api.app)
+    client.cookies.set('medical_ai_pilot_session', 'A' * 4097)
+    assert client.get('/docs').status_code == 401
