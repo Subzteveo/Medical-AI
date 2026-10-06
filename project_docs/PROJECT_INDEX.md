@@ -37,6 +37,7 @@ Key document owners:
 - `docs/VALIDATION_PLAN.md` and `project_docs/VALIDATION_AND_EVIDENCE.md` — validation;
 - `docs/RELEASE_READINESS.md` — release boundary, Issue #5 assessment/decision record, unresolved conditions and final disposition;
 - `docs/PILOT_CANDIDATE_ASSESSMENT.md` — frozen source assessment for the proposed invitation-only pilot on 1 November 2026; capabilities, access gaps, primary-source regulatory findings and unresolved approval conditions.
+- `docs/PILOT_OPERATING_BOUNDARY_AND_REVIEW_BRIEF.md` — supplied operator/hosting/participant boundaries, updated candidate and professional review engagement brief.
 - `docs/KNOWN_LIMITATIONS.md` — bounded capability and verification limitations;
 - `docs/LICENCE_REGISTER.md` and `docs/SOURCE_MAP.md` — licensing and source mapping;
 - `prompts/` — versioned runtime and worker prompts.
