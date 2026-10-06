@@ -23,7 +23,7 @@ A remediation regression suite has since been added and passes in the current wo
 - TGA/PBS and Australian terminology integrations where applicable;
 - product-specific TGA/intended-purpose assessment before public/commercial distribution;
 - robust PHI intake/routing + privacy operational validation;
-- authentication/access controls for any shared/public service;
+- deployment-bound verification of the invitation access configuration, secret custody, TLS/origin exposure and account lifecycle; application-level access control is implemented in engineering candidate `523ab64fd180ab7550c8565dae1cb366c506f159` but is not deployed or release-approved;
 - real browser/accessibility verification;
 - production monitoring/rollback exercises;
 - verified GitHub/revision provenance and fresh-environment install evidence.
@@ -83,6 +83,40 @@ repository material. Fresh primary-source findings and their limits are recorded
 in the linked candidate assessment; neither record establishes an exemption or
 final regulatory classification.
 
+
+### Engineering delta: application-level invitation gate
+
+Engineering candidate `523ab64fd180ab7550c8565dae1cb366c506f159` implements the server-side access boundary that
+was absent from the frozen Issue #5 candidate. The implementation is revision-bound
+to that code candidate and is not retroactive evidence for the earlier assessed SHA.
+
+Implemented/inspected in that candidate:
+
+- deny-by-default protected evidence API when pilot access configuration is missing;
+- explicit participant allowlist with stable participant ID, credential ID, token
+  digest, expiry and revocation state;
+- HMAC-signed HTTP-only browser sessions with bounded lifetime and secure-cookie
+  default;
+- per-request expiry/revocation re-evaluation, so an existing session is invalidated
+  when its participant becomes inactive;
+- direct evidence API and API-documentation protection independent of the browser UI;
+- request models reject extra fields so a client cannot inject or override participant
+  identity through the evidence-query body;
+- `student`, `clinician` and `researcher` remain presentation modes, not verified
+  professional identities; and
+- raw invite tokens are not passed into the evidence engine or SQLite execution trace.
+
+Still unresolved before any external pilot: deploy the exact candidate behind TLS;
+supply runtime secrets/allowlist through an approved secret-management path; verify
+direct-origin exposure and all configured routes in the deployed environment; define
+invite issuance/offboarding ownership and retention; review infrastructure/proxy logs
+for credential or query leakage; decide whether tenancy/rate limiting are required;
+and complete all separate regulatory, privacy, claims, live-source, clinical and
+release-approval gates.
+
+A passing engineering suite may support this access-control delta only. It cannot
+change the current **NO-GO** disposition by itself.
+
 ### Closure rule
 
 Issue #5 remains open. A documentation PR or a green test run cannot close it.
@@ -107,7 +141,10 @@ separate evidence and authorization; closing this issue alone cannot authorize l
 
 ### Smallest next action
 
-Steven Lees resolves the remaining participant/operator/hosting boundaries and
-arranges qualified Australian review of the [frozen candidate assessment](PILOT_CANDIDATE_ASSESSMENT.md).
-The maintainer supplies an enforceable invitation/access design and its evidence.
+Review the exact-head PR/CI evidence for the invitation gate, then verify its runtime
+configuration and direct-origin behavior in the eventual deployment environment.
+In parallel, Steven Lees resolves the remaining participant/operator/hosting boundaries
+and arranges qualified Australian review of the
+[frozen candidate assessment](PILOT_CANDIDATE_ASSESSMENT.md).
+
 No external pilot, public/commercial release or deployment is authorised.
