@@ -1,18 +1,32 @@
 from __future__ import annotations
 
+import uuid
 from collections.abc import Iterable
 
 from .schemas import (
-    AuthorityState,
+    AuthorizedClaimView,
+    ClaimRecord,
     DataPlane,
     DependencyDimension,
+    DependencyEdge,
     DownstreamInfluenceState,
+    EvidenceAuthorityState,
+    GateStatus,
+    InfluenceAuthorization,
+    InfluenceAuthorizationState,
     InfluenceDecision,
     InfluenceDecisionStatus,
+    InfluenceEvaluation,
+    InfluenceReasonCode,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
+    InvalidationReasonCode,
+    InvalidationRecord,
     RevocationResult,
+    TransitionAuthorization,
+    TransitionDecision,
 )
 
 
@@ -20,24 +34,31 @@ class InfluenceController:
     """Machine-enforced gate for whether an object may influence medical output.
 
     The controller keeps authority dimensions independent, fails closed on unknown
-    state or transitions, emits an inspectable decision artefact, and records typed
-    dependencies so revocation propagates only through the dimension that changed.
+    state or transitions, emits a typed authorization capability only for ALLOW
+    decisions, and records typed dependencies so revocation propagates only through
+    the dimension that changed.
     """
 
-    policy_version = "medical-ai-influence-v0.2"
+    policy_version = "medical-ai-influence-v0.2-typesafe"
 
-    def __init__(self, allowed_transitions: Iterable[tuple[DataPlane, DataPlane]] | None = None):
-        defaults = {
+    def __init__(
+        self,
+        allowed_transitions: Iterable[tuple[DataPlane, DataPlane]] | None = None,
+    ) -> None:
+        defaults: set[tuple[DataPlane, DataPlane]] = {
             (DataPlane.EVIDENCE, DataPlane.EVIDENCE),
             (DataPlane.TERMINOLOGY, DataPlane.TERMINOLOGY),
             (DataPlane.CLINICAL, DataPlane.CLINICAL),
             (DataPlane.RESEARCH, DataPlane.RESEARCH),
         }
-        self.allowed_transitions = set(defaults if allowed_transitions is None else allowed_transitions)
+        self.allowed_transitions: set[tuple[DataPlane, DataPlane]] = set(
+            defaults if allowed_transitions is None else allowed_transitions
+        )
         self._subjects: dict[str, InfluenceSubject] = {}
         self._conflicted_subjects: set[str] = set()
         self._decisions: dict[str, InfluenceDecision] = {}
-        self._dependencies = []
+        self._authorizations: dict[str, InfluenceAuthorization] = {}
+        self._dependencies: list[DependencyEdge] = []
         self._downstream_states: dict[str, DownstreamInfluenceState] = {}
 
     @property
@@ -54,76 +75,175 @@ class InfluenceController:
         elif subject.model_dump() != request.subject.model_dump():
             snapshot_conflict = True
             self._conflicted_subjects.add(object_id)
-            subject.evidence_authority = self._restrict_authority(
-                subject.evidence_authority, request.subject.evidence_authority
+            subject.evidence_authority = self._restrict_evidence_authority(
+                subject.evidence_authority,
+                request.subject.evidence_authority,
             )
-            subject.information_handling_authority = self._restrict_authority(
+            subject.information_handling_authority = self._restrict_information_authority(
                 subject.information_handling_authority,
                 request.subject.information_handling_authority,
             )
             self._invalidate_subject_dependents(object_id)
+            self._revoke_subject_authorizations(object_id)
 
-        reasons: list[str] = []
+        reasons: list[InfluenceReasonCode] = []
         if snapshot_conflict or object_id in self._conflicted_subjects:
-            reasons.append("SUBJECT_SNAPSHOT_CONFLICT")
-        transition = request.transition
+            reasons.append(InfluenceReasonCode.SUBJECT_SNAPSHOT_CONFLICT)
 
+        transition = request.transition
+        transition_allowed = (
+            subject.data_plane == transition.source_plane
+            and transition.information_class != InformationClass.UNKNOWN
+            and (transition.source_plane, transition.target_plane) in self.allowed_transitions
+        )
         if subject.data_plane != transition.source_plane:
-            reasons.append("SUBJECT_PLANE_MISMATCH")
+            reasons.append(InfluenceReasonCode.SUBJECT_PLANE_MISMATCH)
         if transition.information_class == InformationClass.UNKNOWN:
-            reasons.append("INFORMATION_CLASS_UNKNOWN")
+            reasons.append(InfluenceReasonCode.INFORMATION_CLASS_UNKNOWN)
         if (transition.source_plane, transition.target_plane) not in self.allowed_transitions:
-            reasons.append("TRANSITION_NOT_ALLOWED")
-        if subject.evidence_authority != AuthorityState.APPROVED:
-            reasons.append(f"EVIDENCE_AUTHORITY_{subject.evidence_authority.value}")
-        if subject.information_handling_authority != AuthorityState.APPROVED:
+            reasons.append(InfluenceReasonCode.TRANSITION_NOT_ALLOWED)
+
+        if subject.evidence_authority != EvidenceAuthorityState.APPROVED:
+            reasons.append(self._evidence_authority_reason(subject.evidence_authority))
+        if (
+            subject.information_handling_authority
+            != InformationHandlingAuthorityState.APPROVED
+        ):
             reasons.append(
-                f"INFORMATION_HANDLING_AUTHORITY_{subject.information_handling_authority.value}"
+                self._information_handling_reason(
+                    subject.information_handling_authority
+                )
             )
         if not subject.provenance_complete:
-            reasons.append("PROVENANCE_INCOMPLETE")
+            reasons.append(InfluenceReasonCode.PROVENANCE_INCOMPLETE)
         if not subject.validation_passed:
-            reasons.append("VALIDATION_NOT_PASSED")
+            reasons.append(InfluenceReasonCode.VALIDATION_NOT_PASSED)
         if not subject.safety_passed:
-            reasons.append("SAFETY_NOT_PASSED")
+            reasons.append(InfluenceReasonCode.SAFETY_NOT_PASSED)
         if not subject.monitoring_enabled:
-            reasons.append("MONITORING_NOT_ENABLED")
+            reasons.append(InfluenceReasonCode.MONITORING_NOT_ENABLED)
 
         allowed = not reasons
+        decision_id = str(uuid.uuid4())
+        transition_authorization = TransitionAuthorization(
+            transition=transition,
+            decision=TransitionDecision.ALLOW if transition_allowed else TransitionDecision.DENY,
+            policy_version=self.policy_version,
+        )
+        evaluation = InfluenceEvaluation(
+            evidence_authority=subject.evidence_authority,
+            information_handling_authority=subject.information_handling_authority,
+            data_plane=subject.data_plane,
+            information_class=transition.information_class,
+            provenance=GateStatus.PASS if subject.provenance_complete else GateStatus.FAIL,
+            validation=GateStatus.PASS if subject.validation_passed else GateStatus.FAIL,
+            safety=GateStatus.PASS if subject.safety_passed else GateStatus.FAIL,
+            monitoring=GateStatus.PASS if subject.monitoring_enabled else GateStatus.FAIL,
+        )
+        authorization: InfluenceAuthorization | None = None
+        if allowed:
+            authorization = InfluenceAuthorization(
+                decision_id=decision_id,
+                object_id=subject.object_id,
+                proposition_id=request.proposition_id,
+                required_dependency_dimensions=list(
+                    request.required_dependency_dimensions
+                ),
+            )
+            self._authorizations[authorization.authorization_id] = authorization
+
         decision = InfluenceDecision(
+            decision_id=decision_id,
             request_id=request.request_id,
             object_id=subject.object_id,
             proposition_id=request.proposition_id,
-            status=InfluenceDecisionStatus.ALLOW if allowed else InfluenceDecisionStatus.DENY,
-            allowed=allowed,
+            status=(
+                InfluenceDecisionStatus.ALLOW
+                if allowed
+                else InfluenceDecisionStatus.DENY
+            ),
             reasons=reasons,
             policy_version=self.policy_version,
-            evaluated_dimensions={
-                "evidence_authority": subject.evidence_authority.value,
-                "information_handling_authority": subject.information_handling_authority.value,
-                "data_plane": subject.data_plane.value,
-                "information_class": transition.information_class.value,
-                "provenance": "PASS" if subject.provenance_complete else "FAIL",
-                "validation": "PASS" if subject.validation_passed else "FAIL",
-                "safety": "PASS" if subject.safety_passed else "FAIL",
-                "monitoring": "PASS" if subject.monitoring_enabled else "FAIL",
-            },
-            transition=transition,
+            evaluated_dimensions=evaluation,
+            transition_authorization=transition_authorization,
+            authorization=authorization,
         )
         self._decisions[decision.decision_id] = decision
         if allowed:
             self._record_dependencies(request)
         return decision
 
+    def build_authorized_claim_view(
+        self,
+        claim: ClaimRecord,
+        decision: InfluenceDecision,
+    ) -> AuthorizedClaimView:
+        stored = self._decisions.get(decision.decision_id)
+        if stored is None or stored.status != InfluenceDecisionStatus.ALLOW:
+            raise ValueError("Claim rendering requires a stored ALLOW decision")
+        authorization = stored.authorization
+        if authorization is None:
+            raise ValueError("ALLOW decision is missing its authorization capability")
+        current = self._authorizations.get(authorization.authorization_id)
+        if current is None or current.state != InfluenceAuthorizationState.ACTIVE:
+            raise ValueError("Claim rendering requires an active authorization capability")
+        if current.object_id != claim.claim_id:
+            raise ValueError("Authorization capability does not belong to this claim")
+        return AuthorizedClaimView(claim=claim, authorization=current)
+
     @staticmethod
-    def _restrict_authority(current: AuthorityState, incoming: AuthorityState) -> AuthorityState:
-        restriction = {
-            AuthorityState.APPROVED: 0,
-            AuthorityState.UNKNOWN: 1,
-            AuthorityState.DENIED: 2,
-            AuthorityState.REVOKED: 3,
+    def _restrict_evidence_authority(
+        current: EvidenceAuthorityState,
+        incoming: EvidenceAuthorityState,
+    ) -> EvidenceAuthorityState:
+        rank: dict[EvidenceAuthorityState, int] = {
+            EvidenceAuthorityState.APPROVED: 0,
+            EvidenceAuthorityState.UNKNOWN: 1,
+            EvidenceAuthorityState.DENIED: 2,
+            EvidenceAuthorityState.REVOKED: 3,
         }
-        return max((current, incoming), key=restriction.__getitem__)
+        return current if rank[current] >= rank[incoming] else incoming
+
+    @staticmethod
+    def _restrict_information_authority(
+        current: InformationHandlingAuthorityState,
+        incoming: InformationHandlingAuthorityState,
+    ) -> InformationHandlingAuthorityState:
+        rank: dict[InformationHandlingAuthorityState, int] = {
+            InformationHandlingAuthorityState.APPROVED: 0,
+            InformationHandlingAuthorityState.UNKNOWN: 1,
+            InformationHandlingAuthorityState.DENIED: 2,
+            InformationHandlingAuthorityState.REVOKED: 3,
+        }
+        return current if rank[current] >= rank[incoming] else incoming
+
+    @staticmethod
+    def _evidence_authority_reason(
+        state: EvidenceAuthorityState,
+    ) -> InfluenceReasonCode:
+        match state:
+            case EvidenceAuthorityState.DENIED:
+                return InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED
+            case EvidenceAuthorityState.UNKNOWN:
+                return InfluenceReasonCode.EVIDENCE_AUTHORITY_UNKNOWN
+            case EvidenceAuthorityState.REVOKED:
+                return InfluenceReasonCode.EVIDENCE_AUTHORITY_REVOKED
+            case EvidenceAuthorityState.APPROVED:
+                raise ValueError("Approved evidence authority has no denial reason")
+
+    @staticmethod
+    def _information_handling_reason(
+        state: InformationHandlingAuthorityState,
+    ) -> InfluenceReasonCode:
+        match state:
+            case InformationHandlingAuthorityState.DENIED:
+                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_DENIED
+            case InformationHandlingAuthorityState.UNKNOWN:
+                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_UNKNOWN
+            case InformationHandlingAuthorityState.REVOKED:
+                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_REVOKED
+            case InformationHandlingAuthorityState.APPROVED:
+                raise ValueError("Approved information-handling authority has no denial reason")
 
     def _invalidate_subject_dependents(self, object_id: str) -> None:
         for edge in self._dependencies:
@@ -134,9 +254,30 @@ class InfluenceController:
                 DownstreamInfluenceState(object_id=edge.downstream_object_id),
             )
             state.active = False
-            reason = f"UPSTREAM_SUBJECT_SNAPSHOT_CONFLICT:{object_id}"
-            if reason not in state.invalidation_reasons:
-                state.invalidation_reasons.append(reason)
+            record = InvalidationRecord(
+                code=InvalidationReasonCode.SUBJECT_SNAPSHOT_CONFLICT,
+                upstream_object_id=object_id,
+                dimension=edge.dimension,
+            )
+            if record not in state.invalidation_reasons:
+                state.invalidation_reasons.append(record)
+
+    def _revoke_subject_authorizations(self, object_id: str) -> None:
+        for authorization in self._authorizations.values():
+            if authorization.object_id == object_id:
+                authorization.state = InfluenceAuthorizationState.REVOKED
+
+    def _revoke_authorizations_for_dimension(
+        self,
+        object_id: str,
+        dimension: DependencyDimension,
+    ) -> None:
+        for authorization in self._authorizations.values():
+            if (
+                authorization.object_id == object_id
+                and dimension in authorization.required_dependency_dimensions
+            ):
+                authorization.state = InfluenceAuthorizationState.REVOKED
 
     def update_subject(self, subject: InfluenceSubject) -> None:
         """Apply an authoritative snapshot only when its revision increases."""
@@ -147,15 +288,13 @@ class InfluenceController:
         self._conflicted_subjects.discard(subject.object_id)
 
     def _record_dependencies(self, request: InfluenceRequest) -> None:
-        from .schemas import DependencyEdge
-
         state = self._downstream_states.setdefault(
             request.proposition_id,
             DownstreamInfluenceState(object_id=request.proposition_id),
         )
         if not state.active:
             return
-        existing = {
+        existing: set[tuple[str, str, DependencyDimension]] = {
             (edge.upstream_object_id, edge.downstream_object_id, edge.dimension)
             for edge in self._dependencies
         }
@@ -163,11 +302,13 @@ class InfluenceController:
             key = (request.subject.object_id, request.proposition_id, dimension)
             if key in existing:
                 continue
-            self._dependencies.append(DependencyEdge(
-                upstream_object_id=request.subject.object_id,
-                downstream_object_id=request.proposition_id,
-                dimension=dimension,
-            ))
+            self._dependencies.append(
+                DependencyEdge(
+                    upstream_object_id=request.subject.object_id,
+                    downstream_object_id=request.proposition_id,
+                    dimension=dimension,
+                )
+            )
 
     def revoke_authority(
         self,
@@ -178,18 +319,23 @@ class InfluenceController:
         if subject is None:
             raise KeyError(f"Unknown influence subject: {object_id}")
         if dimension == DependencyDimension.EVIDENCE_AUTHORITY:
-            subject.evidence_authority = AuthorityState.REVOKED
+            subject.evidence_authority = EvidenceAuthorityState.REVOKED
         elif dimension == DependencyDimension.INFORMATION_HANDLING_AUTHORITY:
-            subject.information_handling_authority = AuthorityState.REVOKED
+            subject.information_handling_authority = (
+                InformationHandlingAuthorityState.REVOKED
+            )
         else:
-            raise ValueError("Only authority dimensions can be revoked with revoke_authority")
+            raise ValueError(
+                "Only authority dimensions can be revoked with revoke_authority"
+            )
 
-        impacted = {
+        self._revoke_authorizations_for_dimension(object_id, dimension)
+        impacted: set[str] = {
             edge.downstream_object_id
             for edge in self._dependencies
             if edge.upstream_object_id == object_id and edge.dimension == dimension
         }
-        related = {
+        related: set[str] = {
             edge.downstream_object_id
             for edge in self._dependencies
             if edge.upstream_object_id == object_id
@@ -200,9 +346,13 @@ class InfluenceController:
                 DownstreamInfluenceState(object_id=downstream_id),
             )
             state.active = False
-            reason = f"UPSTREAM_{dimension.value}_REVOKED:{object_id}"
-            if reason not in state.invalidation_reasons:
-                state.invalidation_reasons.append(reason)
+            record = InvalidationRecord(
+                code=InvalidationReasonCode.AUTHORITY_REVOKED,
+                upstream_object_id=object_id,
+                dimension=dimension,
+            )
+            if record not in state.invalidation_reasons:
+                state.invalidation_reasons.append(record)
         return RevocationResult(
             upstream_object_id=object_id,
             dimension=dimension,
@@ -210,10 +360,19 @@ class InfluenceController:
             unaffected_downstream_ids=sorted(related - impacted),
         )
 
-    def get_downstream_state(self, object_id: str) -> DownstreamInfluenceState | None:
+    def get_downstream_state(
+        self,
+        object_id: str,
+    ) -> DownstreamInfluenceState | None:
         state = self._downstream_states.get(object_id)
         return state.model_copy(deep=True) if state is not None else None
 
     def get_subject(self, object_id: str) -> InfluenceSubject | None:
         subject = self._subjects.get(object_id)
         return subject.model_copy(deep=True) if subject is not None else None
+
+    def get_authorization(
+        self,
+        authorization_id: str,
+    ) -> InfluenceAuthorization | None:
+        return self._authorizations.get(authorization_id)
