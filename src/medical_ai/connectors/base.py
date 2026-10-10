@@ -17,7 +17,8 @@ class EvidenceConnector(Protocol):
         self,
         query: str,
         limit: int = 5,
-    ) -> tuple[list[SourceRecord], list[Passage]]: ...
+    ) -> tuple[list[SourceRecord], list[Passage]]:
+        raise NotImplementedError
 
 
 def require_evidence_approved(
