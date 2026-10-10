@@ -160,7 +160,7 @@ class InfluenceController:
                 decision_id=decision_id,
                 object_id=subject.object_id,
                 proposition_id=request.proposition_id,
-                required_dependency_dimensions=list(
+                required_dependency_dimensions=tuple(
                     request.required_dependency_dimensions
                 ),
             )
