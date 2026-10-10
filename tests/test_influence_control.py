@@ -348,3 +348,43 @@ def test_renderer_rejects_raw_verified_claim_without_authorization_capability():
 
     with pytest.raises(TypeError, match="AuthorizedClaimView"):
         render_answer([claim], [source_obj])
+
+
+
+def test_influence_decision_round_trip_preserves_closed_types_and_authorization():
+    from medical_ai.schemas import InfluenceDecision
+
+    controller = InfluenceController()
+    decision = controller.authorize(request(subject()))
+    payload = decision.model_dump_json()
+    restored = InfluenceDecision.model_validate_json(payload)
+
+    assert restored.status == decision.status
+    assert restored.evaluated_dimensions.evidence_authority == EvidenceAuthorityState.APPROVED
+    assert (
+        restored.evaluated_dimensions.information_handling_authority
+        == InformationHandlingAuthorityState.APPROVED
+    )
+    assert restored.authorization is not None
+    assert restored.authorization.decision_id == restored.decision_id
+    assert restored.allowed is True
+
+
+def test_malformed_authority_state_is_rejected_at_canonical_construction_boundary():
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        InfluenceSubject.model_validate(
+            {
+                "object_id": "evidence:malformed",
+                "object_type": "EVIDENCE_OBJECT",
+                "data_plane": "EVIDENCE",
+                "evidence_authority": "MAGICALLY_APPROVED",
+                "information_handling_authority": "APPROVED",
+                "provenance_complete": True,
+                "validation_passed": True,
+                "safety_passed": True,
+                "monitoring_enabled": True,
+                "version": "malformed-test",
+            }
+        )
