@@ -221,29 +221,25 @@ class InfluenceController:
     def _evidence_authority_reason(
         state: EvidenceAuthorityState,
     ) -> InfluenceReasonCode:
-        match state:
-            case EvidenceAuthorityState.DENIED:
-                return InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED
-            case EvidenceAuthorityState.UNKNOWN:
-                return InfluenceReasonCode.EVIDENCE_AUTHORITY_UNKNOWN
-            case EvidenceAuthorityState.REVOKED:
-                return InfluenceReasonCode.EVIDENCE_AUTHORITY_REVOKED
-            case EvidenceAuthorityState.APPROVED:
-                raise ValueError("Approved evidence authority has no denial reason")
+        if state == EvidenceAuthorityState.DENIED:
+            return InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED
+        if state == EvidenceAuthorityState.UNKNOWN:
+            return InfluenceReasonCode.EVIDENCE_AUTHORITY_UNKNOWN
+        if state == EvidenceAuthorityState.REVOKED:
+            return InfluenceReasonCode.EVIDENCE_AUTHORITY_REVOKED
+        raise ValueError("Approved evidence authority has no denial reason")
 
     @staticmethod
     def _information_handling_reason(
         state: InformationHandlingAuthorityState,
     ) -> InfluenceReasonCode:
-        match state:
-            case InformationHandlingAuthorityState.DENIED:
-                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_DENIED
-            case InformationHandlingAuthorityState.UNKNOWN:
-                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_UNKNOWN
-            case InformationHandlingAuthorityState.REVOKED:
-                return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_REVOKED
-            case InformationHandlingAuthorityState.APPROVED:
-                raise ValueError("Approved information-handling authority has no denial reason")
+        if state == InformationHandlingAuthorityState.DENIED:
+            return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_DENIED
+        if state == InformationHandlingAuthorityState.UNKNOWN:
+            return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_UNKNOWN
+        if state == InformationHandlingAuthorityState.REVOKED:
+            return InfluenceReasonCode.INFORMATION_HANDLING_AUTHORITY_REVOKED
+        raise ValueError("Approved information-handling authority has no denial reason")
 
     def _invalidate_subject_dependents(self, object_id: str) -> None:
         for edge in self._dependencies:
