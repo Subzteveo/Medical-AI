@@ -41,7 +41,7 @@ def main() -> int:
     for path in AUTHORITATIVE_FILES:
         text = path.read_text(encoding="utf-8")
         if "# type: ignore" in text or "# pyright: ignore" in text:
-            errors.append(f"{path.relative_to(ROOT)}: type-ignore escape hatch is forbidden")
+            errors.append(f"{(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)}: type-ignore escape hatch is forbidden")
         tree = ast.parse(text, filename=str(path))
         typing_aliases = {"typing", "typing_extensions"}
         for node in ast.walk(tree):
@@ -53,12 +53,12 @@ def main() -> int:
                 for alias in node.names:
                     if alias.name in {"Any", "cast"}:
                         errors.append(
-                            f"{path.relative_to(ROOT)}:{node.lineno}: "
+                            f"{(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)}:{node.lineno}: "
                             f"typing.{alias.name} is forbidden in the authoritative influence path"
                         )
             if isinstance(node, ast.Name) and node.id == "Any":
                 errors.append(
-                    f"{path.relative_to(ROOT)}:{node.lineno}: Any is forbidden "
+                    f"{(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)}:{node.lineno}: Any is forbidden "
                     "in the authoritative influence path"
                 )
             if (
@@ -68,11 +68,11 @@ def main() -> int:
                 and node.attr in {"Any", "cast"}
             ):
                 errors.append(
-                    f"{path.relative_to(ROOT)}:{node.lineno}: qualified typing.{node.attr} is forbidden"
+                    f"{(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)}:{node.lineno}: qualified typing.{node.attr} is forbidden"
                 )
             if isinstance(node, ast.Call) and _name(node.func) == "cast":
                 errors.append(
-                    f"{path.relative_to(ROOT)}:{node.lineno}: unchecked cast is forbidden"
+                    f"{(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)}:{node.lineno}: unchecked cast is forbidden"
                 )
 
     renderer_path = ROOT / "src/medical_ai/renderer.py"
@@ -99,7 +99,7 @@ def main() -> int:
 
     for path in RUNTIME_ROOT.rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        relative = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else str(path)
+        relative = (path.relative_to(ROOT) if path.is_relative_to(ROOT) else path).as_posix() if path.is_relative_to(ROOT) else str(path)
         capability_aliases = set(CAPABILITY_CONSTRUCTORS)
         output_aliases = set(OUTPUT_CONSTRUCTORS)
         for node in ast.walk(tree):
