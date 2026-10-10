@@ -25,7 +25,7 @@ def require_evidence_approved(
     expected_source_class: str,
 ) -> EvidenceConnector:
     if not isinstance(connector, EvidenceConnector):
-        raise ValueError("Connector does not satisfy the typed EvidenceConnector contract")
+        raise ValueError("Connector is not evidence-approved: typed approval metadata is incomplete")
     if connector.source_class != expected_source_class:
         raise ValueError(
             "Connector source class mismatch: "
