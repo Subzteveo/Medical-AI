@@ -272,7 +272,7 @@ class EvidenceEngine:
             source for source in admitted if source.source_id in authorized_source_ids
         ]
         unit_by_id = {unit.evidence_id: unit for unit in visible_units}
-        citation_mappings = []
+        citation_mappings: list[CitationMapping] = []
         for claim in authorized_claims:
             for evidence_id in claim.evidence_ids:
                 unit = unit_by_id.get(evidence_id)
