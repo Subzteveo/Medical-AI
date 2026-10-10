@@ -303,7 +303,7 @@ def test_renderer_view_requires_current_active_authorization():
         object_type=InfluenceObjectType.CLAIM_RECORD,
     )
     decision = controller.authorize(
-        request(subj, downstream=f"user-output:{claim.claim_id}")
+        request(subj, downstream=f"user-output:{claim.claim_id}"), claim=claim
     )
     view = controller.build_authorized_claim_view(claim, decision)
 
@@ -313,7 +313,7 @@ def test_renderer_view_requires_current_active_authorization():
         claim.claim_id,
         DependencyDimension.EVIDENCE_AUTHORITY,
     )
-    assert view.authorization.state == InfluenceAuthorizationState.REVOKED
+    assert controller.get_authorization(view.authorization.authorization_id).state == InfluenceAuthorizationState.REVOKED
 
     with pytest.raises(ValueError, match="active authorization"):
         controller.build_authorized_claim_view(claim, decision)
