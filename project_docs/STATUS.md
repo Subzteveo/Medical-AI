@@ -1,3 +1,7 @@
+> **11 October 2026 addendum — revision-bound repository observation.** The 5 October checkpoint below remains historical and must not be read as the present branch head. On 11 October, `main` was observed at `13fadd41e628ff60de2cdfff933b3e2be19f1327` (merged PR #21, type-safe influence-control hardening). The `source-and-tests` and code-quality checks returned successful outcomes for that exact revision. This is engineering-check evidence only, not medical validation. The active `LAB AI Sec` ruleset was observed to enforce deletion/non-fast-forward prohibitions **without** demonstrated required PR and required CI-check gates. Issue #2 is closed but its GitHub enforcement requirements remain unproven. Issue #4 is closed but current Alpha3 live/clinician-reviewed fidelity remains unproven. The proposed four-dimension Tranche A engineering contract has received conversation-level owner approval; no machine-evaluated project-status approval, clinical authorization or release-readiness claim follows. See [G0 checkpoint](ALPHA3_TRANCHE_A_G0_CHECKPOINT.md). **Safety-kernel merge remains gated on GitHub enforcement read-back and human-reviewed exact-head checks.**
+
+---
+
 # Project Status
 
 **Checkpoint date:** 5 October 2026  
