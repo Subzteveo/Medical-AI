@@ -345,14 +345,14 @@ class InfluenceEvaluation(BaseModel):
 
 
 class InfluenceAuthorization(BaseModel):
-    model_config = ConfigDict(validate_assignment=True, revalidate_instances="never")
+    model_config = ConfigDict(frozen=True, revalidate_instances="always")
 
     authorization_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     decision_id: str
     object_id: str
     proposition_id: str
     state: InfluenceAuthorizationState = InfluenceAuthorizationState.ACTIVE
-    required_dependency_dimensions: list[DependencyDimension]
+    required_dependency_dimensions: tuple[DependencyDimension, ...]
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -374,8 +374,6 @@ class InfluenceDecision(BaseModel):
         if self.status == InfluenceDecisionStatus.ALLOW:
             if self.authorization is None:
                 raise ValueError("ALLOW decisions require an authorization")
-            if self.authorization.state != InfluenceAuthorizationState.ACTIVE:
-                raise ValueError("ALLOW decisions require an active authorization")
             if self.authorization.decision_id != self.decision_id:
                 raise ValueError("Authorization must reference the decision that created it")
         elif self.authorization is not None:
@@ -414,7 +412,7 @@ class RevocationResult(BaseModel):
 
 
 class AuthorizedClaimView(BaseModel):
-    model_config = ConfigDict(revalidate_instances="never")
+    model_config = ConfigDict(frozen=True, revalidate_instances="always")
 
     claim: ClaimRecord
     authorization: InfluenceAuthorization
