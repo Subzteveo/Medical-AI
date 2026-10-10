@@ -37,7 +37,7 @@ def _runtime_authorized_view(
 ) -> AuthorizedClaimView:
     if not isinstance(value, AuthorizedClaimView):
         raise TypeError("Renderer requires AuthorizedClaimView inputs")
-    if controller is None or not isinstance(controller, InfluenceController):
+    if controller is None:
         raise ValueError("Renderer requires the issuing influence controller")
     controller.validate_authorized_claim_view(value)
     return value
