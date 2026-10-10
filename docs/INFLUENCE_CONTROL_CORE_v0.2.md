@@ -81,3 +81,22 @@ python -m pytest
 ```
 
 The repository checksum manifest must be updated deliberately whenever tracked source/test files change; CI verifies the committed manifest rather than regenerating it.
+
+
+## Type-safe influence-control assurance
+
+The v0.2 control core is additionally constrained by a closed-type authorization path:
+
+- evidence authority and information-handling authority use distinct enum types;
+- data-plane transition authority is represented separately from the overall influence decision;
+- an `ALLOW` decision must carry an active `InfluenceAuthorization`;
+- `InfluenceDecision.allowed` is derived from the closed decision state rather than stored as independently mutable state;
+- only `InfluenceController.build_authorized_claim_view()` may construct the runtime `AuthorizedClaimView` capability;
+- the renderer accepts `AuthorizedClaimView` objects rather than raw `ClaimRecord` objects and retains runtime fail-closed checks for untyped callers;
+- revocation or conflicting authoritative snapshots revoke affected authorization capabilities;
+- the authoritative influence path is checked under strict static typing with no `Any`, unchecked casts, or type-ignore escape hatches;
+- a source-level guard rejects alternate runtime renderer calls and runtime construction of authorization capabilities outside the influence controller.
+
+The CI type-safety gate emits a JSON artifact bound to the exact checked Git revision. That artifact records the strict static type-check result and the influence-boundary source-guard result.
+
+This is revision-bound engineering evidence only. It does not prove medical correctness, clinical safety, regulatory compliance, or future-revision safety.

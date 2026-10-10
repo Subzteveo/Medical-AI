@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Protocol
+
+from typing import Protocol, runtime_checkable
+
 from medical_ai.schemas import Passage, SourceRecord
 
 
+@runtime_checkable
 class EvidenceConnector(Protocol):
     name: str
     version: str
@@ -10,18 +13,27 @@ class EvidenceConnector(Protocol):
     evidence_approved: bool
     phi_approved: bool
 
-    async def search_and_fetch(self, query: str, limit: int = 5) -> tuple[list[SourceRecord], list[Passage]]: ...
+    async def search_and_fetch(
+        self,
+        query: str,
+        limit: int = 5,
+    ) -> tuple[list[SourceRecord], list[Passage]]:
+        raise NotImplementedError
 
 
-def require_evidence_approved(connector: object, expected_source_class: str) -> object:
-    configured_source_class = getattr(connector, "source_class", None)
-    if configured_source_class != expected_source_class:
+def require_evidence_approved(
+    connector: object,
+    expected_source_class: str,
+) -> EvidenceConnector:
+    if not isinstance(connector, EvidenceConnector):
+        raise ValueError("Connector is not evidence-approved: typed approval metadata is incomplete")
+    if connector.source_class != expected_source_class:
         raise ValueError(
-            f"Connector source class mismatch: expected {expected_source_class}, got {configured_source_class!r}"
+            "Connector source class mismatch: "
+            f"expected {expected_source_class}, got {connector.source_class!r}"
         )
-    evidence_approved = getattr(connector, "evidence_approved", None)
-    if evidence_approved is not True:
+    if connector.evidence_approved is not True:
         raise ValueError(
-            f"Connector {getattr(connector, 'name', 'unknown')} is not evidence-approved for {expected_source_class}"
+            f"Connector {connector.name} is not evidence-approved for {expected_source_class}"
         )
     return connector

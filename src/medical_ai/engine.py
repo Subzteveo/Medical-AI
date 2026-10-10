@@ -5,20 +5,27 @@ import hmac
 import os
 import secrets
 import uuid
-from typing import Mapping
+from collections.abc import Mapping
+from typing import Protocol
 
 from .schemas import (
     AnswerStatus,
-    AuthorityState,
+    AuthorizedClaimView,
     CitationMapping,
+    ConsequenceLevel,
     DataPlane,
     DataPlaneTransition,
     EvidenceAnswer,
+    EvidenceAuthorityState,
     ExecutionTrace,
+    InfluenceDecision,
+    InfluenceObjectType,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
     PHIClassification,
+    QueryPlan,
     VerificationStatus,
 )
 from .planner import plan_query
@@ -27,7 +34,7 @@ from .extractor import extract_evidence
 from .claims import build_claims
 from .verifier import verify_claims
 from .renderer import render_answer
-from .connectors.base import require_evidence_approved
+from .connectors.base import EvidenceConnector, require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
 from .influence import InfluenceController
 
@@ -41,10 +48,20 @@ def _digest_query(text: str) -> str:
     return "hmac-sha256:" + hmac.new(_TRACE_HMAC_KEY, text.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
+class TraceStore(Protocol):
+    def save(self, trace: ExecutionTrace) -> None:
+        raise NotImplementedError
+
+
 class EvidenceEngine:
     version = "0.2.0-influence-control-core"
 
-    def __init__(self, connectors: Mapping[str, object] | object, trace_store=None, influence_controller=None):
+    def __init__(
+        self,
+        connectors: Mapping[str, EvidenceConnector] | EvidenceConnector,
+        trace_store: TraceStore | None = None,
+        influence_controller: InfluenceController | None = None,
+    ) -> None:
         # Load and enforce packaged runtime policies rather than treating YAML as documentation only.
         phi_policy = phi_routing_policy()
         evidence_policy = evidence_influence_policy()
@@ -53,15 +70,19 @@ class EvidenceEngine:
         if phi_policy.get("rule") is None:
             raise RuntimeError("PHI routing policy is missing its governing rule")
         if isinstance(connectors, Mapping):
-            self.connectors = {
+            self.connectors: dict[str, EvidenceConnector] = {
                 source_class: require_evidence_approved(connector, source_class)
                 for source_class, connector in connectors.items()
             }
         else:
-            source_class = getattr(connectors, "source_class", "biomedical_literature")
-            self.connectors = {source_class: require_evidence_approved(connectors, source_class)}
-        self.trace_store = trace_store
-        self.influence_controller = influence_controller or InfluenceController()
+            source_class = connectors.source_class
+            self.connectors = {
+                source_class: require_evidence_approved(connectors, source_class)
+            }
+        self.trace_store: TraceStore | None = trace_store
+        self.influence_controller: InfluenceController = (
+            influence_controller or InfluenceController()
+        )
 
     async def answer(self, question: str, *, user_mode: str = "clinician", jurisdiction: str = "AU", limit: int = 5) -> EvidenceAnswer:
         plan = plan_query(question, user_mode=user_mode, jurisdiction=jurisdiction)
@@ -139,7 +160,7 @@ class EvidenceEngine:
                 message=(
                     "### Evidence-bound answer\n\nThe required authoritative source is currently unavailable, so the system is not producing a medical evidence answer from memory or fallback generation."
                 ),
-                connectors_used=[getattr(connector, "name", "unknown")],
+                connectors_used=[connector.name],
                 safety_flags=[*plan.safety_flags, f"CONNECTOR_ERROR:{type(exc).__name__}"],
             )
 
@@ -152,7 +173,7 @@ class EvidenceEngine:
                     "### Evidence-bound answer\n\nThe configured authoritative source returned no matching records for the retrieval query. "
                     "That does not mean that no authoritative evidence exists."
                 ),
-                connectors_used=[getattr(connector, "name", "unknown")],
+                connectors_used=[connector.name],
             )
 
         admitted = [s for s in sources if qualify_source(s, plan).admitted]
@@ -163,8 +184,8 @@ class EvidenceEngine:
         claims = build_claims(units, plan)
         verified = verify_claims(claims, units, admitted_passages, high_consequence_supported=False)
 
-        influence_decisions = []
-        authorized_claims = []
+        influence_decisions: list[InfluenceDecision] = []
+        authorized_views: list[AuthorizedClaimView] = []
         for claim in verified:
             if claim.verification_status != VerificationStatus.PASS:
                 continue
@@ -178,17 +199,19 @@ class EvidenceEngine:
             )
             subject = InfluenceSubject(
                 object_id=claim.claim_id,
-                object_type="ClaimRecord",
+                object_type=InfluenceObjectType.CLAIM_RECORD,
                 data_plane=DataPlane.EVIDENCE,
-                evidence_authority=AuthorityState.APPROVED,
+                evidence_authority=EvidenceAuthorityState.APPROVED,
                 information_handling_authority=(
-                    AuthorityState.APPROVED if public_non_phi else AuthorityState.UNKNOWN
+                    InformationHandlingAuthorityState.APPROVED
+                    if public_non_phi
+                    else InformationHandlingAuthorityState.UNKNOWN
                 ),
                 provenance_complete=bool(claim_sources) and all(
                     source.provenance_complete for source in claim_sources
                 ),
                 validation_passed=True,
-                safety_passed=claim.consequence_level.value != "HIGH",
+                safety_passed=claim.consequence_level != ConsequenceLevel.HIGH,
                 # Every answer creates an ExecutionTrace with component versions and gate outcomes.
                 monitoring_enabled=True,
                 version=self.version,
@@ -203,12 +226,16 @@ class EvidenceEngine:
                         InformationClass.PUBLIC if public_non_phi else InformationClass.UNKNOWN
                     ),
                 ),
-            ))
+            ), claim=claim)
             influence_decisions.append(decision)
             if decision.allowed:
-                authorized_claims.append(claim)
+                authorized_views.append(
+                    self.influence_controller.build_authorized_claim_view(claim, decision)
+                )
 
-        if any(c.consequence_level.value == "HIGH" for c in verified):
+        authorized_claims = [view.claim for view in authorized_views]
+
+        if any(c.consequence_level == ConsequenceLevel.HIGH for c in verified):
             status = AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
         elif authorized_claims:
             status = AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
@@ -246,7 +273,7 @@ class EvidenceEngine:
             source for source in admitted if source.source_id in authorized_source_ids
         ]
         unit_by_id = {unit.evidence_id: unit for unit in visible_units}
-        citation_mappings = []
+        citation_mappings: list[CitationMapping] = []
         for claim in authorized_claims:
             for evidence_id in claim.evidence_ids:
                 unit = unit_by_id.get(evidence_id)
@@ -266,7 +293,7 @@ class EvidenceEngine:
             trace_id=str(uuid.uuid4()),
             query_plan=plan,
             retrieval_query_digests=[digest],
-            connectors_used=[getattr(connector, "name", "unknown")],
+            connectors_used=[connector.name],
             source_ids=[s.source_id for s in admitted],
             evidence_ids=[e.evidence_id for e in units],
             candidate_claim_ids=[c.claim_id for c in verified],
@@ -280,9 +307,10 @@ class EvidenceEngine:
         return EvidenceAnswer(
             status=status,
             answer_markdown=render_answer(
-                authorized_claims,
+                authorized_views,
                 visible_sources,
                 trial_discovery="TRIAL_QUERY" in plan.intent,
+                influence_controller=self.influence_controller,
             ),
             claims=authorized_claims,
             sources=visible_sources,
@@ -293,7 +321,16 @@ class EvidenceEngine:
             influence_decisions=influence_decisions,
         )
 
-    def _terminal(self, *, plan, digest, status, message, connectors_used=None, safety_flags=None) -> EvidenceAnswer:
+    def _terminal(
+        self,
+        *,
+        plan: QueryPlan,
+        digest: str,
+        status: AnswerStatus,
+        message: str,
+        connectors_used: list[str] | None = None,
+        safety_flags: list[str] | None = None,
+    ) -> EvidenceAnswer:
         trace = ExecutionTrace(
             trace_id=str(uuid.uuid4()),
             query_plan=plan,
@@ -310,10 +347,10 @@ class EvidenceEngine:
         if self.trace_store is not None:
             self.trace_store.save(trace)
 
-    def _versions(self, connector) -> dict[str, str]:
+    def _versions(self, connector: EvidenceConnector | None) -> dict[str, str]:
         return {
             "engine": self.version,
-            "connector": getattr(connector, "version", "none") if connector else "none",
+            "connector": connector.version if connector is not None else "none",
             "planner": "alpha2.1-policy-bound",
             "extractor": "alpha2.1-extractive-safety-filtered",
             "claim_builder": "alpha2.1-claim-consequence",

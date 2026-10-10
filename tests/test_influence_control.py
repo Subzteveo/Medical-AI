@@ -2,22 +2,25 @@ import pytest
 
 from medical_ai.influence import InfluenceController
 from medical_ai.schemas import (
-    AuthorityState,
     DataPlane,
+    EvidenceAuthorityState,
     DataPlaneTransition,
     DependencyDimension,
+    InfluenceObjectType,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
 )
 
 
 def subject(
     object_id="evidence:1",
     *,
+    object_type=InfluenceObjectType.EVIDENCE_OBJECT,
     plane=DataPlane.EVIDENCE,
-    evidence=AuthorityState.APPROVED,
-    information=AuthorityState.APPROVED,
+    evidence=EvidenceAuthorityState.APPROVED,
+    information=InformationHandlingAuthorityState.APPROVED,
     provenance=True,
     validation=True,
     safety=True,
@@ -26,7 +29,7 @@ def subject(
 ):
     return InfluenceSubject(
         object_id=object_id,
-        object_type="EvidenceObject",
+        object_type=object_type,
         data_plane=plane,
         evidence_authority=evidence,
         information_handling_authority=information,
@@ -60,28 +63,28 @@ def test_authorized_evidence_object_gets_inspectable_allow_decision():
     decision = controller.authorize(request(subject()))
     assert decision.allowed is True
     assert decision.policy_version == controller.policy_version
-    assert decision.evaluated_dimensions["evidence_authority"] == "APPROVED"
-    assert decision.evaluated_dimensions["information_handling_authority"] == "APPROVED"
+    assert decision.evaluated_dimensions.evidence_authority == EvidenceAuthorityState.APPROVED
+    assert decision.evaluated_dimensions.information_handling_authority == InformationHandlingAuthorityState.APPROVED
     assert controller.get_downstream_state("claim:1").active is True
 
 
 def test_evidence_approval_does_not_grant_information_handling_authority():
     controller = InfluenceController()
-    decision = controller.authorize(request(subject(information=AuthorityState.DENIED), info=InformationClass.PHI))
+    decision = controller.authorize(request(subject(information=InformationHandlingAuthorityState.DENIED), info=InformationClass.PHI))
     assert decision.allowed is False
     assert "INFORMATION_HANDLING_AUTHORITY_DENIED" in decision.reasons
 
 
 def test_information_handling_approval_does_not_grant_evidence_authority():
     controller = InfluenceController()
-    decision = controller.authorize(request(subject(evidence=AuthorityState.DENIED)))
+    decision = controller.authorize(request(subject(evidence=EvidenceAuthorityState.DENIED)))
     assert decision.allowed is False
     assert "EVIDENCE_AUTHORITY_DENIED" in decision.reasons
 
 
 def test_unknown_authority_and_information_class_fail_closed():
     controller = InfluenceController()
-    subj = subject(evidence=AuthorityState.UNKNOWN, information=AuthorityState.UNKNOWN)
+    subj = subject(evidence=EvidenceAuthorityState.UNKNOWN, information=InformationHandlingAuthorityState.UNKNOWN)
     decision = controller.authorize(request(subj, info=InformationClass.UNKNOWN))
     assert decision.allowed is False
     assert "EVIDENCE_AUTHORITY_UNKNOWN" in decision.reasons
@@ -159,7 +162,7 @@ def test_revocation_propagates_only_along_matching_authority_dimension():
     assert result.unaffected_downstream_ids == ["route:information-dependent"]
     assert controller.get_downstream_state("claim:evidence-dependent").active is False
     assert controller.get_downstream_state("route:information-dependent").active is True
-    assert controller.get_subject(subj.object_id).information_handling_authority == AuthorityState.APPROVED
+    assert controller.get_subject(subj.object_id).information_handling_authority == InformationHandlingAuthorityState.APPROVED
 
 
 def test_revoked_subject_cannot_bypass_gate_with_stale_approved_request():
@@ -179,11 +182,11 @@ def test_conflicting_subject_snapshot_denies_and_requires_higher_revision_update
     approved = subject()
     assert controller.authorize(request(approved, downstream="claim:first")).allowed is True
 
-    denied = subject(evidence=AuthorityState.DENIED)
+    denied = subject(evidence=EvidenceAuthorityState.DENIED)
     decision = controller.authorize(request(denied, downstream="claim:denied"))
     assert decision.allowed is False
     assert "SUBJECT_SNAPSHOT_CONFLICT" in decision.reasons
-    assert controller.get_subject(approved.object_id).evidence_authority == AuthorityState.DENIED
+    assert controller.get_subject(approved.object_id).evidence_authority == EvidenceAuthorityState.DENIED
     assert controller.get_downstream_state("claim:first").active is False
 
     stale_decision = controller.authorize(request(approved, downstream="claim:stale"))
@@ -248,8 +251,8 @@ def test_canonical_object_model_is_machine_readable():
     approval = ConnectorApproval(
         connector_id="pubmed",
         source_class="biomedical_literature",
-        evidence_authority=AuthorityState.APPROVED,
-        information_handling_authority=AuthorityState.DENIED,
+        evidence_authority=EvidenceAuthorityState.APPROVED,
+        information_handling_authority=InformationHandlingAuthorityState.DENIED,
         permitted_planes=[DataPlane.EVIDENCE],
     )
     phi = PHIClassification(
@@ -274,5 +277,114 @@ def test_canonical_object_model_is_machine_readable():
 
     for obj in (source_obj, evidence_obj, claim_obj, citation, approval, phi, verification, workflow):
         assert obj.model_dump(mode="json")
-    assert approval.evidence_authority == AuthorityState.APPROVED
-    assert approval.information_handling_authority == AuthorityState.DENIED
+    assert approval.evidence_authority == EvidenceAuthorityState.APPROVED
+    assert approval.information_handling_authority == InformationHandlingAuthorityState.DENIED
+
+
+
+def test_renderer_view_requires_current_active_authorization():
+    from medical_ai.schemas import (
+        ClaimRecord,
+        ConsequenceLevel,
+        InfluenceAuthorizationState,
+        VerificationStatus,
+    )
+
+    controller = InfluenceController()
+    claim = ClaimRecord(
+        claim_id="claim:authorized-view",
+        claim_text="Treatment X reduced symptom scores.",
+        consequence_level=ConsequenceLevel.MODERATE,
+        evidence_ids=["evidence:1"],
+        verification_status=VerificationStatus.PASS,
+    )
+    subj = subject(
+        object_id=claim.claim_id,
+        object_type=InfluenceObjectType.CLAIM_RECORD,
+    )
+    decision = controller.authorize(
+        request(subj, downstream=f"user-output:{claim.claim_id}"), claim=claim
+    )
+    view = controller.build_authorized_claim_view(claim, decision)
+
+    assert view.authorization.state == InfluenceAuthorizationState.ACTIVE
+
+    controller.revoke_authority(
+        claim.claim_id,
+        DependencyDimension.EVIDENCE_AUTHORITY,
+    )
+    assert controller.get_authorization(view.authorization.authorization_id).state == InfluenceAuthorizationState.REVOKED
+
+    with pytest.raises(ValueError, match="active authorization"):
+        controller.build_authorized_claim_view(claim, decision)
+
+
+def test_renderer_rejects_raw_verified_claim_without_authorization_capability():
+    from medical_ai.renderer import render_answer
+    from medical_ai.schemas import (
+        ClaimRecord,
+        ConsequenceLevel,
+        SourceRecord,
+        VerificationStatus,
+    )
+
+    source_obj = SourceRecord(
+        source_id="pubmed:bypass",
+        authority="NLM",
+        publisher="NLM",
+        source_type="indexed_biomedical_literature",
+        title="Bypass fixture",
+        record_id="1",
+        stable_url="https://example.invalid/1",
+    )
+    claim = ClaimRecord(
+        claim_id="claim:bypass",
+        claim_text="A verified-looking raw claim must not render.",
+        consequence_level=ConsequenceLevel.MODERATE,
+        evidence_ids=["evidence:bypass"],
+        source_ids=[source_obj.source_id],
+        verification_status=VerificationStatus.PASS,
+    )
+
+    with pytest.raises(TypeError, match="AuthorizedClaimView"):
+        render_answer([claim], [source_obj])
+
+
+
+def test_influence_decision_round_trip_preserves_closed_types_and_authorization():
+    from medical_ai.schemas import InfluenceDecision
+
+    controller = InfluenceController()
+    decision = controller.authorize(request(subject()))
+    payload = decision.model_dump_json()
+    restored = InfluenceDecision.model_validate_json(payload)
+
+    assert restored.status == decision.status
+    assert restored.evaluated_dimensions.evidence_authority == EvidenceAuthorityState.APPROVED
+    assert (
+        restored.evaluated_dimensions.information_handling_authority
+        == InformationHandlingAuthorityState.APPROVED
+    )
+    assert restored.authorization is not None
+    assert restored.authorization.decision_id == restored.decision_id
+    assert restored.allowed is True
+
+
+def test_malformed_authority_state_is_rejected_at_canonical_construction_boundary():
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        InfluenceSubject.model_validate(
+            {
+                "object_id": "evidence:malformed",
+                "object_type": "EVIDENCE_OBJECT",
+                "data_plane": "EVIDENCE",
+                "evidence_authority": "MAGICALLY_APPROVED",
+                "information_handling_authority": "APPROVED",
+                "provenance_complete": True,
+                "validation_passed": True,
+                "safety_passed": True,
+                "monitoring_enabled": True,
+                "version": "malformed-test",
+            }
+        )

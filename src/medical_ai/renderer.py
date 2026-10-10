@@ -1,11 +1,15 @@
 from __future__ import annotations
+
+from collections.abc import Sequence
 from urllib.parse import quote, urlsplit, urlunsplit
-from .schemas import ClaimRecord, SourceRecord, VerificationStatus
+
+from .schemas import AuthorizedClaimView, SourceRecord
+from .influence import InfluenceController
 
 
 def _escape_markdown_text(value: str) -> str:
     escaped = value.replace("\\", "\\\\")
-    for ch in ("`", "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "!", ">", "<", "|"):
+    for ch in (chr(96), "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "!", ">", "<", "|"):
         escaped = escaped.replace(ch, f"\\{ch}")
     return escaped
 
@@ -28,32 +32,92 @@ def _safe_markdown_url(value: str) -> str:
     )
 
 
-def render_answer(claims: list[ClaimRecord], sources: list[SourceRecord], *, trial_discovery: bool = False) -> str:
-    source_map = {s.source_id: s for s in sources}
+def _runtime_authorized_view(
+    value: object, controller: InfluenceController | None
+) -> AuthorizedClaimView:
+    if not isinstance(value, AuthorizedClaimView):
+        raise TypeError("Renderer requires AuthorizedClaimView inputs")
+    if controller is None:
+        raise ValueError("Renderer requires the issuing influence controller")
+    controller.validate_authorized_claim_view(value)
+    return value
+
+def render_answer(
+    views: Sequence[AuthorizedClaimView],
+    sources: Sequence[SourceRecord],
+    *,
+    trial_discovery: bool = False,
+    influence_controller: InfluenceController | None = None,
+) -> str:
+    """Render only authorization-carrying claim views.
+
+    Raw ClaimRecord objects are not accepted. Runtime checks are retained even
+    with static typing so untyped callers fail closed rather than bypassing the
+    authorization capability.
+    """
+
+    checked_views = [_runtime_authorized_view(view, influence_controller) for view in views]
+
+    source_map = {source.source_id: source for source in sources}
     lines = ["### Evidence-bound answer", ""]
-    passed = [c for c in claims if c.verification_status == VerificationStatus.PASS]
-    if not passed:
-        return "### Evidence-bound answer\n\nThe available evidence did not pass the required verification gates for a supported answer."
-    for claim in passed:
-        refs = []
-        for sid in claim.source_ids:
-            src = source_map.get(sid)
-            if src:
-                if "PMID" in src.identifiers:
-                    label = f"PMID {src.identifiers['PMID']}"
-                elif "NCT" in src.identifiers:
-                    label = src.identifiers["NCT"]
-                else:
-                    label = src.record_id
-                refs.append(f"[{_escape_markdown_text(label)}]({_safe_markdown_url(src.stable_url)})")
+    if not checked_views:
+        return (
+            "### Evidence-bound answer\n\n"
+            "The available evidence did not pass the required verification "
+            "and influence-authorization gates for a supported answer."
+        )
+
+    for view in checked_views:
+        claim = view.claim
+        refs: list[str] = []
+        for source_id in claim.source_ids:
+            source = source_map.get(source_id)
+            if source is None:
+                continue
+            if "PMID" in source.identifiers:
+                label = "PMID " + source.identifiers["PMID"]
+            elif "NCT" in source.identifiers:
+                label = source.identifiers["NCT"]
+            else:
+                label = source.record_id
+            refs.append(
+                f"[{_escape_markdown_text(label)}]"
+                f"({_safe_markdown_url(source.stable_url)})"
+            )
         citation = " " + " ".join(refs) if refs else ""
         lines.append(f"- {_escape_markdown_text(claim.claim_text)}{citation}")
+
     lines.extend(["", "### Sources"])
-    for src in sources:
-        ids = ", ".join(f"{_escape_markdown_text(k)}: {_escape_markdown_text(v)}" for k, v in src.identifiers.items())
-        lines.append(f"- [{_escape_markdown_text(src.title)}]({_safe_markdown_url(src.stable_url)}) — {ids}")
+    for source in sources:
+        identifiers = ", ".join(
+            f"{_escape_markdown_text(key)}: {_escape_markdown_text(value)}"
+            for key, value in source.identifiers.items()
+        )
+        lines.append(
+            f"- [{_escape_markdown_text(source.title)}]"
+            f"({_safe_markdown_url(source.stable_url)}) — {identifiers}"
+        )
+
     if trial_discovery:
-        lines.extend(["", "*Alpha2 trial-discovery limitation: ClinicalTrials.gov records support discovery and registered-study facts. They are not treated as proof that an intervention is effective or safe.*"])
+        lines.extend(
+            [
+                "",
+                (
+                    "*Alpha2 trial-discovery limitation: ClinicalTrials.gov records "
+                    + "support discovery and registered-study facts. They are not treated "
+                    + "as proof that an intervention is effective or safe.*"
+                ),
+            ]
+        )
     else:
-        lines.extend(["", "*Alpha2 literature limitation: claims are extractive sentences from admitted PubMed abstract passages; study quality, GRADE certainty and clinical recommendations are not yet synthesized.*"])
+        lines.extend(
+            [
+                "",
+                (
+                    "*Alpha2 literature limitation: claims are extractive sentences from "
+                    + "admitted PubMed abstract passages; study quality, GRADE certainty "
+                    + "and clinical recommendations are not yet synthesized.*"
+                ),
+            ]
+        )
     return "\n".join(lines)

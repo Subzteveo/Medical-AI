@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -22,6 +23,7 @@ from .access import (
 from .connectors.pubmed import PubMedConnector
 from .connectors.clinical_trials import ClinicalTrialsConnector
 from .engine import EvidenceEngine
+from .influence import InfluenceController
 from .trace_store import SQLiteTraceStore
 
 VERSION = "0.1.0-alpha2.1-remediation"
@@ -110,12 +112,22 @@ class QueryRequest(BaseModel):
     limit: int = Field(default=5, ge=1, le=20)
 
 
+@lru_cache(maxsize=1)
+def _shared_influence_controller() -> InfluenceController:
+    """Preserve revocation decisions across requests within one API process."""
+    return InfluenceController()
+
+
 def build_engine() -> EvidenceEngine:
     connectors = {
         "biomedical_literature": PubMedConnector(email=os.getenv("NCBI_EMAIL"), api_key=os.getenv("NCBI_API_KEY")),
         "clinical_trial_registry": ClinicalTrialsConnector(),
     }
-    return EvidenceEngine(connectors, trace_store=SQLiteTraceStore(TRACE_DB))
+    return EvidenceEngine(
+        connectors,
+        trace_store=SQLiteTraceStore(TRACE_DB),
+        influence_controller=_shared_influence_controller(),
+    )
 
 
 @app.get("/", include_in_schema=False)

@@ -3,8 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 
 class AnswerStatus(StrEnum):
@@ -43,7 +42,14 @@ class Applicability(StrEnum):
     NOT_APPLICABLE = "NOT_APPLICABLE"
 
 
-class AuthorityState(StrEnum):
+class EvidenceAuthorityState(StrEnum):
+    APPROVED = "APPROVED"
+    DENIED = "DENIED"
+    UNKNOWN = "UNKNOWN"
+    REVOKED = "REVOKED"
+
+
+class InformationHandlingAuthorityState(StrEnum):
     APPROVED = "APPROVED"
     DENIED = "DENIED"
     UNKNOWN = "UNKNOWN"
@@ -78,6 +84,51 @@ class InfluenceDecisionStatus(StrEnum):
     DENY = "DENY"
 
 
+class TransitionDecision(StrEnum):
+    ALLOW = "ALLOW"
+    DENY = "DENY"
+
+
+class InfluenceAuthorizationState(StrEnum):
+    ACTIVE = "ACTIVE"
+    REVOKED = "REVOKED"
+
+
+class InfluenceObjectType(StrEnum):
+    CLAIM_RECORD = "CLAIM_RECORD"
+    EVIDENCE_OBJECT = "EVIDENCE_OBJECT"
+    SOURCE = "SOURCE"
+    CONNECTOR = "CONNECTOR"
+    WORKFLOW = "WORKFLOW"
+
+
+class GateStatus(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+
+
+class InfluenceReasonCode(StrEnum):
+    SUBJECT_SNAPSHOT_CONFLICT = "SUBJECT_SNAPSHOT_CONFLICT"
+    SUBJECT_PLANE_MISMATCH = "SUBJECT_PLANE_MISMATCH"
+    INFORMATION_CLASS_UNKNOWN = "INFORMATION_CLASS_UNKNOWN"
+    TRANSITION_NOT_ALLOWED = "TRANSITION_NOT_ALLOWED"
+    EVIDENCE_AUTHORITY_DENIED = "EVIDENCE_AUTHORITY_DENIED"
+    EVIDENCE_AUTHORITY_UNKNOWN = "EVIDENCE_AUTHORITY_UNKNOWN"
+    EVIDENCE_AUTHORITY_REVOKED = "EVIDENCE_AUTHORITY_REVOKED"
+    INFORMATION_HANDLING_AUTHORITY_DENIED = "INFORMATION_HANDLING_AUTHORITY_DENIED"
+    INFORMATION_HANDLING_AUTHORITY_UNKNOWN = "INFORMATION_HANDLING_AUTHORITY_UNKNOWN"
+    INFORMATION_HANDLING_AUTHORITY_REVOKED = "INFORMATION_HANDLING_AUTHORITY_REVOKED"
+    PROVENANCE_INCOMPLETE = "PROVENANCE_INCOMPLETE"
+    VALIDATION_NOT_PASSED = "VALIDATION_NOT_PASSED"
+    SAFETY_NOT_PASSED = "SAFETY_NOT_PASSED"
+    MONITORING_NOT_ENABLED = "MONITORING_NOT_ENABLED"
+
+
+class InvalidationReasonCode(StrEnum):
+    SUBJECT_SNAPSHOT_CONFLICT = "SUBJECT_SNAPSHOT_CONFLICT"
+    AUTHORITY_REVOKED = "AUTHORITY_REVOKED"
+
+
 class PHIClassification(BaseModel):
     classification_id: str
     object_id: str
@@ -108,7 +159,7 @@ class SourceRecord(BaseModel):
     phi_status: str = "non_phi"
     phi_classification: PHIClassification | None = None
     provenance_complete: bool = True
-    raw_metadata: dict[str, Any] = Field(default_factory=dict)
+    raw_metadata: dict[str, JsonValue] = Field(default_factory=dict)
 
 
 class Passage(BaseModel):
@@ -213,9 +264,9 @@ class CitationMapping(BaseModel):
 class ConnectorApproval(BaseModel):
     connector_id: str
     source_class: str
-    evidence_authority: AuthorityState = AuthorityState.UNKNOWN
-    information_handling_authority: AuthorityState = AuthorityState.UNKNOWN
-    permitted_planes: list[DataPlane] = Field(default_factory=list)
+    evidence_authority: EvidenceAuthorityState = EvidenceAuthorityState.UNKNOWN
+    information_handling_authority: InformationHandlingAuthorityState = InformationHandlingAuthorityState.UNKNOWN
+    permitted_planes: list[DataPlane] = Field(default_factory=list[DataPlane])
     policy_version: str = "medical-ai-influence-v0.2"
 
 
@@ -241,10 +292,10 @@ class WorkflowRun(BaseModel):
 
 class InfluenceSubject(BaseModel):
     object_id: str
-    object_type: str
+    object_type: InfluenceObjectType
     data_plane: DataPlane
-    evidence_authority: AuthorityState = AuthorityState.UNKNOWN
-    information_handling_authority: AuthorityState = AuthorityState.UNKNOWN
+    evidence_authority: EvidenceAuthorityState = EvidenceAuthorityState.UNKNOWN
+    information_handling_authority: InformationHandlingAuthorityState = InformationHandlingAuthorityState.UNKNOWN
     provenance_complete: bool = False
     validation_passed: bool = False
     safety_passed: bool = False
@@ -276,18 +327,62 @@ class InfluenceRequest(BaseModel):
     )
 
 
+class TransitionAuthorization(BaseModel):
+    transition: DataPlaneTransition
+    decision: TransitionDecision
+    policy_version: str
+
+
+class InfluenceEvaluation(BaseModel):
+    evidence_authority: EvidenceAuthorityState
+    information_handling_authority: InformationHandlingAuthorityState
+    data_plane: DataPlane
+    information_class: InformationClass
+    provenance: GateStatus
+    validation: GateStatus
+    safety: GateStatus
+    monitoring: GateStatus
+
+
+class InfluenceAuthorization(BaseModel):
+    model_config = ConfigDict(frozen=True, revalidate_instances="always")
+
+    authorization_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    decision_id: str
+    object_id: str
+    proposition_id: str
+    state: InfluenceAuthorizationState = InfluenceAuthorizationState.ACTIVE
+    required_dependency_dimensions: tuple[DependencyDimension, ...]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class InfluenceDecision(BaseModel):
     decision_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     request_id: str
     object_id: str
     proposition_id: str
     status: InfluenceDecisionStatus
-    allowed: bool
-    reasons: list[str] = Field(default_factory=list)
+    reasons: list[InfluenceReasonCode] = Field(default_factory=list[InfluenceReasonCode])
     policy_version: str
-    evaluated_dimensions: dict[str, str]
-    transition: DataPlaneTransition
+    evaluated_dimensions: InfluenceEvaluation
+    transition_authorization: TransitionAuthorization
+    authorization: InfluenceAuthorization | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @model_validator(mode="after")
+    def validate_authorization_consistency(self) -> "InfluenceDecision":
+        if self.status == InfluenceDecisionStatus.ALLOW:
+            if self.authorization is None:
+                raise ValueError("ALLOW decisions require an authorization")
+            if self.authorization.decision_id != self.decision_id:
+                raise ValueError("Authorization must reference the decision that created it")
+        elif self.authorization is not None:
+            raise ValueError("DENY decisions must not carry an authorization")
+        return self
+
+    @property
+    def allowed(self) -> bool:
+        return self.status == InfluenceDecisionStatus.ALLOW
 
 
 class DependencyEdge(BaseModel):
@@ -297,10 +392,16 @@ class DependencyEdge(BaseModel):
     dimension: DependencyDimension
 
 
+class InvalidationRecord(BaseModel):
+    code: InvalidationReasonCode
+    upstream_object_id: str
+    dimension: DependencyDimension | None = None
+
+
 class DownstreamInfluenceState(BaseModel):
     object_id: str
     active: bool = True
-    invalidation_reasons: list[str] = Field(default_factory=list)
+    invalidation_reasons: list[InvalidationRecord] = Field(default_factory=list[InvalidationRecord])
 
 
 class RevocationResult(BaseModel):
@@ -310,13 +411,30 @@ class RevocationResult(BaseModel):
     unaffected_downstream_ids: list[str] = Field(default_factory=list)
 
 
+class AuthorizedClaimView(BaseModel):
+    model_config = ConfigDict(frozen=True, revalidate_instances="always")
+
+    claim: ClaimRecord
+    authorization: InfluenceAuthorization
+
+    @model_validator(mode="after")
+    def validate_authorized_claim(self) -> "AuthorizedClaimView":
+        if self.authorization.state != InfluenceAuthorizationState.ACTIVE:
+            raise ValueError("Renderer capability requires an active authorization")
+        if self.authorization.object_id != self.claim.claim_id:
+            raise ValueError("Authorization object must match the claim")
+        if self.claim.verification_status != VerificationStatus.PASS:
+            raise ValueError("Only verified claims may enter an authorized render view")
+        return self
+
+
 class EvidenceAnswer(BaseModel):
     status: AnswerStatus
     answer_markdown: str
     claims: list[ClaimRecord]
     sources: list[SourceRecord]
-    evidence_objects: list[EvidenceUnit] = Field(default_factory=list)
-    citation_mappings: list[CitationMapping] = Field(default_factory=list)
-    passages: list[Passage] = Field(default_factory=list)
+    evidence_objects: list[EvidenceUnit] = Field(default_factory=list[EvidenceUnit])
+    citation_mappings: list[CitationMapping] = Field(default_factory=list[CitationMapping])
+    passages: list[Passage] = Field(default_factory=list[Passage])
     trace: ExecutionTrace
-    influence_decisions: list[InfluenceDecision] = Field(default_factory=list)
+    influence_decisions: list[InfluenceDecision] = Field(default_factory=list[InfluenceDecision])
