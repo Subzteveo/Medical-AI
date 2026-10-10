@@ -31,6 +31,14 @@ def _safe_markdown_url(value: str) -> str:
     )
 
 
+def _runtime_authorized_view(value: object) -> AuthorizedClaimView:
+    if not isinstance(value, AuthorizedClaimView):
+        raise TypeError("Renderer requires AuthorizedClaimView inputs")
+    if value.authorization.state != InfluenceAuthorizationState.ACTIVE:
+        raise ValueError("Renderer received a revoked influence authorization")
+    return value
+
+
 def render_answer(
     views: Sequence[AuthorizedClaimView],
     sources: Sequence[SourceRecord],
@@ -44,22 +52,18 @@ def render_answer(
     authorization capability.
     """
 
-    for view in views:
-        if not isinstance(view, AuthorizedClaimView):
-            raise TypeError("Renderer requires AuthorizedClaimView inputs")
-        if view.authorization.state != InfluenceAuthorizationState.ACTIVE:
-            raise ValueError("Renderer received a revoked influence authorization")
+    checked_views = [_runtime_authorized_view(view) for view in views]
 
     source_map = {source.source_id: source for source in sources}
     lines = ["### Evidence-bound answer", ""]
-    if not views:
+    if not checked_views:
         return (
             "### Evidence-bound answer\n\n"
             "The available evidence did not pass the required verification "
             "and influence-authorization gates for a supported answer."
         )
 
-    for view in views:
+    for view in checked_views:
         claim = view.claim
         refs: list[str] = []
         for source_id in claim.source_ids:
