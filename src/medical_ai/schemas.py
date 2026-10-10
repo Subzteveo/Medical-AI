@@ -266,7 +266,7 @@ class ConnectorApproval(BaseModel):
     source_class: str
     evidence_authority: EvidenceAuthorityState = EvidenceAuthorityState.UNKNOWN
     information_handling_authority: InformationHandlingAuthorityState = InformationHandlingAuthorityState.UNKNOWN
-    permitted_planes: list[DataPlane] = Field(default_factory=list)
+    permitted_planes: list[DataPlane] = Field(default_factory=lambda: list[DataPlane]())
     policy_version: str = "medical-ai-influence-v0.2"
 
 
@@ -362,7 +362,7 @@ class InfluenceDecision(BaseModel):
     object_id: str
     proposition_id: str
     status: InfluenceDecisionStatus
-    reasons: list[InfluenceReasonCode] = Field(default_factory=list)
+    reasons: list[InfluenceReasonCode] = Field(default_factory=lambda: list[InfluenceReasonCode]())
     policy_version: str
     evaluated_dimensions: InfluenceEvaluation
     transition_authorization: TransitionAuthorization
@@ -403,7 +403,7 @@ class InvalidationRecord(BaseModel):
 class DownstreamInfluenceState(BaseModel):
     object_id: str
     active: bool = True
-    invalidation_reasons: list[InvalidationRecord] = Field(default_factory=list)
+    invalidation_reasons: list[InvalidationRecord] = Field(default_factory=lambda: list[InvalidationRecord]())
 
 
 class RevocationResult(BaseModel):
@@ -435,8 +435,8 @@ class EvidenceAnswer(BaseModel):
     answer_markdown: str
     claims: list[ClaimRecord]
     sources: list[SourceRecord]
-    evidence_objects: list[EvidenceUnit] = Field(default_factory=list)
-    citation_mappings: list[CitationMapping] = Field(default_factory=list)
-    passages: list[Passage] = Field(default_factory=list)
+    evidence_objects: list[EvidenceUnit] = Field(default_factory=lambda: list[EvidenceUnit]())
+    citation_mappings: list[CitationMapping] = Field(default_factory=lambda: list[CitationMapping]())
+    passages: list[Passage] = Field(default_factory=lambda: list[Passage]())
     trace: ExecutionTrace
-    influence_decisions: list[InfluenceDecision] = Field(default_factory=list)
+    influence_decisions: list[InfluenceDecision] = Field(default_factory=lambda: list[InfluenceDecision]())
