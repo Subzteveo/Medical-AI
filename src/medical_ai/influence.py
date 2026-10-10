@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import uuid
 from collections.abc import Iterable
 
@@ -20,6 +22,7 @@ from .schemas import (
     InfluenceReasonCode,
     InfluenceRequest,
     InfluenceSubject,
+    InfluenceObjectType,
     InformationClass,
     InformationHandlingAuthorityState,
     InvalidationReasonCode,
@@ -27,6 +30,7 @@ from .schemas import (
     RevocationResult,
     TransitionAuthorization,
     TransitionDecision,
+    VerificationStatus,
 )
 
 
@@ -58,6 +62,8 @@ class InfluenceController:
         self._conflicted_subjects: set[str] = set()
         self._decisions: dict[str, InfluenceDecision] = {}
         self._authorizations: dict[str, InfluenceAuthorization] = {}
+        self._claim_digests: dict[str, str] = {}
+        self._authorization_revisions: dict[str, int] = {}
         self._dependencies: list[DependencyEdge] = []
         self._downstream_states: dict[str, DownstreamInfluenceState] = {}
 
@@ -65,7 +71,15 @@ class InfluenceController:
     def decisions(self) -> list[InfluenceDecision]:
         return list(self._decisions.values())
 
-    def authorize(self, request: InfluenceRequest) -> InfluenceDecision:
+    def authorize(
+        self, request: InfluenceRequest, *, claim: ClaimRecord | None = None
+    ) -> InfluenceDecision:
+        if claim is not None and (
+            request.subject.object_type != InfluenceObjectType.CLAIM_RECORD
+            or claim.claim_id != request.subject.object_id
+            or claim.verification_status != VerificationStatus.PASS
+        ):
+            raise ValueError("Claim authorization requires a matching verified claim snapshot")
         object_id = request.subject.object_id
         subject = self._subjects.get(object_id)
         snapshot_conflict = False
@@ -151,6 +165,9 @@ class InfluenceController:
                 ),
             )
             self._authorizations[authorization.authorization_id] = authorization
+            self._authorization_revisions[authorization.authorization_id] = subject.revision
+            if claim is not None:
+                self._claim_digests[authorization.authorization_id] = self._claim_digest(claim)
 
         decision = InfluenceDecision(
             decision_id=decision_id,
@@ -173,6 +190,54 @@ class InfluenceController:
             self._record_dependencies(request)
         return decision
 
+    @staticmethod
+    def _claim_digest(claim: ClaimRecord) -> str:
+        """Hash the entire canonical claim, not just its reusable identifier."""
+        serialized = json.dumps(
+            claim.model_dump(mode="json"), sort_keys=True, separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(serialized).hexdigest()
+
+    def validate_authorized_claim_view(self, view: AuthorizedClaimView) -> None:
+        """Revalidate at the point of output against controller-owned live state."""
+        current = self._authorizations.get(view.authorization.authorization_id)
+        if current is None or current.state != InfluenceAuthorizationState.ACTIVE:
+            raise ValueError("Authorization is revoked or not registered as active")
+        if view.authorization.model_dump() != current.model_dump():
+            raise ValueError("Authorization does not match the registered capability")
+        if current.object_id != view.claim.claim_id:
+            raise ValueError("Authorization capability does not belong to this claim")
+        digest = self._claim_digests.get(current.authorization_id)
+        if digest is None or digest != self._claim_digest(view.claim):
+            raise ValueError("Claim snapshot digest mismatch or missing authorization")
+        subject = self._subjects.get(current.object_id)
+        if (
+            subject is None
+            or current.object_id in self._conflicted_subjects
+            or self._authorization_revisions.get(current.authorization_id) != subject.revision
+            or subject.evidence_authority != EvidenceAuthorityState.APPROVED
+            or subject.information_handling_authority != InformationHandlingAuthorityState.APPROVED
+            or not subject.provenance_complete
+            or not subject.validation_passed
+            or not subject.safety_passed
+            or not subject.monitoring_enabled
+        ):
+            raise ValueError("Authorization is stale or authority is no longer approved")
+        decision = self._decisions.get(current.decision_id)
+        if (
+            decision is None
+            or decision.status != InfluenceDecisionStatus.ALLOW
+            or decision.authorization is None
+            or decision.authorization.authorization_id != current.authorization_id
+            or decision.policy_version != self.policy_version
+            or decision.transition_authorization.transition.source_plane != subject.data_plane
+            or (
+                decision.transition_authorization.transition.source_plane,
+                decision.transition_authorization.transition.target_plane,
+            ) not in self.allowed_transitions
+        ):
+            raise ValueError("Authorization is not backed by a current controller decision")
+
     def build_authorized_claim_view(
         self,
         claim: ClaimRecord,
@@ -189,7 +254,9 @@ class InfluenceController:
             raise ValueError("Claim rendering requires an active authorization capability")
         if current.object_id != claim.claim_id:
             raise ValueError("Authorization capability does not belong to this claim")
-        return AuthorizedClaimView(claim=claim, authorization=current)
+        view = AuthorizedClaimView(claim=claim.model_copy(deep=True), authorization=current)
+        self.validate_authorized_claim_view(view)
+        return view
 
     @staticmethod
     def _restrict_evidence_authority(
@@ -261,7 +328,9 @@ class InfluenceController:
     def _revoke_subject_authorizations(self, object_id: str) -> None:
         for authorization in self._authorizations.values():
             if authorization.object_id == object_id:
-                authorization.state = InfluenceAuthorizationState.REVOKED
+                self._authorizations[authorization.authorization_id] = authorization.model_copy(
+                    update={"state": InfluenceAuthorizationState.REVOKED}
+                )
 
     def _revoke_authorizations_for_dimension(
         self,
@@ -273,7 +342,9 @@ class InfluenceController:
                 authorization.object_id == object_id
                 and dimension in authorization.required_dependency_dimensions
             ):
-                authorization.state = InfluenceAuthorizationState.REVOKED
+                self._authorizations[authorization.authorization_id] = authorization.model_copy(
+                    update={"state": InfluenceAuthorizationState.REVOKED}
+                )
 
     def update_subject(self, subject: InfluenceSubject) -> None:
         """Apply an authoritative snapshot only when its revision increases."""
@@ -282,6 +353,42 @@ class InfluenceController:
             raise ValueError("Authoritative subject updates require a higher revision")
         self._subjects[subject.object_id] = subject.model_copy(deep=True)
         self._conflicted_subjects.discard(subject.object_id)
+        if current is not None:
+            # Every earlier capability was bound to a previous authoritative revision.
+            self._revoke_subject_authorizations(subject.object_id)
+            if (
+                current.evidence_authority == EvidenceAuthorityState.APPROVED
+                and subject.evidence_authority != EvidenceAuthorityState.APPROVED
+            ):
+                self._invalidate_dimension_dependents(
+                    subject.object_id, DependencyDimension.EVIDENCE_AUTHORITY
+                )
+            if (
+                current.information_handling_authority == InformationHandlingAuthorityState.APPROVED
+                and subject.information_handling_authority != InformationHandlingAuthorityState.APPROVED
+            ):
+                self._invalidate_dimension_dependents(
+                    subject.object_id, DependencyDimension.INFORMATION_HANDLING_AUTHORITY
+                )
+
+    def _invalidate_dimension_dependents(
+        self, object_id: str, dimension: DependencyDimension
+    ) -> None:
+        for edge in self._dependencies:
+            if edge.upstream_object_id != object_id or edge.dimension != dimension:
+                continue
+            state = self._downstream_states.setdefault(
+                edge.downstream_object_id,
+                DownstreamInfluenceState(object_id=edge.downstream_object_id),
+            )
+            state.active = False
+            record = InvalidationRecord(
+                code=InvalidationReasonCode.AUTHORITY_REVOKED,
+                upstream_object_id=object_id,
+                dimension=dimension,
+            )
+            if record not in state.invalidation_reasons:
+                state.invalidation_reasons.append(record)
 
     def _record_dependencies(self, request: InfluenceRequest) -> None:
         state = self._downstream_states.setdefault(
@@ -371,4 +478,5 @@ class InfluenceController:
         self,
         authorization_id: str,
     ) -> InfluenceAuthorization | None:
-        return self._authorizations.get(authorization_id)
+        authorization = self._authorizations.get(authorization_id)
+        return authorization.model_copy(deep=True) if authorization is not None else None
