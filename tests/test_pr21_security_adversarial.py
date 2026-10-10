@@ -89,7 +89,7 @@ def test_caller_cannot_reactivate_revoked_authorization() -> None:
 
 def test_authorized_claim_id_cannot_be_reused_for_changed_text() -> None:
     controller = InfluenceController()
-    decision = controller.authorize(_request())
+    decision = controller.authorize(_request(), claim=_claim())
     controller.build_authorized_claim_view(_claim(), decision)
     with pytest.raises(ValueError, match="snapshot|digest|claim"):
         controller.build_authorized_claim_view(_claim("Different synthetic proposition B."), decision)
@@ -97,7 +97,7 @@ def test_authorized_claim_id_cannot_be_reused_for_changed_text() -> None:
 
 def test_revoked_copy_cannot_be_replayed_for_rendering() -> None:
     controller = InfluenceController()
-    decision = controller.authorize(_request())
+    decision = controller.authorize(_request(), claim=_claim())
     view = controller.build_authorized_claim_view(_claim(), decision)
     copied = AuthorizedClaimView.model_validate_json(view.model_dump_json())
     controller.revoke_authority("claim:adversarial", DependencyDimension.EVIDENCE_AUTHORITY)
