@@ -3,7 +3,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from urllib.parse import quote, urlsplit, urlunsplit
 
-from .schemas import AuthorizedClaimView, InfluenceAuthorizationState, SourceRecord
+from .schemas import AuthorizedClaimView, SourceRecord
+from .influence import InfluenceController
 
 
 def _escape_markdown_text(value: str) -> str:
@@ -31,19 +32,22 @@ def _safe_markdown_url(value: str) -> str:
     )
 
 
-def _runtime_authorized_view(value: object) -> AuthorizedClaimView:
+def _runtime_authorized_view(
+    value: object, controller: InfluenceController | None
+) -> AuthorizedClaimView:
     if not isinstance(value, AuthorizedClaimView):
         raise TypeError("Renderer requires AuthorizedClaimView inputs")
-    if value.authorization.state != InfluenceAuthorizationState.ACTIVE:
-        raise ValueError("Renderer received a revoked influence authorization")
+    if controller is None or not isinstance(controller, InfluenceController):
+        raise ValueError("Renderer requires the issuing influence controller")
+    controller.validate_authorized_claim_view(value)
     return value
-
 
 def render_answer(
     views: Sequence[AuthorizedClaimView],
     sources: Sequence[SourceRecord],
     *,
     trial_discovery: bool = False,
+    influence_controller: InfluenceController | None = None,
 ) -> str:
     """Render only authorization-carrying claim views.
 
@@ -52,7 +56,7 @@ def render_answer(
     authorization capability.
     """
 
-    checked_views = [_runtime_authorized_view(view) for view in views]
+    checked_views = [_runtime_authorized_view(view, influence_controller) for view in views]
 
     source_map = {source.source_id: source for source in sources}
     lines = ["### Evidence-bound answer", ""]
