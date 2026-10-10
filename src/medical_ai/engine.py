@@ -9,15 +9,20 @@ from typing import Mapping
 
 from .schemas import (
     AnswerStatus,
-    AuthorityState,
+    AuthorizedClaimView,
     CitationMapping,
+    ConsequenceLevel,
     DataPlane,
     DataPlaneTransition,
     EvidenceAnswer,
+    EvidenceAuthorityState,
     ExecutionTrace,
+    InfluenceDecision,
+    InfluenceObjectType,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
     PHIClassification,
     VerificationStatus,
 )
@@ -163,8 +168,8 @@ class EvidenceEngine:
         claims = build_claims(units, plan)
         verified = verify_claims(claims, units, admitted_passages, high_consequence_supported=False)
 
-        influence_decisions = []
-        authorized_claims = []
+        influence_decisions: list[InfluenceDecision] = []
+        authorized_views: list[AuthorizedClaimView] = []
         for claim in verified:
             if claim.verification_status != VerificationStatus.PASS:
                 continue
@@ -178,17 +183,19 @@ class EvidenceEngine:
             )
             subject = InfluenceSubject(
                 object_id=claim.claim_id,
-                object_type="ClaimRecord",
+                object_type=InfluenceObjectType.CLAIM_RECORD,
                 data_plane=DataPlane.EVIDENCE,
-                evidence_authority=AuthorityState.APPROVED,
+                evidence_authority=EvidenceAuthorityState.APPROVED,
                 information_handling_authority=(
-                    AuthorityState.APPROVED if public_non_phi else AuthorityState.UNKNOWN
+                    InformationHandlingAuthorityState.APPROVED
+                    if public_non_phi
+                    else InformationHandlingAuthorityState.UNKNOWN
                 ),
                 provenance_complete=bool(claim_sources) and all(
                     source.provenance_complete for source in claim_sources
                 ),
                 validation_passed=True,
-                safety_passed=claim.consequence_level.value != "HIGH",
+                safety_passed=claim.consequence_level != ConsequenceLevel.HIGH,
                 # Every answer creates an ExecutionTrace with component versions and gate outcomes.
                 monitoring_enabled=True,
                 version=self.version,
@@ -206,9 +213,13 @@ class EvidenceEngine:
             ))
             influence_decisions.append(decision)
             if decision.allowed:
-                authorized_claims.append(claim)
+                authorized_views.append(
+                    self.influence_controller.build_authorized_claim_view(claim, decision)
+                )
 
-        if any(c.consequence_level.value == "HIGH" for c in verified):
+        authorized_claims = [view.claim for view in authorized_views]
+
+        if any(c.consequence_level == ConsequenceLevel.HIGH for c in verified):
             status = AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
         elif authorized_claims:
             status = AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
@@ -280,7 +291,7 @@ class EvidenceEngine:
         return EvidenceAnswer(
             status=status,
             answer_markdown=render_answer(
-                authorized_claims,
+                authorized_views,
                 visible_sources,
                 trial_discovery="TRIAL_QUERY" in plan.intent,
             ),
