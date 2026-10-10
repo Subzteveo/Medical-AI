@@ -16,6 +16,9 @@ Those engineering results establish only the tested implementation behavior. The
 
 See [`project_docs/NORTH_STAR.md`](project_docs/NORTH_STAR.md) for the canonical long-term product direction, [`project_docs/PROJECT_INDEX.md`](project_docs/PROJECT_INDEX.md) for the source-of-truth map, [`project_docs/STATUS.md`](project_docs/STATUS.md) for the current development checkpoint, and [`docs/INTENDED_USE.md`](docs/INTENDED_USE.md) for the current intended-use boundary.
 
+
+> **11 October 2026 governance addendum:** At observed `main` revision `13fadd41e628ff60de2cdfff933b3e2be19f1327`, PR #21's typed influence-control hardening is merged and exact-revision deterministic CI completed successfully. Those outcomes are revision-bound engineering evidence only. The approved Alpha3 Tranche A **engineering contract** has not yet been implemented. Required PR and required CI merge enforcement are not demonstrated in the active branch ruleset; see [G0 governance checkpoint](project_docs/ALPHA3_TRANCHE_A_G0_CHECKPOINT.md). No status of clinical validation, release authorization or production readiness is implied.
+
 ## Engineering principles
 
 - A model is never evidence.
