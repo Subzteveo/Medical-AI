@@ -49,7 +49,8 @@ def _digest_query(text: str) -> str:
 
 
 class TraceStore(Protocol):
-    def save(self, trace: ExecutionTrace) -> None: ...
+    def save(self, trace: ExecutionTrace) -> None:
+        raise NotImplementedError
 
 
 class EvidenceEngine:
