@@ -13,14 +13,22 @@ from medical_ai.claims import build_claims
 from medical_ai.connectors.clinical_trials import ClinicalTrialsConnector
 from medical_ai.connectors.pubmed import PubMedConnector
 from medical_ai.engine import EvidenceEngine
+from medical_ai.influence import InfluenceController
 from medical_ai.extractor import extract_evidence
 from medical_ai.planner import plan_query
 from medical_ai.schemas import (
     AnswerStatus,
     ClaimRecord,
     ConsequenceLevel,
+    DataPlane,
+    DataPlaneTransition,
+    EvidenceAuthorityState,
     EvidenceUnit,
+    InfluenceObjectType,
+    InfluenceRequest,
+    InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
     Passage,
     PHIClassification,
     SourceRecord,
@@ -397,6 +405,34 @@ async def test_overlapping_prompt_injection_sentence_is_not_rendered():
     assert "doubled" not in out.answer_markdown.lower()
 
 
+def _authorized_render_view(claim: ClaimRecord):
+    controller = InfluenceController()
+    subject = InfluenceSubject(
+        object_id=claim.claim_id,
+        object_type=InfluenceObjectType.CLAIM_RECORD,
+        data_plane=DataPlane.EVIDENCE,
+        evidence_authority=EvidenceAuthorityState.APPROVED,
+        information_handling_authority=InformationHandlingAuthorityState.APPROVED,
+        provenance_complete=True,
+        validation_passed=True,
+        safety_passed=True,
+        monitoring_enabled=True,
+        version="renderer-test",
+    )
+    decision = controller.authorize(
+        InfluenceRequest(
+            subject=subject,
+            proposition_id=f"user-output:{claim.claim_id}",
+            transition=DataPlaneTransition(
+                source_plane=DataPlane.EVIDENCE,
+                target_plane=DataPlane.EVIDENCE,
+                information_class=InformationClass.PUBLIC,
+            ),
+        )
+    )
+    return controller.build_authorized_claim_view(claim, decision)
+
+
 def test_renderer_escapes_untrusted_markdown_content():
     from medical_ai.renderer import render_answer
 
@@ -419,7 +455,7 @@ def test_renderer_escapes_untrusted_markdown_content():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([claim], [source])
+    out = render_answer([_authorized_render_view(claim)], [source])
     assert "- Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
     assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](#)" in out
     assert "javascript:alert(1))" not in out
@@ -447,7 +483,7 @@ def test_renderer_blocks_relative_urls_fail_closed():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([claim], [source])
+    out = render_answer([_authorized_render_view(claim)], [source])
     assert "[PMID 124](#)" in out
     assert "[Relative URL source](#)" in out
 
@@ -474,7 +510,7 @@ def test_renderer_blocks_http_scheme_without_netloc():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([claim], [source])
+    out = render_answer([_authorized_render_view(claim)], [source])
     assert "[PMID 125](#)" in out
     assert "[Malformed URL source](#)" in out
 
