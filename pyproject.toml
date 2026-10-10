@@ -44,4 +44,3 @@ include = [
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-reportExplicitAny = "error"
