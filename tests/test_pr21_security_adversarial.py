@@ -140,7 +140,7 @@ def test_boundary_guard_rejects_qualified_any(tmp_path, monkeypatch) -> None:
     from scripts import verify_influence_boundary as guard
 
     file_path = tmp_path / "qualified_any.py"
-    file_path.write_text("import typing as t\\nunsafe: t.Any = None\\n", encoding="utf-8")
+    file_path.write_text("import typing as t\nunsafe: t.Any = None\n", encoding="utf-8")
     monkeypatch.setattr(guard, "AUTHORITATIVE_FILES", (*guard.AUTHORITATIVE_FILES, file_path))
     assert guard.main() == 1
 
@@ -156,9 +156,9 @@ def test_boundary_guard_rejects_indirect_capability_creation(
     from scripts import verify_influence_boundary as guard
 
     source = (
-        "from medical_ai.schemas import AuthorizedClaimView, InfluenceAuthorization\\n"
-        "Alias = AuthorizedClaimView\\n"
-        f"{expression}\\n"
+        "from medical_ai.schemas import AuthorizedClaimView, InfluenceAuthorization\n"
+        "Alias = AuthorizedClaimView\n"
+        f"{expression}\n"
     )
     runtime = tmp_path / "src" / "medical_ai"
     runtime.mkdir(parents=True)
