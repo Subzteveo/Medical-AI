@@ -43,9 +43,13 @@ def main() -> int:
         if "# type: ignore" in text or "# pyright: ignore" in text:
             errors.append(f"{path.relative_to(ROOT)}: type-ignore escape hatch is forbidden")
         tree = ast.parse(text, filename=str(path))
-
+        typing_aliases = {"typing", "typing_extensions"}
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module == "typing":
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name in {"typing", "typing_extensions"}:
+                        typing_aliases.add(alias.asname or alias.name)
+            if isinstance(node, ast.ImportFrom) and node.module in {"typing", "typing_extensions"}:
                 for alias in node.names:
                     if alias.name in {"Any", "cast"}:
                         errors.append(
@@ -56,6 +60,15 @@ def main() -> int:
                 errors.append(
                     f"{path.relative_to(ROOT)}:{node.lineno}: Any is forbidden "
                     "in the authoritative influence path"
+                )
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id in typing_aliases
+                and node.attr in {"Any", "cast"}
+            ):
+                errors.append(
+                    f"{path.relative_to(ROOT)}:{node.lineno}: qualified typing.{node.attr} is forbidden"
                 )
             if isinstance(node, ast.Call) and _name(node.func) == "cast":
                 errors.append(
@@ -86,7 +99,28 @@ def main() -> int:
 
     for path in RUNTIME_ROOT.rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        relative = path.relative_to(ROOT).as_posix()
+        relative = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else str(path)
+        capability_aliases = set(CAPABILITY_CONSTRUCTORS)
+        output_aliases = set(OUTPUT_CONSTRUCTORS)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name in CAPABILITY_CONSTRUCTORS:
+                        capability_aliases.add(alias.asname or alias.name)
+                    if alias.name in OUTPUT_CONSTRUCTORS:
+                        output_aliases.add(alias.asname or alias.name)
+        for _ in range(3):
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign) and isinstance(node.value, (ast.Name, ast.Attribute)):
+                    assigned = _name(node.value)
+                    for target in node.targets:
+                        if not isinstance(target, ast.Name):
+                            continue
+                        if assigned in capability_aliases:
+                            capability_aliases.add(target.id)
+                        if assigned in output_aliases:
+                            output_aliases.add(target.id)
+        pydantic_constructors = {"model_construct", "model_validate", "model_validate_json"}
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
@@ -95,15 +129,22 @@ def main() -> int:
                 errors.append(
                     f"{relative}:{node.lineno}: alternate runtime render_answer call path"
                 )
-            if (
-                called in CAPABILITY_CONSTRUCTORS
-                and relative != "src/medical_ai/influence.py"
-            ):
+            capability_type = called in capability_aliases or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr in pydantic_constructors
+                and _name(node.func.value) in capability_aliases
+            )
+            output_type = called in output_aliases or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr in pydantic_constructors
+                and _name(node.func.value) in output_aliases
+            )
+            if capability_type and relative != "src/medical_ai/influence.py":
                 errors.append(
                     f"{relative}:{node.lineno}: {called} capability construction "
                     "is restricted to influence.py"
                 )
-            if called in OUTPUT_CONSTRUCTORS and relative != "src/medical_ai/engine.py":
+            if output_type and relative != "src/medical_ai/engine.py":
                 errors.append(
                     f"{relative}:{node.lineno}: {called} user-facing output construction "
                     "is restricted to engine.py"
