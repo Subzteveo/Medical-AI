@@ -2,13 +2,15 @@ import pytest
 
 from medical_ai.influence import InfluenceController
 from medical_ai.schemas import (
-    AuthorityState,
     DataPlane,
+    EvidenceAuthorityState,
     DataPlaneTransition,
     DependencyDimension,
+    InfluenceObjectType,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
+    InformationHandlingAuthorityState,
 )
 
 
@@ -16,8 +18,8 @@ def subject(
     object_id="evidence:1",
     *,
     plane=DataPlane.EVIDENCE,
-    evidence=AuthorityState.APPROVED,
-    information=AuthorityState.APPROVED,
+    evidence=EvidenceAuthorityState.APPROVED,
+    information=InformationHandlingAuthorityState.APPROVED,
     provenance=True,
     validation=True,
     safety=True,
@@ -26,7 +28,7 @@ def subject(
 ):
     return InfluenceSubject(
         object_id=object_id,
-        object_type="EvidenceObject",
+        object_type=InfluenceObjectType.EVIDENCE_OBJECT,
         data_plane=plane,
         evidence_authority=evidence,
         information_handling_authority=information,
@@ -67,21 +69,21 @@ def test_authorized_evidence_object_gets_inspectable_allow_decision():
 
 def test_evidence_approval_does_not_grant_information_handling_authority():
     controller = InfluenceController()
-    decision = controller.authorize(request(subject(information=AuthorityState.DENIED), info=InformationClass.PHI))
+    decision = controller.authorize(request(subject(information=InformationHandlingAuthorityState.DENIED), info=InformationClass.PHI))
     assert decision.allowed is False
     assert "INFORMATION_HANDLING_AUTHORITY_DENIED" in decision.reasons
 
 
 def test_information_handling_approval_does_not_grant_evidence_authority():
     controller = InfluenceController()
-    decision = controller.authorize(request(subject(evidence=AuthorityState.DENIED)))
+    decision = controller.authorize(request(subject(evidence=EvidenceAuthorityState.DENIED)))
     assert decision.allowed is False
     assert "EVIDENCE_AUTHORITY_DENIED" in decision.reasons
 
 
 def test_unknown_authority_and_information_class_fail_closed():
     controller = InfluenceController()
-    subj = subject(evidence=AuthorityState.UNKNOWN, information=AuthorityState.UNKNOWN)
+    subj = subject(evidence=EvidenceAuthorityState.UNKNOWN, information=InformationHandlingAuthorityState.UNKNOWN)
     decision = controller.authorize(request(subj, info=InformationClass.UNKNOWN))
     assert decision.allowed is False
     assert "EVIDENCE_AUTHORITY_UNKNOWN" in decision.reasons
@@ -159,7 +161,7 @@ def test_revocation_propagates_only_along_matching_authority_dimension():
     assert result.unaffected_downstream_ids == ["route:information-dependent"]
     assert controller.get_downstream_state("claim:evidence-dependent").active is False
     assert controller.get_downstream_state("route:information-dependent").active is True
-    assert controller.get_subject(subj.object_id).information_handling_authority == AuthorityState.APPROVED
+    assert controller.get_subject(subj.object_id).information_handling_authority == InformationHandlingAuthorityState.APPROVED
 
 
 def test_revoked_subject_cannot_bypass_gate_with_stale_approved_request():
@@ -179,11 +181,11 @@ def test_conflicting_subject_snapshot_denies_and_requires_higher_revision_update
     approved = subject()
     assert controller.authorize(request(approved, downstream="claim:first")).allowed is True
 
-    denied = subject(evidence=AuthorityState.DENIED)
+    denied = subject(evidence=EvidenceAuthorityState.DENIED)
     decision = controller.authorize(request(denied, downstream="claim:denied"))
     assert decision.allowed is False
     assert "SUBJECT_SNAPSHOT_CONFLICT" in decision.reasons
-    assert controller.get_subject(approved.object_id).evidence_authority == AuthorityState.DENIED
+    assert controller.get_subject(approved.object_id).evidence_authority == EvidenceAuthorityState.DENIED
     assert controller.get_downstream_state("claim:first").active is False
 
     stale_decision = controller.authorize(request(approved, downstream="claim:stale"))
@@ -248,8 +250,8 @@ def test_canonical_object_model_is_machine_readable():
     approval = ConnectorApproval(
         connector_id="pubmed",
         source_class="biomedical_literature",
-        evidence_authority=AuthorityState.APPROVED,
-        information_handling_authority=AuthorityState.DENIED,
+        evidence_authority=EvidenceAuthorityState.APPROVED,
+        information_handling_authority=InformationHandlingAuthorityState.DENIED,
         permitted_planes=[DataPlane.EVIDENCE],
     )
     phi = PHIClassification(
@@ -274,5 +276,5 @@ def test_canonical_object_model_is_machine_readable():
 
     for obj in (source_obj, evidence_obj, claim_obj, citation, approval, phi, verification, workflow):
         assert obj.model_dump(mode="json")
-    assert approval.evidence_authority == AuthorityState.APPROVED
-    assert approval.information_handling_authority == AuthorityState.DENIED
+    assert approval.evidence_authority == EvidenceAuthorityState.APPROVED
+    assert approval.information_handling_authority == InformationHandlingAuthorityState.DENIED
