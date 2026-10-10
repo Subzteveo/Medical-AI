@@ -226,7 +226,7 @@ class EvidenceEngine:
                         InformationClass.PUBLIC if public_non_phi else InformationClass.UNKNOWN
                     ),
                 ),
-            ))
+            ), claim=claim)
             influence_decisions.append(decision)
             if decision.allowed:
                 authorized_views.append(
@@ -310,6 +310,7 @@ class EvidenceEngine:
                 authorized_views,
                 visible_sources,
                 trial_discovery="TRIAL_QUERY" in plan.intent,
+                influence_controller=self.influence_controller,
             ),
             claims=authorized_claims,
             sources=visible_sources,
