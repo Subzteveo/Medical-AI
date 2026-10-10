@@ -428,9 +428,9 @@ def _authorized_render_view(claim: ClaimRecord):
                 target_plane=DataPlane.EVIDENCE,
                 information_class=InformationClass.PUBLIC,
             ),
-        )
+        ), claim=claim
     )
-    return controller.build_authorized_claim_view(claim, decision)
+    return controller.build_authorized_claim_view(claim, decision), controller
 
 
 def test_renderer_escapes_untrusted_markdown_content():
@@ -455,7 +455,8 @@ def test_renderer_escapes_untrusted_markdown_content():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([_authorized_render_view(claim)], [source])
+    view, controller = _authorized_render_view(claim)
+    out = render_answer([view], [source], influence_controller=controller)
     assert "- Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
     assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](#)" in out
     assert "javascript:alert(1))" not in out
@@ -483,7 +484,8 @@ def test_renderer_blocks_relative_urls_fail_closed():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([_authorized_render_view(claim)], [source])
+    view, controller = _authorized_render_view(claim)
+    out = render_answer([view], [source], influence_controller=controller)
     assert "[PMID 124](#)" in out
     assert "[Relative URL source](#)" in out
 
@@ -510,7 +512,8 @@ def test_renderer_blocks_http_scheme_without_netloc():
         verification_status=VerificationStatus.PASS,
     )
 
-    out = render_answer([_authorized_render_view(claim)], [source])
+    view, controller = _authorized_render_view(claim)
+    out = render_answer([view], [source], influence_controller=controller)
     assert "[PMID 125](#)" in out
     assert "[Malformed URL source](#)" in out
 
