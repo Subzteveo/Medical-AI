@@ -18,6 +18,7 @@ CAPABILITY_CONSTRUCTORS = {
     "InfluenceDecision",
     "AuthorizedClaimView",
 }
+OUTPUT_CONSTRUCTORS = {"EvidenceAnswer"}
 
 
 def _name(node: ast.AST) -> str | None:
@@ -102,6 +103,11 @@ def main() -> int:
                     f"{relative}:{node.lineno}: {called} capability construction "
                     "is restricted to influence.py"
                 )
+            if called in OUTPUT_CONSTRUCTORS and relative != "src/medical_ai/engine.py":
+                errors.append(
+                    f"{relative}:{node.lineno}: {called} user-facing output construction "
+                    "is restricted to engine.py"
+                )
 
     schemas_tree = ast.parse(
         (ROOT / "src/medical_ai/schemas.py").read_text(encoding="utf-8")
@@ -143,7 +149,7 @@ def main() -> int:
     print(
         "Influence boundary static guard passed: "
         f"{len(AUTHORITATIVE_FILES)} authoritative files checked; "
-        "renderer and capability construction paths are singular."
+        "renderer, output, and capability construction paths are singular."
     )
     return 0
 
