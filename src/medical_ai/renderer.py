@@ -98,18 +98,22 @@ def render_answer(
         lines.extend(
             [
                 "",
-                "*Alpha2 trial-discovery limitation: ClinicalTrials.gov records "
-                "support discovery and registered-study facts. They are not treated "
-                "as proof that an intervention is effective or safe.*",
+                (
+                    "*Alpha2 trial-discovery limitation: ClinicalTrials.gov records "
+                    + "support discovery and registered-study facts. They are not treated "
+                    + "as proof that an intervention is effective or safe.*"
+                ),
             ]
         )
     else:
         lines.extend(
             [
                 "",
-                "*Alpha2 literature limitation: claims are extractive sentences from "
-                "admitted PubMed abstract passages; study quality, GRADE certainty "
-                "and clinical recommendations are not yet synthesized.*",
+                (
+                    "*Alpha2 literature limitation: claims are extractive sentences from "
+                    + "admitted PubMed abstract passages; study quality, GRADE certainty "
+                    + "and clinical recommendations are not yet synthesized.*"
+                ),
             ]
         )
     return "\n".join(lines)
