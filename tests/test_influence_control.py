@@ -63,7 +63,7 @@ def test_authorized_evidence_object_gets_inspectable_allow_decision():
     decision = controller.authorize(request(subject()))
     assert decision.allowed is True
     assert decision.policy_version == controller.policy_version
-    assert decision.evaluated_dimensions["evidence_authority"] == "APPROVED"
+    assert decision.evaluated_dimensions.evidence_authority == EvidenceAuthorityState.APPROVED
     assert decision.evaluated_dimensions["information_handling_authority"] == "APPROVED"
     assert controller.get_downstream_state("claim:1").active is True
 
