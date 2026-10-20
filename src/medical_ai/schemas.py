@@ -429,6 +429,8 @@ class AuthorizedClaimView(BaseModel):
 
 
 class EvidenceAnswer(BaseModel):
+    model_config = ConfigDict(revalidate_instances="always")
+
     status: AnswerStatus
     answer_markdown: str
     claims: list[ClaimRecord]
@@ -438,3 +440,54 @@ class EvidenceAnswer(BaseModel):
     passages: list[Passage] = Field(default_factory=list[Passage])
     trace: ExecutionTrace
     influence_decisions: list[InfluenceDecision] = Field(default_factory=list[InfluenceDecision])
+
+    @model_validator(mode="after")
+    def validate_output_consistency(self) -> "EvidenceAnswer":
+        # Structural checks do not mint authority. The engine/API separately check
+        # controller-owned live capabilities at the point of output.
+        from .provenance import index_records, unique_ids, validate_output_provenance
+
+        supported = self.status in {
+            AnswerStatus.ANSWER_SUPPORTED, AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS,
+        }
+        if supported != bool(self.claims) or self.trace.final_status != self.status:
+            raise ValueError("Supported status, claims and trace outcome must agree")
+        validate_output_provenance(self.claims, self.sources, self.evidence_objects, self.passages, self.citation_mappings)
+        decisions = index_records(self.influence_decisions, lambda decision: decision.decision_id)
+        if unique_ids(self.trace.authorization_decision_ids) != decisions.keys():
+            raise ValueError("Trace decision references must match delivered decisions")
+        trace_sources = unique_ids(self.trace.source_ids)
+        trace_evidence = unique_ids(self.trace.evidence_ids)
+        trace_claims = unique_ids(self.trace.candidate_claim_ids)
+        for claim in self.claims:
+            if (claim.claim_id not in trace_claims or not set(claim.source_ids) <= trace_sources
+                    or not set(claim.evidence_ids) <= trace_evidence
+                    or self.trace.verification_results.get(claim.claim_id) != VerificationStatus.PASS):
+                raise ValueError("Claim lacks matching trace records")
+            matching = [d for d in self.influence_decisions if d.object_id == claim.claim_id and d.allowed]
+            if len(matching) != 1:
+                raise ValueError("Claim requires one recorded ALLOW decision")
+            decision = matching[0]
+            authorization = decision.authorization
+            dimensions = decision.evaluated_dimensions
+            transition = decision.transition_authorization
+            if (authorization is None or authorization.state != InfluenceAuthorizationState.ACTIVE
+                    or authorization.object_id != claim.claim_id
+                    or authorization.decision_id != decision.decision_id
+                    or authorization.proposition_id != decision.proposition_id
+                    or decision.proposition_id != f"user-output:{claim.claim_id}"
+                    or not decision.policy_version or decision.reasons
+                    or transition.policy_version != decision.policy_version
+                    or transition.decision != TransitionDecision.ALLOW
+                    or transition.transition.source_plane != DataPlane.EVIDENCE
+                    or transition.transition.target_plane != DataPlane.EVIDENCE
+                    or transition.transition.information_class != InformationClass.PUBLIC
+                    or dimensions.data_plane != DataPlane.EVIDENCE
+                    or dimensions.information_class != InformationClass.PUBLIC
+                    or dimensions.evidence_authority != EvidenceAuthorityState.APPROVED
+                    or dimensions.information_handling_authority != InformationHandlingAuthorityState.APPROVED
+                    or any(gate != GateStatus.PASS for gate in (
+                        dimensions.provenance, dimensions.validation, dimensions.safety, dimensions.monitoring,
+                    ))):
+                raise ValueError("Recorded decision does not support the delivered claim")
+        return self

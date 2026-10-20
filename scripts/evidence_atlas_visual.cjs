@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { chromium } = require('playwright');
+const { supportedFixture, mutations } = require('./provenance_test_cases.cjs');
 
 const HTML = fs.readFileSync(path.join(__dirname, '..', 'src/medical_ai/static/index.html'), 'utf8');
 const OUT = '/tmp/medical-ai-evidence-atlas-screenshots';
@@ -33,6 +34,14 @@ const server = http.createServer((req, res) => {
       assert.equal(typeof payload.question, 'string');
       assert.equal(payload.jurisdiction, 'AU');
       assert.ok(['student', 'clinician', 'researcher'].includes(payload.user_mode));
+      if (payload.question.startsWith('integrity ')) {
+        const caseName = payload.question.slice('integrity '.length);
+        const data = structuredClone(supportedFixture);
+        if (mutations[caseName]) mutations[caseName](data);
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify(data));
+        return;
+      }
       const blocked = payload.question.includes('blocked');
       const result = blocked ? {
         status: 'INFLUENCE_DENIED',
@@ -65,7 +74,7 @@ async function run() {
   const port = server.address().port;
   let browser;
   try {
-    browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+    browser = await chromium.launch({ headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE, args: ['--no-sandbox'] });
     const desktop = await browser.newPage({ viewport: { width: 1450, height: 930 }, deviceScaleFactor: 1 });
     const browserErrors = [];
     desktop.on('pageerror', e => browserErrors.push(e.message));
@@ -84,9 +93,32 @@ async function run() {
     await desktop.locator('#question').fill('blocked fixture question');
     await desktop.locator('#submit').click();
     await desktop.locator('#result').waitFor({ state: 'visible' });
-    assert.match(await desktop.locator('#status').innerText(), /INFLUENCE_DENIED/);
+    assert.match(await desktop.locator('#status').innerText(), /PROVENANCE_INCOMPLETE/);
     assert.equal((await desktop.locator('#answer').innerText()).includes(forbidden), false);
     assert.equal(await desktop.locator('#answer li').count(), 0);
+    const failures = [];
+    for (const caseName of ['positive', ...Object.keys(mutations)]) {
+      await desktop.locator('#question').fill('integrity ' + caseName);
+      await desktop.locator('#submit').click();
+      await desktop.waitForFunction(() => !document.getElementById('submit').disabled);
+      try {
+        assert.equal(await desktop.locator('#result').isVisible(), true);
+        const text = await desktop.locator('#answer').innerText();
+        const state = await desktop.locator('#state-code').innerText();
+        if (caseName === 'positive') {
+          assert.ok(text.includes(supportedFixture.claims[0].claim_text));
+          assert.equal(state, 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS');
+          assert.ok(await desktop.locator('#sources a').count() > 0);
+        } else {
+          assert.equal(text.includes(supportedFixture.claims[0].claim_text), false, 'Invalid claim disclosed');
+          assert.equal(state, 'PROVENANCE_INCOMPLETE', 'Inconsistent response was not withheld');
+          assert.equal(await desktop.locator('#sources a').count(), 0);
+        }
+        const unsafe = await desktop.locator('#result a').evaluateAll(links => links.some(link => new URL(link.href).protocol !== 'https:'));
+        assert.equal(unsafe, false, 'Unsafe source link retained');
+      } catch (error) { failures.push(caseName + ': ' + error.message); }
+    }
+    assert.deepEqual(failures, [], 'Provenance browser regressions');
     assert.deepEqual(browserErrors, []);
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
     const mobileErrors = [];

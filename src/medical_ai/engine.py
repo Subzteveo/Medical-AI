@@ -37,6 +37,7 @@ from .renderer import render_answer
 from .connectors.base import EvidenceConnector, require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
 from .influence import InfluenceController
+from .provenance import validate_retrieved_records
 
 _TRACE_HMAC_KEY = (
     os.getenv("MEDICAL_AI_TRACE_HMAC_KEY", "").encode("utf-8")
@@ -164,6 +165,16 @@ class EvidenceEngine:
                 safety_flags=[*plan.safety_flags, f"CONNECTOR_ERROR:{type(exc).__name__}"],
             )
 
+        try:
+            validate_retrieved_records(sources, passages)
+        except ValueError:
+            return self._terminal(
+                plan=plan, digest=digest, status=AnswerStatus.PROVENANCE_INCOMPLETE,
+                message="Source and passage provenance could not be resolved unambiguously. No claim is shown.",
+                connectors_used=[connector.name],
+                safety_flags=[*plan.safety_flags, "RETRIEVAL_PROVENANCE_REJECTED"],
+            )
+
         if not sources:
             return self._terminal(
                 plan=plan,
@@ -251,6 +262,10 @@ class EvidenceEngine:
         else:
             status = AnswerStatus.EVIDENCE_INSUFFICIENT
 
+        if status not in {AnswerStatus.ANSWER_SUPPORTED, AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS}:
+            authorized_views = []
+            authorized_claims = []
+
         authorized_evidence_ids = {
             evidence_id
             for claim in authorized_claims
@@ -303,22 +318,65 @@ class EvidenceEngine:
             final_status=status,
             authorization_decision_ids=[decision.decision_id for decision in influence_decisions],
         )
+        try:
+            answer = EvidenceAnswer(
+                status=status,
+                answer_markdown=render_answer(
+                    authorized_views, visible_sources,
+                    trial_discovery="TRIAL_QUERY" in plan.intent,
+                    influence_controller=self.influence_controller,
+                    evidence_objects=visible_units, passages=visible_passages,
+                    citation_mappings=citation_mappings,
+                ),
+                claims=authorized_claims, sources=visible_sources,
+                evidence_objects=visible_units, citation_mappings=citation_mappings,
+                passages=visible_passages, trace=trace,
+                influence_decisions=[decision.model_copy(deep=True) for decision in influence_decisions],
+            )
+        except ValueError:
+            return self._withhold_output(trace, AnswerStatus.PROVENANCE_INCOMPLETE, "OUTPUT_PROVENANCE_REJECTED")
         self._persist(trace)
-        return EvidenceAnswer(
-            status=status,
-            answer_markdown=render_answer(
-                authorized_views,
-                visible_sources,
-                trial_discovery="TRIAL_QUERY" in plan.intent,
+        return answer
+
+    def revalidate_output(self, answer: EvidenceAnswer) -> EvidenceAnswer:
+        """Recheck a detached response snapshot and current capabilities at the API boundary.
+
+        A serialized ALLOW field cannot grant authority. Only the issuing controller
+        can reconstruct a current view, and Markdown is regenerated from that view.
+        """
+        try:
+            checked = EvidenceAnswer.model_validate(answer.model_dump(mode="python"))
+        except ValueError:
+            return self._withhold_output(answer.trace, AnswerStatus.PROVENANCE_INCOMPLETE, "OUTPUT_PROVENANCE_REJECTED")
+        views: list[AuthorizedClaimView] = []
+        stored = {decision.decision_id: decision for decision in self.influence_controller.decisions}
+        try:
+            for claim in checked.claims:
+                decision = next(d for d in checked.influence_decisions if d.object_id == claim.claim_id and d.allowed)
+                current = stored.get(decision.decision_id)
+                if current is None or current.model_dump() != decision.model_dump():
+                    raise ValueError("Response decision is not the registered controller decision")
+                views.append(self.influence_controller.build_authorized_claim_view(claim, decision))
+            checked.answer_markdown = render_answer(
+                views, checked.sources,
+                trial_discovery="TRIAL_QUERY" in checked.trace.query_plan.intent,
                 influence_controller=self.influence_controller,
-            ),
-            claims=authorized_claims,
-            sources=visible_sources,
-            evidence_objects=visible_units,
-            citation_mappings=citation_mappings,
-            passages=visible_passages,
-            trace=trace,
-            influence_decisions=influence_decisions,
+                evidence_objects=checked.evidence_objects, passages=checked.passages,
+                citation_mappings=checked.citation_mappings,
+            )
+        except ValueError:
+            return self._withhold_output(checked.trace, AnswerStatus.INFLUENCE_DENIED, "OUTPUT_AUTHORIZATION_REJECTED")
+        return checked
+
+    def _withhold_output(self, trace: ExecutionTrace, status: AnswerStatus, flag: str) -> EvidenceAnswer:
+        # Record an integrity hold, not a fabricated source revocation or medical verdict.
+        return self._terminal(
+            plan=trace.query_plan,
+            digest=trace.retrieval_query_digests[0] if trace.retrieval_query_digests else "unavailable",
+            status=status,
+            message="Output withheld because its provenance or current authorization could not be verified.",
+            connectors_used=trace.connectors_used,
+            safety_flags=[*trace.safety_flags, flag],
         )
 
     def _terminal(

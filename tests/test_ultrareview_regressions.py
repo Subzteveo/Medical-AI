@@ -19,6 +19,7 @@ from medical_ai.planner import plan_query
 from medical_ai.schemas import (
     AnswerStatus,
     ClaimRecord,
+    CitationMapping,
     ConsequenceLevel,
     DataPlane,
     DataPlaneTransition,
@@ -443,7 +444,7 @@ def test_renderer_escapes_untrusted_markdown_content():
         source_type="indexed_biomedical_literature",
         title="Source [title](javascript:alert(1))",
         record_id="1",
-        stable_url="javascript:alert(1)",
+        stable_url="https://example.org/article",
         identifiers={"PMID": "123"},
     )
     claim = ClaimRecord(
@@ -453,12 +454,19 @@ def test_renderer_escapes_untrusted_markdown_content():
         evidence_ids=["e1"],
         source_ids=[source.source_id],
         verification_status=VerificationStatus.PASS,
+        entailment_status="SUPPORTED_EXACT_PASSAGE",
     )
 
     view, controller = _authorized_render_view(claim)
-    out = render_answer([view], [source], influence_controller=controller)
+    out = render_answer(
+        [view], [source], influence_controller=controller,
+        evidence_objects=[EvidenceUnit(evidence_id="e1", source_id=source.source_id, passage_ids=["p1"], proposition=claim.claim_text)],
+        passages=[Passage(passage_id="p1", source_id=source.source_id, text=claim.claim_text, section="ABSTRACT", locator="AbstractText[0]")],
+        citation_mappings=[CitationMapping(mapping_id="m1", claim_id="c1", evidence_id="e1", source_id=source.source_id,
+            passage_ids=["p1"], verified=True, entailment_status="SUPPORTED_EXACT_PASSAGE")],
+    )
     assert "- Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
-    assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](#)" in out
+    assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](https://example.org/article)" in out
     assert "javascript:alert(1))" not in out
 
 
@@ -485,9 +493,8 @@ def test_renderer_blocks_relative_urls_fail_closed():
     )
 
     view, controller = _authorized_render_view(claim)
-    out = render_answer([view], [source], influence_controller=controller)
-    assert "[PMID 124](#)" in out
-    assert "[Relative URL source](#)" in out
+    with pytest.raises(ValueError, match="HTTPS"):
+        render_answer([view], [source], influence_controller=controller)
 
 
 def test_renderer_blocks_http_scheme_without_netloc():
@@ -513,9 +520,8 @@ def test_renderer_blocks_http_scheme_without_netloc():
     )
 
     view, controller = _authorized_render_view(claim)
-    out = render_answer([view], [source], influence_controller=controller)
-    assert "[PMID 125](#)" in out
-    assert "[Malformed URL source](#)" in out
+    with pytest.raises(ValueError, match="HTTPS"):
+        render_answer([view], [source], influence_controller=controller)
 
 
 def test_policy_file_is_operationally_bound_to_planner_categories():

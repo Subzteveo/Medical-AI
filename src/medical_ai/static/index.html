@@ -147,8 +147,103 @@ const sources = document.getElementById('sources');
 const trace = document.getElementById('trace');
 const submit = document.getElementById('submit');
 function safeSourceUrl(value) {
-  try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; }
+  if (typeof value !== 'string' || !/^https:\/\//i.test(value) || /[\s\x00-\x1f\x7f\\]/u.test(value)) return null;
+  const authority = value.match(/^https:\/\/([^/?#]+)/i)?.[1];
+  if (!authority || !/^[A-Za-z0-9.:[\]-]+$/.test(authority)) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname && !url.username && !url.password
+      && /^[A-Za-z0-9.:[\]-]+$/.test(url.hostname) && url.port !== '0' ? url.href : null;
+  }
   catch { return null; }
+}
+function appendSourceLink(parent, source, label) {
+  const href = safeSourceUrl(source.stable_url);
+  if (!href) return appendText(parent, 'span', 'Source link withheld: invalid or non-HTTPS URL.');
+  const link = appendText(parent, 'a', label);
+  link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  return link;
+}
+const supportedStates = new Set(['ANSWER_SUPPORTED', 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS']);
+const terminalStates = new Set(['EVIDENCE_INSUFFICIENT', 'EVIDENCE_CONFLICTING', 'SOURCE_OUTDATED',
+  'POPULATION_MISMATCH', 'NO_AUTHORITATIVE_SOURCE', 'JURISDICTION_UNCLEAR', 'PROVENANCE_INCOMPLETE',
+  'HIGH_CONSEQUENCE_VERIFICATION_FAILED', 'OUTSIDE_VALIDATED_CAPABILITY', 'SOURCE_UNAVAILABLE', 'INFLUENCE_DENIED']);
+function requireIntegrity(condition) { if (!condition) throw new Error('Response provenance is inconsistent'); }
+function idSet(ids, required = false) {
+  requireIntegrity(Array.isArray(ids) && (!required || ids.length > 0));
+  requireIntegrity(ids.every(id => typeof id === 'string' && id.length > 0 && id === id.trim()));
+  const set = new Set(ids); requireIntegrity(set.size === ids.length); return set;
+}
+function recordMap(records, key) {
+  requireIntegrity(Array.isArray(records));
+  idSet(records.map(record => record?.[key]));
+  return new Map(records.map(record => [record[key], record]));
+}
+function sameIds(a, b) { return a.size === b.size && [...a].every(id => b.has(id)); }
+function validateResponse(data) {
+  // Defense in depth for a response snapshot. This never issues medical authority
+  // or verifies live revocation; those remain controller checks on the server.
+  try {
+    const supported = supportedStates.has(data.status);
+    requireIntegrity(supported || terminalStates.has(data.status));
+    const sm = recordMap(data.sources, 'source_id'), cm = recordMap(data.claims, 'claim_id');
+    const em = recordMap(data.evidence_objects, 'evidence_id'), pm = recordMap(data.passages, 'passage_id');
+    recordMap(data.citation_mappings, 'mapping_id');
+    const dm = recordMap(data.influence_decisions, 'decision_id'), t = data.trace;
+    requireIntegrity(supported === (cm.size > 0) && t.final_status === data.status);
+    requireIntegrity(sameIds(idSet(t.authorization_decision_ids), new Set(dm.keys())));
+    const ts = idSet(t.source_ids), te = idSet(t.evidence_ids), tc = idSet(t.candidate_claim_ids);
+    const usedSources = new Set(), usedEvidence = new Set(), usedPassages = new Set(), pairs = new Set();
+    for (const source of sm.values()) {
+      requireIntegrity(safeSourceUrl(source.stable_url) && source.provenance_complete === true && source.superseded === false);
+    }
+    for (const claim of cm.values()) {
+      requireIntegrity(claim.verification_status === 'PASS' && claim.entailment_status === 'SUPPORTED_EXACT_PASSAGE'
+        && typeof claim.claim_text === 'string' && claim.claim_text.trim() && claim.consequence_level !== 'HIGH');
+      const sids = idSet(claim.source_ids, true), eids = idSet(claim.evidence_ids, true), evidenceSources = new Set();
+      requireIntegrity(tc.has(claim.claim_id) && t.verification_results?.[claim.claim_id] === 'PASS');
+      requireIntegrity([...sids].every(id => sm.has(id) && ts.has(id)));
+      for (const eid of eids) {
+        requireIntegrity(em.has(eid) && te.has(eid));
+        const unit = em.get(eid), pids = idSet(unit.passage_ids, true);
+        requireIntegrity(sids.has(unit.source_id) && unit.proposition === claim.claim_text);
+        for (const pid of pids) {
+          const passage = pm.get(pid);
+          requireIntegrity(passage && passage.source_id === unit.source_id && typeof passage.locator === 'string'
+            && passage.locator.trim() && typeof passage.section === 'string' && passage.section.trim()
+            && typeof passage.text === 'string' && passage.text.includes(claim.claim_text));
+          usedPassages.add(pid);
+        }
+        evidenceSources.add(unit.source_id); usedEvidence.add(eid);
+        pairs.add(JSON.stringify([claim.claim_id, eid]));
+      }
+      requireIntegrity(sameIds(evidenceSources, sids));
+      sids.forEach(id => usedSources.add(id));
+      const decisions = data.influence_decisions.filter(d => d.object_id === claim.claim_id && d.status === 'ALLOW');
+      requireIntegrity(decisions.length === 1);
+      const d = decisions[0], a = d.authorization, ev = d.evaluated_dimensions, tr = d.transition_authorization;
+      requireIntegrity(a && a.state === 'ACTIVE' && a.object_id === claim.claim_id && a.decision_id === d.decision_id
+        && a.proposition_id === d.proposition_id && d.proposition_id === 'user-output:' + claim.claim_id
+        && typeof d.policy_version === 'string' && d.policy_version.length > 0 && Array.isArray(d.reasons) && d.reasons.length === 0
+        && tr?.policy_version === d.policy_version && tr.decision === 'ALLOW'
+        && tr.transition?.source_plane === 'EVIDENCE' && tr.transition?.target_plane === 'EVIDENCE'
+        && tr.transition?.information_class === 'PUBLIC' && ev?.data_plane === 'EVIDENCE' && ev.information_class === 'PUBLIC'
+        && ev.evidence_authority === 'APPROVED' && ev.information_handling_authority === 'APPROVED'
+        && ['provenance', 'validation', 'safety', 'monitoring'].every(key => ev[key] === 'PASS'));
+    }
+    const mapped = new Set();
+    for (const mapping of data.citation_mappings) {
+      const key = JSON.stringify([mapping.claim_id, mapping.evidence_id]);
+      requireIntegrity(pairs.has(key) && !mapped.has(key));
+      const unit = em.get(mapping.evidence_id), claim = cm.get(mapping.claim_id);
+      requireIntegrity(mapping.verified === true && mapping.entailment_status === claim.entailment_status
+        && mapping.source_id === unit.source_id && sameIds(idSet(mapping.passage_ids, true), new Set(unit.passage_ids)));
+      mapped.add(key);
+    }
+    requireIntegrity(sameIds(mapped, pairs) && sameIds(usedSources, new Set(sm.keys()))
+      && sameIds(usedEvidence, new Set(em.keys())) && sameIds(usedPassages, new Set(pm.keys())));
+    return true;
+  } catch { return false; }
 }
 const tabs = [...document.querySelectorAll('[data-view]')];
 const names = ['search','map','directory'];
@@ -205,17 +300,16 @@ form.addEventListener('submit', async (event) => {
     });
     if (!response.ok) throw new Error(response.status === 401 ? 'Pilot session ended; please sign in again.' : `Request failed (${response.status})`);
     const data = await response.json();
-    statusEl.textContent = `Result state: ${data.status}`;
+    const integrity = validateResponse(data);
+    const displayStatus = integrity ? data.status : 'PROVENANCE_INCOMPLETE';
+    statusEl.textContent = `Result state: ${displayStatus}`;
     const state = document.getElementById('state-banner');
     state.hidden = false;
-    document.getElementById('state-code').textContent = String(data.status || 'UNKNOWN');
-    state.className = 'state ' + (data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS' ? '' : data.status === 'OUTSIDE_VALIDATED_CAPABILITY' || data.status === 'INFLUENCE_DENIED' || data.status === 'HIGH_CONSEQUENCE_VERIFICATION_FAILED' ? 'blocked' : 'caution');
+    document.getElementById('state-code').textContent = displayStatus;
+    state.className = 'state ' + (supportedStates.has(displayStatus) ? '' : 'caution');
     // Render structured verified claims rather than raw Markdown text or untrusted HTML.
     answer.textContent = '';
-    const supported = data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS';
-    const passedClaims = supported && Array.isArray(data.claims)
-      ? data.claims.filter(c => c.verification_status === 'PASS' && Array.isArray(c.source_ids) && c.source_ids.length > 0)
-      : [];
+    const passedClaims = integrity && supportedStates.has(data.status) ? data.claims : [];
     if (passedClaims.length === 0) {
       const descriptions = {
         EVIDENCE_INSUFFICIENT: 'No authorized claim was supported by the available evidence.',
@@ -230,7 +324,8 @@ form.addEventListener('submit', async (event) => {
         SOURCE_UNAVAILABLE: 'The required evidence source is unavailable; no claim was invented.',
         INFLUENCE_DENIED: 'Evidence influence was denied; no claim is shown.'
       };
-      appendText(answer, 'p', descriptions[data.status] || 'No authorized medical claim was returned.');
+      appendText(answer, 'p', descriptions[displayStatus] || 'No authorized medical claim was returned.');
+      if (!integrity) appendText(answer, 'p', 'Response integrity failed. Claims and source details were withheld; re-run the query.');
     } else {
       const list = document.createElement('ul');
       const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
@@ -239,34 +334,32 @@ form.addEventListener('submit', async (event) => {
         item.appendChild(document.createTextNode(claim.claim_text + ' '));
         (claim.source_ids || []).forEach((sid, idx) => {
           const src = sourceMap.get(sid);
-          if (!src) return;
-          const link = document.createElement('a');
-          const safeUrl = safeSourceUrl(src.stable_url); if (!safeUrl) return; link.href = safeUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
-          link.textContent = src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id);
-          item.appendChild(link);
+          appendSourceLink(item, src, src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id));
           if (idx < claim.source_ids.length - 1) item.appendChild(document.createTextNode(' '));
         });
         list.appendChild(item);
       });
       answer.appendChild(list);
     }
-    if (data.sources.length === 0) {
+    if (!integrity || data.sources.length === 0) {
       appendText(sources, 'p', 'No admitted source was used for this answer.');
     } else {
       data.sources.forEach(src => {
         const box = document.createElement('div'); box.className = 'source';
-        const link = document.createElement('a'); link.href = src.stable_url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = src.title; box.appendChild(link);
+        appendSourceLink(box, src, src.title);
         appendText(box, 'div', `${src.authority} · ${src.source_type} · ${src.jurisdiction}`, 'meta');
         appendText(box, 'div', Object.entries(src.identifiers).map(([k,v]) => `${k}: ${v}`).join(' · '), 'meta');
         sources.appendChild(box);
       });
     }
+    if (integrity) {
     appendText(trace, 'p', `Trace ID: ${data.trace.trace_id}`);
     appendText(trace, 'p', `Consequence: ${data.trace.query_plan.consequence_level}; source classes: ${data.trace.query_plan.required_source_classes.join(', ')}`);
     appendText(trace, 'p', `Connectors: ${data.trace.connectors_used.join(', ') || 'none'}; source IDs: ${data.trace.source_ids.join(', ') || 'none'}`);
     appendText(trace, 'p', `Safety flags: ${data.trace.safety_flags.join(', ') || 'none'}`);
     appendText(trace, 'p', `Influence decisions: ${Array.isArray(data.influence_decisions) ? data.influence_decisions.map(d => d.status + (Array.isArray(d.reasons) && d.reasons.length ? ' (' + d.reasons.join(', ') + ')' : '')).join('; ') || 'none' : 'not supplied'}`);
     appendText(trace, 'p', `Authorization decision IDs: ${(data.trace.authorization_decision_ids || []).join(', ') || 'none'}`);
+    } else appendText(trace, 'p', 'Trace details withheld because response consistency could not be checked.');
     result.hidden = false;
     document.getElementById('answer-heading').focus?.();
   } catch (err) {
