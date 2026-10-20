@@ -1,7 +1,8 @@
 'use strict';
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const supportedFixture = JSON.parse(execFileSync(process.env.PYTHON || 'python', [path.join(__dirname, '../tests/browser_fixture.py')], { encoding: 'utf8' }));
+const fixtures = JSON.parse(execFileSync(process.env.PYTHON || 'python', [path.join(__dirname, '../tests/browser_fixture.py')], { encoding: 'utf8' }));
+const supportedFixture = fixtures.supported;
 const mutations = {
   unsafe: d => { d.sources[0].stable_url = 'javascript:alert(1)'; },
   http: d => { d.sources[0].stable_url = 'http://example.org/'; },
@@ -37,4 +38,4 @@ const unsafeUrls = ['javascript:alert(1)', 'data:text/html,unsafe', 'http://exam
   'https://example.org:bad/', 'https://example.org:0/', 'https://example.org\\@evil.test/',
   'https://exam\nple.org/', ' https://example.org/', 'https://%65xample.org/'];
 unsafeUrls.forEach((url, i) => { mutations['url' + i] = d => { d.sources[0].stable_url = url; }; });
-module.exports = { supportedFixture, mutations, unsafeUrls };
+module.exports = { fixtures, supportedFixture, mutations, unsafeUrls };
