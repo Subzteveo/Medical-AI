@@ -3,43 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Medical AI Evidence Workbench</title>
+  <title>Medical AI Evidence Workbench | Evidence Atlas</title>
   <style>
-    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color-scheme: light dark; }
-    body { margin: 0; background: Canvas; color: CanvasText; }
-    main { max-width: 1040px; margin: 0 auto; padding: 2rem 1rem 4rem; }
-    header { margin-bottom: 1.5rem; }
-    h1 { margin-bottom: .35rem; }
-    .lede { max-width: 76ch; color: color-mix(in srgb, CanvasText 72%, transparent); }
-    .notice { border: 2px solid currentColor; padding: .9rem 1rem; border-radius: .7rem; margin: 1rem 0; }
-    form { display: grid; gap: 1rem; }
-    label { font-weight: 650; display: block; margin-bottom: .35rem; }
-    textarea, select, input, button { font: inherit; }
-    textarea, select { width: 100%; box-sizing: border-box; padding: .75rem; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: .55rem; background: Canvas; color: CanvasText; }
-    textarea { min-height: 9rem; resize: vertical; }
-    .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-    button { justify-self: start; padding: .75rem 1.1rem; border-radius: .55rem; border: 2px solid currentColor; background: CanvasText; color: Canvas; font-weight: 700; cursor: pointer; }
-    button:disabled { opacity: .55; cursor: wait; }
-    button:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
-    #status { margin: 1.5rem 0 .75rem; font-weight: 700; }
-    .panel { border: 1px solid color-mix(in srgb, CanvasText 28%, transparent); border-radius: .7rem; padding: 1rem; margin-top: 1rem; }
-    .answer { white-space: pre-wrap; line-height: 1.55; }
-    .source { padding: .8rem 0; border-top: 1px solid color-mix(in srgb, CanvasText 18%, transparent); }
-    .source:first-child { border-top: 0; }
-    .meta { font-size: .92rem; color: color-mix(in srgb, CanvasText 72%, transparent); }
-    code { overflow-wrap: anywhere; }
-    details { margin-top: 1rem; }
-    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
-  </style>
+
+:root{color-scheme:light;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;--ink:#1b302a;--muted:#586e61;--line:#cbd9cf;--bg:#f5f7f1;--white:#fffefa;--green:#155f47;--deep:#0b3c30;--soft:#e9f2e9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}html{scroll-behavior:smooth}[hidden]{display:none!important}
+a{color:var(--green);text-underline-offset:3px}button,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+:focus-visible{outline:3px solid #c2882d!important;outline-offset:3px}.skip{position:absolute;top:-90px;left:10px;background:white;padding:14px;z-index:9}.skip:focus{top:10px}
+.shell{max-width:1460px;margin:auto;padding:0 clamp(15px,3vw,40px)}.topbar{border-bottom:1px solid var(--line);background:var(--white)}
+.topbar .shell{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center;color:inherit;text-decoration:none;font-weight:800;font-size:19px}
+.brand-mark{background:var(--deep);color:white;border-radius:12px;width:43px;height:43px;display:grid;place-items:center;font-size:23px}
+.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:1.3px;text-transform:uppercase}.head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:white;color:var(--muted);padding:7px 12px;border-radius:90px;font-size:12px;font-weight:700}
+.exit{background:white;color:var(--deep);border:1px solid var(--line);padding:8px 13px;border-radius:9px;font-weight:750}
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:end;padding:37px 0 30px}
+.eyebrow{color:var(--green);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:850}
+h1,h2,h3{color:var(--deep)}h1{font:500 clamp(40px,5.8vw,76px)/1.04 Georgia,serif;letter-spacing:-2px;margin:10px 0}h2{font:500 30px/1.18 Georgia,serif;margin:7px 0 12px}
+.hero p,.subtle{color:var(--muted)}.hero p{max-width:62ch;margin:0}.quote{border-left:3px solid #9ac3a9;padding:9px 0 9px 20px;font:italic 22px/1.4 Georgia,serif}.quote small{display:block;font:800 10px/2 system-ui;letter-spacing:1.6px;text-transform:uppercase;margin-top:9px;color:var(--green)}
+.nav{display:flex;gap:27px;border-block:1px solid var(--line);overflow-x:auto}.nav button{white-space:nowrap;border:0;border-bottom:3px solid transparent;background:none;font-size:14px;color:var(--muted);padding:17px 0 13px;font-weight:800}
+.nav button[aria-selected=true]{color:var(--deep);border-color:var(--green)}.view{padding:28px 0 55px}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
+.rail,.query,.panel,.column,.directory article{background:var(--white);border:1px solid var(--line);border-radius:14px}.rail{padding:23px;position:sticky;top:18px}.rail p,.rail dd{font-size:13px;color:var(--muted)}.rail dl{margin-top:20px}.rail dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:800;margin-top:13px}.rail dd{margin:0}
+.workspace{display:grid;gap:16px;min-width:0}.query,.panel{padding:clamp(20px,3vw,30px)}.query p{font-size:13px;color:var(--muted)}
+.notice{border:1px solid #e0d4b8;background:#fbf6e9;color:#75551a;border-radius:10px;padding:13px 15px;margin:15px 0;font-size:13px}
+form{display:grid;gap:16px;margin-top:16px}label{font-size:13px;font-weight:750;display:block;margin-bottom:7px}
+textarea,select{width:100%;border:1px solid #b8cbc0;border-radius:9px;background:white;color:var(--ink);padding:12px 14px}
+textarea{min-height:132px;line-height:1.6;resize:vertical}.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+button[type=submit]{justify-self:start;background:var(--deep);color:white;border:1px solid var(--deep);border-radius:9px;padding:12px 20px;font-weight:800}
+#status{min-height:1.5em;font-weight:750;color:var(--green);margin:5px 0}.panel{margin:0}.results{display:grid;gap:16px}.state{background:var(--soft);border-left:4px solid var(--green);border-radius:7px;padding:12px 15px;margin:12px 0 15px;font-size:13px}.state code{display:block;overflow-wrap:anywhere;font-weight:800}
+.state.blocked{background:#f7eeec;border-left-color:#963e40}.state.caution{background:#fbf1e1;border-left-color:#b67a24}
+.answer{white-space:pre-wrap;line-height:1.62}.answer li{margin:12px 0}.source{border-top:1px solid #e1e9e3;padding:15px 0}.source:first-child{border-top:0}.meta{font-size:12px;color:var(--muted);overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:750}#trace p{overflow-wrap:anywhere}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.rules article{padding:18px;background:var(--soft);border:1px solid #d3e2d3;border-radius:11px}.rules strong{display:block;font-size:13px}.rules p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.view-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:19px}.view-head p{font-size:14px;color:var(--muted);max-width:68ch;margin:0}
+.diagram{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.column{padding:18px 15px;min-width:0}.column:nth-child(odd){background:#edf3ed}.column h3{font:500 25px/1.13 Georgia,serif;margin:12px 0}.column p,.column dd{font-size:12px;color:var(--muted)}.column dt{font-size:13px;font-weight:800;border-top:1px solid var(--line);padding-top:11px;margin-top:13px}.column dd{margin:4px 0}
+.infobar{margin-top:16px;background:var(--white);border:1px solid var(--line);padding:21px;border-radius:13px}.infobar code{display:block;color:var(--green);white-space:normal;margin-top:10px;font-size:15px}
+.directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.directory article{padding:24px}.directory article p{font-size:14px;color:var(--muted)}.directory small{color:var(--green);text-transform:uppercase;letter-spacing:1px;font-size:11px;font-weight:800}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:70px;padding:5px 10px;font-size:12px;font-weight:800;color:var(--deep)}.pill.planned{background:#fcf3e5;color:#805717}
+.footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted);font-size:12px;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
+@media(max-width:1050px){.diagram{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.hero{display:block}.quote{margin-top:20px}.layout{grid-template-columns:1fr}.rail{position:static}.row,.rules,.directory,.diagram{grid-template-columns:1fr}.topbar .shell{padding-block:12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+</style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Medical AI Evidence Workbench</h1>
-    <p class="lede">Alpha2 evidence-retrieval workbench for medical education, research and clinician evidence review. It is not validated for autonomous diagnosis, prescribing or patient-specific treatment decisions.</p>
-  </header>
+<a class="skip" href="#view-search">Skip to evidence search</a>
+<div class="topbar"><div class="shell">
+<a href="/" class="brand" id="home-link"><span class="brand-mark" aria-hidden="true">✳</span><span>Medical AI<small>Evidence Atlas · Engineering alpha</small></span></a>
+<div class="head-actions"><span class="chip">AU first · Research & education</span><span class="chip">Invitation only</span><button type="button" class="exit" id="sign-out">Sign out</button></div>
+</div></div><main class="shell">
+  <header class="hero"><div><span class="eyebrow">Medical research · Evidence before answers</span>
+<h1>Evidence you can inspect.</h1><p>Search source-backed medical information. Follow each authorized claim to the sources and processing decisions that support it.</p>
+</div><div class="quote">“A model is never evidence.”<small>Medical AI governing principle</small></div></header>
+<nav class="nav" role="tablist" aria-label="Evidence Atlas views">
+<button type="button" role="tab" id="tab-search" data-view="search" aria-controls="view-search" aria-selected="true" tabindex="0">01 / Search evidence</button>
+<button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="false" tabindex="-1">02 / Inside Medical AI</button>
+<button type="button" role="tab" id="tab-directory" data-view="directory" aria-controls="view-directory" aria-selected="false" tabindex="-1">03 / Source directory</button>
+</nav>
 
-  <div class="notice" role="note">
+<section class="view" id="view-search" role="tabpanel" aria-labelledby="tab-search">
+<div class="layout"><aside class="rail" aria-label="Research boundaries"><span class="eyebrow">Boundaries</span><h2>Know the limits.</h2>
+<p>General medical learning and research, not a tool for diagnosis, prescribing, patient-specific treatment or emergency triage.</p>
+<dl><dt>AU first</dt><dd>Jurisdiction is explicit, not inferred from foreign evidence.</dd>
+<dt>Evidence authority</dt><dd>The server controls which verified claims can be shown.</dd>
+<dt>Information handling</dt><dd>PHI approval is separate from evidence approval.</dd></dl></aside>
+<div class="workspace"><div class="query"><span class="eyebrow">01 / Search evidence</span><h2>Start with a question.</h2>
+<p>One general question. Visible evidence state. No clinical facts invented for fluency.</p>
+<div class="notice" role="note">
     <strong>Privacy boundary:</strong> do not enter identifying patient information. This build attempts to detect and block patient-specific or identifying wording before public evidence connectors are called, but the detector is heuristic and cannot guarantee de-identification.
   </div>
 
@@ -76,21 +107,37 @@
   </form>
 
   <div id="status" role="status" aria-live="polite"></div>
-  <section id="result" hidden aria-labelledby="answer-heading">
+  </div><section id="result" class="results" hidden aria-labelledby="answer-heading">
     <div class="panel">
-      <h2 id="answer-heading" tabindex="-1">Answer</h2>
+      <span class="eyebrow">02 / Evidence state</span><h2 id="answer-heading" tabindex="-1">What the evidence supports</h2>
+<div id="state-banner" class="state" hidden>Backend result state <code id="state-code"></code></div>
       <div id="answer" class="answer"></div>
     </div>
     <div class="panel">
-      <h2>Sources</h2>
+      <span class="eyebrow">03 / Provenance</span><h2>Admitted sources</h2><p class="meta">Registry information is for study discovery, not independent proof of efficacy or safety.</p>
       <div id="sources"></div>
     </div>
     <details class="panel">
-      <summary><strong>Why this answer?</strong></summary>
+      <summary>04 / Why this answer? · Review trace</summary>
       <div id="trace" class="meta"></div>
     </details>
   </section>
-</main>
+<div class="rules" aria-label="Three governing rules">
+<article><strong>Evidence first</strong><p>Only admissible records can support a medical proposition.</p></article>
+<article><strong>Provenance</strong><p>Inspect source IDs, authority and jurisdiction.</p></article>
+<article><strong>Fail closed</strong><p>Uncertain and blocked states are legitimate outcomes.</p></article>
+</div></div></div></section>
+<section class="view" id="view-map" role="tabpanel" aria-labelledby="tab-map" hidden>
+<div class="view-head"><div><span class="eyebrow">Diagram view · System anatomy</span><h2>What's inside Medical AI</h2><p>Five connected disciplines; this explanatory architecture is not a live monitoring screen.</p></div><span class="chip">Engineering alpha, not clinically validated</span></div>
+<div class="diagram"><article class="column"><span class="eyebrow">01 / STAGE</span><h3>The question</h3><p>Research/education context, jurisdiction and sensitivity</p><dl><dt>User modes</dt><dd>Student, clinician, researcher — presentation modes only</dd><dt>Privacy screen</dt><dd>Heuristic detection before public retrieval; not guaranteed</dd><dt>Intended use</dt><dd>No patient-specific decisions</dd></dl></article><article class="column"><span class="eyebrow">02 / STAGE</span><h3>The sources</h3><p>Admitted evidence requires provenance and source identity</p><dl><dt>PubMed</dt><dd>Current alpha literature adapter</dd><dt>ClinicalTrials.gov</dt><dd>Current trial discovery adapter</dd><dt>AU integrations</dt><dd>TGA, PBS and NCTS planned</dd></dl></article><article class="column"><span class="eyebrow">03 / STAGE</span><h3>Authority gates</h3><p>Information availability never equals permission to influence</p><dl><dt>Evidence gates</dt><dd>Evidence ∧ Provenance ∧ Validation ∧ Safety ∧ Monitoring</dd><dt>Separate PHI authority</dt><dd>Information processing permission remains independent</dd><dt>Revocation</dt><dd>v0.2 dependency-aware control core</dd></dl></article><article class="column"><span class="eyebrow">04 / STAGE</span><h3>Claims & answers</h3><p>Render only the server's authorized evidence claims</p><dl><dt>Claim ledger</dt><dd>Source IDs, verification, jurisdiction and applicability</dd><dt>Abstention</dt><dd>Unknown, conflict and outdated are real states</dd><dt>High consequence</dt><dd>Fails closed without dedicated verification</dd></dl></article><article class="column"><span class="eyebrow">05 / STAGE</span><h3>Control & review</h3><p>A trace enables later investigation; it is not clinical approval</p><dl><dt>Trace</dt><dd>Run ID, source IDs, connectors and safety flags</dd><dt>Evidence Passport</dt><dd>Future component contract; not operational</dd><dt>Release</dt><dd>Engineering alpha; external clinical release blocked</dd></dl></article></div>
+<div class="infobar"><strong>Influence pathway</strong><p>Model output cannot grant evidence authority; authorization is enforced upstream of the browser.</p><code>Question → Source → Gate → Authorized claim → Review</code></div>
+</section>
+<section class="view" id="view-directory" role="tabpanel" aria-labelledby="tab-directory" hidden>
+<div class="view-head"><div><span class="eyebrow">Authority and plane directory</span><h2>Not all data is evidence.</h2><p>Existing, planned and out-of-scope capabilities are explicitly separated.</p></div></div>
+<div class="directory"><article><small>Evidence plane · Alpha adapter</small><h3>PubMed / NLM</h3><p>Indexed biomedical literature with bounded extractive source support. Not a clinical practice guideline or validated certainty assessment.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · Alpha adapter</small><h3>ClinicalTrials.gov</h3><p>Trial discovery and registry facts. Sponsor/investigator narrative is not efficacy or safety evidence.</p><span class="pill ">Current adapter</span></article><article><small>AU regulatory plane · Future</small><h3>TGA and PBS</h3><p>Australian regulatory/medicine authority integration needs separate connector, validation and licensing controls.</p><span class="pill planned">Not connected</span></article><article><small>Terminology plane · Future</small><h3>SNOMED CT-AU / AMT / NCTS</h3><p>Australian terminologies aid normalization; they do not independently establish therapeutic evidence.</p><span class="pill planned">Not connected</span></article><article><small>Clinical data plane · Out of scope</small><h3>FHIR / SMART</h3><p>Patient and EHR information is not automatically evidence. No patient-record workspace is included.</p><span class="pill planned">No PHI workflow</span></article><article><small>Research data plane · Future</small><h3>OMOP cohorts</h3><p>Observational data requires separate authority and processing approvals.</p><span class="pill planned">Not connected</span></article></div>
+</section>
+</main><footer class="footer shell"><span>Medical AI · Evidence Atlas · Engineering alpha / no clinical release</span><span>A model is never evidence.</span></footer>
+
 <script>
 const form = document.getElementById('query-form');
 const statusEl = document.getElementById('status');
@@ -99,6 +146,36 @@ const answer = document.getElementById('answer');
 const sources = document.getElementById('sources');
 const trace = document.getElementById('trace');
 const submit = document.getElementById('submit');
+function safeSourceUrl(value) {
+  try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; }
+  catch { return null; }
+}
+const tabs = [...document.querySelectorAll('[data-view]')];
+const names = ['search','map','directory'];
+function setView(name, focus = false) {
+  if (!names.includes(name)) return;
+  for (const tab of tabs) {
+    const active = tab.dataset.view === name;
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+    if (active && focus) tab.focus();
+  }
+  for (const view of names) document.getElementById('view-' + view).hidden = view !== name;
+}
+tabs.forEach((tab,i) => {
+  tab.addEventListener('click', () => setView(tab.dataset.view));
+  tab.addEventListener('keydown', event => {
+    const next = event.key === 'ArrowRight' ? i+1 : event.key === 'ArrowLeft' ? i-1 : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length-1 : null;
+    if (next === null) return;
+    event.preventDefault();
+    setView(tabs[(next+tabs.length)%tabs.length].dataset.view, true);
+  });
+});
+document.getElementById('home-link').addEventListener('click',e=>{e.preventDefault();setView('search');document.getElementById('question').focus();});
+document.getElementById('sign-out').addEventListener('click',async()=>{
+  try { await fetch('/access/logout',{method:'POST',credentials:'same-origin',cache:'no-store'}); }
+  finally { window.location.assign('/'); }
+});
 
 function appendText(parent, tag, text, cls) {
   const el = document.createElement(tag);
@@ -123,17 +200,37 @@ form.addEventListener('submit', async (event) => {
       jurisdiction: document.getElementById('jurisdiction').value,
       limit: Number(document.getElementById('limit').value)
     };
-    const response = await fetch('/v1/evidence/query', {
+    const response = await fetch('/v1/evidence/query', { credentials:'same-origin', cache:'no-store',
       method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(payload)
     });
-    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    if (!response.ok) throw new Error(response.status === 401 ? 'Pilot session ended; please sign in again.' : `Request failed (${response.status})`);
     const data = await response.json();
     statusEl.textContent = `Result state: ${data.status}`;
+    const state = document.getElementById('state-banner');
+    state.hidden = false;
+    document.getElementById('state-code').textContent = String(data.status || 'UNKNOWN');
+    state.className = 'state ' + (data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS' ? '' : data.status === 'OUTSIDE_VALIDATED_CAPABILITY' || data.status === 'INFLUENCE_DENIED' || data.status === 'HIGH_CONSEQUENCE_VERIFICATION_FAILED' ? 'blocked' : 'caution');
     // Render structured verified claims rather than raw Markdown text or untrusted HTML.
     answer.textContent = '';
-    const passedClaims = (data.claims || []).filter(c => c.verification_status === 'PASS');
+    const supported = data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS';
+    const passedClaims = supported && Array.isArray(data.claims)
+      ? data.claims.filter(c => c.verification_status === 'PASS' && Array.isArray(c.source_ids) && c.source_ids.length > 0)
+      : [];
     if (passedClaims.length === 0) {
-      appendText(answer, 'p', data.answer_markdown.replace(/^### Evidence-bound answer\s*/m, '').trim());
+      const descriptions = {
+        EVIDENCE_INSUFFICIENT: 'No authorized claim was supported by the available evidence.',
+        EVIDENCE_CONFLICTING: 'The evidence is conflicting; no medical claim is shown.',
+        SOURCE_OUTDATED: 'The available source is outdated; no claim is shown.',
+        POPULATION_MISMATCH: 'The population does not match; no claim is shown.',
+        NO_AUTHORITATIVE_SOURCE: 'No authoritative source was admitted for this question.',
+        JURISDICTION_UNCLEAR: 'Jurisdiction is unclear; no medical claim is shown.',
+        PROVENANCE_INCOMPLETE: 'Required provenance is incomplete; no medical claim is shown.',
+        HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'High-consequence verification failed or is unavailable; no claim is shown.',
+        OUTSIDE_VALIDATED_CAPABILITY: 'This request is outside the validated scope or was blocked to protect privacy.',
+        SOURCE_UNAVAILABLE: 'The required evidence source is unavailable; no claim was invented.',
+        INFLUENCE_DENIED: 'Evidence influence was denied; no claim is shown.'
+      };
+      appendText(answer, 'p', descriptions[data.status] || 'No authorized medical claim was returned.');
     } else {
       const list = document.createElement('ul');
       const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
@@ -144,7 +241,7 @@ form.addEventListener('submit', async (event) => {
           const src = sourceMap.get(sid);
           if (!src) return;
           const link = document.createElement('a');
-          link.href = src.stable_url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+          const safeUrl = safeSourceUrl(src.stable_url); if (!safeUrl) return; link.href = safeUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
           link.textContent = src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id);
           item.appendChild(link);
           if (idx < claim.source_ids.length - 1) item.appendChild(document.createTextNode(' '));
@@ -168,6 +265,8 @@ form.addEventListener('submit', async (event) => {
     appendText(trace, 'p', `Consequence: ${data.trace.query_plan.consequence_level}; source classes: ${data.trace.query_plan.required_source_classes.join(', ')}`);
     appendText(trace, 'p', `Connectors: ${data.trace.connectors_used.join(', ') || 'none'}; source IDs: ${data.trace.source_ids.join(', ') || 'none'}`);
     appendText(trace, 'p', `Safety flags: ${data.trace.safety_flags.join(', ') || 'none'}`);
+    appendText(trace, 'p', `Influence decisions: ${Array.isArray(data.influence_decisions) ? data.influence_decisions.map(d => d.status + (Array.isArray(d.reasons) && d.reasons.length ? ' (' + d.reasons.join(', ') + ')' : '')).join('; ') || 'none' : 'not supplied'}`);
+    appendText(trace, 'p', `Authorization decision IDs: ${(data.trace.authorization_decision_ids || []).join(', ') || 'none'}`);
     result.hidden = false;
     document.getElementById('answer-heading').focus?.();
   } catch (err) {
