@@ -157,8 +157,15 @@ async function run() {
     await mobile.locator('#submit').click();
     await mobile.waitForFunction(() => !document.getElementById('submit').disabled);
     await mobile.locator('.passport summary').first().click();
-    assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2), false, 'Mobile passport overflow detected');
     await mobile.screenshot({ path: path.join(OUT, 'mobile-evidence-passport.png'), fullPage: true });
+    const passportOverflow = await mobile.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth > window.innerWidth + 2,
+      elements: [...document.querySelectorAll('body *')].filter(element => {
+        const box = element.getBoundingClientRect();
+        return box.width > 0 && box.right > window.innerWidth + 2;
+      }).map(element => element.tagName + '#' + element.id + '.' + element.className).slice(0, 20),
+    }));
+    assert.equal(passportOverflow.overflow, false, 'Mobile passport overflow detected: ' + passportOverflow.elements.join(', '));
     await mobile.getByRole('tab', { name: /Inside Medical AI/ }).click();
     const mapOverflow = await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     assert.equal(mapOverflow, false, 'Mobile architecture map overflow detected');
