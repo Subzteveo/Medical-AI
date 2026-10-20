@@ -8,21 +8,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 import medical_ai.api as api
+from medical_ai.engine import EvidenceEngine
 
 
 VALID_TOKEN = "pilot-token-" + ("A" * 40)
 SESSION_SECRET = "session-secret-" + ("S" * 40)
-
-
-class StubEngine:
-    async def answer(self, question, *, user_mode, jurisdiction, limit):
-        return {
-            "status": "EVIDENCE_INSUFFICIENT",
-            "question_seen": question,
-            "user_mode": user_mode,
-            "jurisdiction": jurisdiction,
-            "limit": limit,
-        }
 
 
 def _access_document(*, revoked=False, expires_at=None):
@@ -41,11 +31,11 @@ def _access_document(*, revoked=False, expires_at=None):
 
 
 @pytest.fixture
-def configured_access(monkeypatch):
+def configured_access(monkeypatch, fake_connector):
     monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_JSON", json.dumps(_access_document()))
     monkeypatch.setenv("MEDICAL_AI_PILOT_SESSION_SECRET", SESSION_SECRET)
     monkeypatch.setenv("MEDICAL_AI_PILOT_COOKIE_SECURE", "false")
-    monkeypatch.setattr(api, "build_engine", StubEngine)
+    monkeypatch.setattr(api, "build_engine", lambda: EvidenceEngine(fake_connector))
 
 
 def _query_payload(**extra):
@@ -87,7 +77,7 @@ def test_valid_invited_participant_can_use_direct_api(configured_access):
         headers={"Authorization": f"Bearer {VALID_TOKEN}"},
     )
     assert response.status_code == 200
-    assert response.json()["user_mode"] == "student"
+    assert response.json()["trace"]["query_plan"]["user_mode"] == "student"
 
 
 def test_expired_participant_is_rejected(configured_access, monkeypatch):

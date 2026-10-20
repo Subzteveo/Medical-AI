@@ -3,8 +3,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from urllib.parse import quote, urlsplit, urlunsplit
 
-from .schemas import AuthorizedClaimView, SourceRecord
+from .schemas import AuthorizedClaimView, CitationMapping, EvidenceUnit, Passage, SourceRecord
 from .influence import InfluenceController
+from .provenance import safe_source_url, validate_output_provenance
 
 
 def _escape_markdown_text(value: str) -> str:
@@ -18,9 +19,9 @@ def _safe_markdown_url(value: str) -> str:
     def _encode_link_component(component: str, *, safe: str) -> str:
         return quote(component, safe=safe).replace("(", "%28").replace(")", "%29")
 
+    if safe_source_url(value) is None:
+        raise ValueError("Source link is not permitted HTTPS")
     parts = urlsplit(value)
-    if parts.scheme.lower() not in {"http", "https"} or not parts.netloc:
-        return "#"
     return urlunsplit(
         (
             parts.scheme,
@@ -48,6 +49,9 @@ def render_answer(
     *,
     trial_discovery: bool = False,
     influence_controller: InfluenceController | None = None,
+    evidence_objects: Sequence[EvidenceUnit] = (),
+    passages: Sequence[Passage] = (),
+    citation_mappings: Sequence[CitationMapping] = (),
 ) -> str:
     """Render only authorization-carrying claim views.
 
@@ -57,6 +61,9 @@ def render_answer(
     """
 
     checked_views = [_runtime_authorized_view(view, influence_controller) for view in views]
+    validate_output_provenance(
+        [view.claim for view in checked_views], sources, evidence_objects, passages, citation_mappings,
+    )
 
     source_map = {source.source_id: source for source in sources}
     lines = ["### Evidence-bound answer", ""]
@@ -71,9 +78,7 @@ def render_answer(
         claim = view.claim
         refs: list[str] = []
         for source_id in claim.source_ids:
-            source = source_map.get(source_id)
-            if source is None:
-                continue
+            source = source_map[source_id]
             if "PMID" in source.identifiers:
                 label = "PMID " + source.identifiers["PMID"]
             elif "NCT" in source.identifiers:

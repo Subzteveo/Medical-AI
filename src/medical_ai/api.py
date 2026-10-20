@@ -25,6 +25,7 @@ from .connectors.clinical_trials import ClinicalTrialsConnector
 from .engine import EvidenceEngine
 from .influence import InfluenceController
 from .trace_store import SQLiteTraceStore
+from .schemas import EvidenceAnswer
 
 VERSION = "0.1.0-alpha2.1-remediation"
 STATIC_DIR = Path(__file__).parent / "static"
@@ -196,10 +197,11 @@ def protected_docs(_participant=Depends(require_pilot_participant)):
     )
 
 
-@app.post("/v1/evidence/query")
+@app.post("/v1/evidence/query", response_model=EvidenceAnswer)
 async def query(
     req: QueryRequest,
     _participant=Depends(require_pilot_participant),
 ):
     engine = build_engine()
-    return await engine.answer(req.question, user_mode=req.user_mode, jurisdiction=req.jurisdiction, limit=req.limit)
+    answer = await engine.answer(req.question, user_mode=req.user_mode, jurisdiction=req.jurisdiction, limit=req.limit)
+    return engine.revalidate_output(answer)

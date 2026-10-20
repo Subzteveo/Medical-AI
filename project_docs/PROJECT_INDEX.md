@@ -31,6 +31,7 @@ Key document owners:
 - `docs/INTENDED_USE.md` — current intended purpose and explicit non-intended uses;
 - `project_docs/PRODUCT_FOUNDATION.md` — current bounded product/MVP contract;
 - `project_docs/ARCHITECTURE_AND_CONTRACTS.md` — architecture and typed contracts;
+- `project_docs/EVIDENCE_ATLAS_UI.md` — output provenance boundary, Evidence Passport, deterministic limitations panel and UI verification scope;
 - `docs/MEDICAL_EVIDENCE_INFLUENCE_POLICY_v0.1.md` — evidence influence rules;
 - `docs/INFLUENCE_CONTROL_CORE_v0.2.md` — machine-enforced influence-control implementation contract;
 - `policies/` — source, consequence, PHI routing and evidence influence policies; `src/medical_ai/policies/` is the identical packaged copy;

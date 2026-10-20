@@ -18,10 +18,10 @@ def test_evidence_atlas_navigation_and_accessibility_structure():
 
 def test_evidence_atlas_safe_claim_rendering_contract():
     html = PAGE.read_text(encoding="utf-8")
-    assert "const supported = data.status === 'ANSWER_SUPPORTED'" in html
-    assert "data.claims.filter(c => c.verification_status === 'PASS'" in html
+    assert "validateResponse(data)" in html
+    assert "integrity && supportedStates.has(data.status) ? data.claims : []" in html
     assert "No authorized medical claim" in html
-    assert "descriptions[data.status]" in html
+    assert "descriptions[displayStatus]" in html
     assert "new URL(value)" in html and "url.protocol === 'https:'" in html
     assert "textContent" in html and "innerHTML" not in html
     assert "data.answer_markdown.replace" not in html

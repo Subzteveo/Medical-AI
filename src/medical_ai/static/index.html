@@ -31,9 +31,10 @@ form{display:grid;gap:16px;margin-top:16px}label{font-size:13px;font-weight:750;
 textarea,select{width:100%;border:1px solid #b8cbc0;border-radius:9px;background:white;color:var(--ink);padding:12px 14px}
 textarea{min-height:132px;line-height:1.6;resize:vertical}.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
 button[type=submit]{justify-self:start;background:var(--deep);color:white;border:1px solid var(--deep);border-radius:9px;padding:12px 20px;font-weight:800}
-#status{min-height:1.5em;font-weight:750;color:var(--green);margin:5px 0}.panel{margin:0}.results{display:grid;gap:16px}.state{background:var(--soft);border-left:4px solid var(--green);border-radius:7px;padding:12px 15px;margin:12px 0 15px;font-size:13px}.state code{display:block;overflow-wrap:anywhere;font-weight:800}
+#status{min-height:1.5em;font-weight:750;color:var(--green);margin:5px 0;overflow-wrap:anywhere}.panel{margin:0}.results{display:grid;gap:16px}.state{background:var(--soft);border-left:4px solid var(--green);border-radius:7px;padding:12px 15px;margin:12px 0 15px;font-size:13px}.state code{display:block;overflow-wrap:anywhere;font-weight:800}
 .state.blocked{background:#f7eeec;border-left-color:#963e40}.state.caution{background:#fbf1e1;border-left-color:#b67a24}
 .answer{white-space:pre-wrap;line-height:1.62}.answer li{margin:12px 0}.source{border-top:1px solid #e1e9e3;padding:15px 0}.source:first-child{border-top:0}.meta{font-size:12px;color:var(--muted);overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:750}#trace p{overflow-wrap:anywhere}
+.passport{white-space:normal;border:1px solid var(--line);border-radius:9px;padding:14px;margin:12px 0;overflow-wrap:anywhere}.passport summary{color:var(--deep)}.passport blockquote{margin:12px 0;padding:12px 16px;border-left:3px solid #91afa0;background:var(--soft);white-space:pre-wrap}.passport mark{background:#f1dfac;color:var(--ink)}.passport h3{font-size:16px;margin-bottom:6px}.passport p{margin:8px 0}.boundary-row{padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.boundary-row p{margin:4px 0;font-size:14px}.boundary-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}.boundary-row[data-boundary-state=failed] .boundary-label{color:#8b3434}.boundary-row[data-boundary-state=unknown] .boundary-label{color:#76551a}
 .rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.rules article{padding:18px;background:var(--soft);border:1px solid #d3e2d3;border-radius:11px}.rules strong{display:block;font-size:13px}.rules p{font-size:12px;color:var(--muted);margin:4px 0 0}
 .view-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:19px}.view-head p{font-size:14px;color:var(--muted);max-width:68ch;margin:0}
 .diagram{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.column{padding:18px 15px;min-width:0}.column:nth-child(odd){background:#edf3ed}.column h3{font:500 25px/1.13 Georgia,serif;margin:12px 0}.column p,.column dd{font-size:12px;color:var(--muted)}.column dt{font-size:13px;font-weight:800;border-top:1px solid var(--line);padding-top:11px;margin-top:13px}.column dd{margin:4px 0}
@@ -114,11 +115,16 @@ button[type=submit]{justify-self:start;background:var(--deep);color:white;border
       <div id="answer" class="answer"></div>
     </div>
     <div class="panel">
-      <span class="eyebrow">03 / Provenance</span><h2>Admitted sources</h2><p class="meta">Registry information is for study discovery, not independent proof of efficacy or safety.</p>
+      <span class="eyebrow">03 / Provenance</span><h2>Admitted sources</h2><p class="meta">HTTPS is a permitted link scheme; it does not verify medical evidence. Registry information supports study discovery, not independent proof of efficacy or safety.</p>
       <div id="sources"></div>
     </div>
+    <section class="panel" aria-labelledby="boundaries-heading">
+      <span class="eyebrow">04 / Evidence boundaries</span><h2 id="boundaries-heading">What this answer cannot establish</h2>
+      <p class="meta">Recorded failures, missing assessments and capabilities absent from this build have different meanings.</p>
+      <div id="boundaries"></div>
+    </section>
     <details class="panel">
-      <summary>04 / Why this answer? · Review trace</summary>
+      <summary>05 / Why this answer? · Review trace</summary>
       <div id="trace" class="meta"></div>
     </details>
   </section>
@@ -129,12 +135,12 @@ button[type=submit]{justify-self:start;background:var(--deep);color:white;border
 </div></div></div></section>
 <section class="view" id="view-map" role="tabpanel" aria-labelledby="tab-map" hidden>
 <div class="view-head"><div><span class="eyebrow">Diagram view · System anatomy</span><h2>What's inside Medical AI</h2><p>Five connected disciplines; this explanatory architecture is not a live monitoring screen.</p></div><span class="chip">Engineering alpha, not clinically validated</span></div>
-<div class="diagram"><article class="column"><span class="eyebrow">01 / STAGE</span><h3>The question</h3><p>Research/education context, jurisdiction and sensitivity</p><dl><dt>User modes</dt><dd>Student, clinician, researcher — presentation modes only</dd><dt>Privacy screen</dt><dd>Heuristic detection before public retrieval; not guaranteed</dd><dt>Intended use</dt><dd>No patient-specific decisions</dd></dl></article><article class="column"><span class="eyebrow">02 / STAGE</span><h3>The sources</h3><p>Admitted evidence requires provenance and source identity</p><dl><dt>PubMed</dt><dd>Current alpha literature adapter</dd><dt>ClinicalTrials.gov</dt><dd>Current trial discovery adapter</dd><dt>AU integrations</dt><dd>TGA, PBS and NCTS planned</dd></dl></article><article class="column"><span class="eyebrow">03 / STAGE</span><h3>Authority gates</h3><p>Information availability never equals permission to influence</p><dl><dt>Evidence gates</dt><dd>Evidence ∧ Provenance ∧ Validation ∧ Safety ∧ Monitoring</dd><dt>Separate PHI authority</dt><dd>Information processing permission remains independent</dd><dt>Revocation</dt><dd>v0.2 dependency-aware control core</dd></dl></article><article class="column"><span class="eyebrow">04 / STAGE</span><h3>Claims & answers</h3><p>Render only the server's authorized evidence claims</p><dl><dt>Claim ledger</dt><dd>Source IDs, verification, jurisdiction and applicability</dd><dt>Abstention</dt><dd>Unknown, conflict and outdated are real states</dd><dt>High consequence</dt><dd>Fails closed without dedicated verification</dd></dl></article><article class="column"><span class="eyebrow">05 / STAGE</span><h3>Control & review</h3><p>A trace enables later investigation; it is not clinical approval</p><dl><dt>Trace</dt><dd>Run ID, source IDs, connectors and safety flags</dd><dt>Evidence Passport</dt><dd>Future component contract; not operational</dd><dt>Release</dt><dd>Engineering alpha; external clinical release blocked</dd></dl></article></div>
+<div class="diagram"><article class="column"><span class="eyebrow">01 / STAGE</span><h3>The question</h3><p>Research/education context, jurisdiction and sensitivity</p><dl><dt>User modes</dt><dd>Student, clinician, researcher — presentation modes only</dd><dt>Privacy screen</dt><dd>Heuristic detection before public retrieval; not guaranteed</dd><dt>Intended use</dt><dd>No patient-specific decisions</dd></dl></article><article class="column"><span class="eyebrow">02 / STAGE</span><h3>The sources</h3><p>Admitted evidence requires provenance and source identity</p><dl><dt>PubMed</dt><dd>Current alpha literature adapter</dd><dt>ClinicalTrials.gov</dt><dd>Current trial discovery adapter</dd><dt>AU integrations</dt><dd>TGA, PBS and NCTS planned</dd></dl></article><article class="column"><span class="eyebrow">03 / STAGE</span><h3>Authority gates</h3><p>Information availability never equals permission to influence</p><dl><dt>Evidence gates</dt><dd>Evidence ∧ Provenance ∧ Validation ∧ Safety ∧ Monitoring</dd><dt>Separate PHI authority</dt><dd>Information processing permission remains independent</dd><dt>Revocation</dt><dd>v0.2 dependency-aware control core</dd></dl></article><article class="column"><span class="eyebrow">04 / STAGE</span><h3>Claims & answers</h3><p>Render only the server's authorized evidence claims</p><dl><dt>Claim ledger</dt><dd>Source IDs, verification, jurisdiction and applicability</dd><dt>Abstention</dt><dd>Unknown, conflict and outdated are real states</dd><dt>High consequence</dt><dd>Fails closed without dedicated verification</dd></dl></article><article class="column"><span class="eyebrow">05 / STAGE</span><h3>Control & review</h3><p>A trace enables later investigation; it is not clinical approval</p><dl><dt>Trace</dt><dd>Run ID, source IDs, connectors and safety flags</dd><dt>Evidence Passport</dt><dd>Returned passages, mappings and recorded decisions</dd><dt>Release</dt><dd>Engineering alpha; external clinical release blocked</dd></dl></article></div>
 <div class="infobar"><strong>Influence pathway</strong><p>Model output cannot grant evidence authority; authorization is enforced upstream of the browser.</p><code>Question → Source → Gate → Authorized claim → Review</code></div>
 </section>
 <section class="view" id="view-directory" role="tabpanel" aria-labelledby="tab-directory" hidden>
 <div class="view-head"><div><span class="eyebrow">Authority and plane directory</span><h2>Not all data is evidence.</h2><p>Existing, planned and out-of-scope capabilities are explicitly separated.</p></div></div>
-<div class="directory"><article><small>Evidence plane · Alpha adapter</small><h3>PubMed / NLM</h3><p>Indexed biomedical literature with bounded extractive source support. Not a clinical practice guideline or validated certainty assessment.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · Alpha adapter</small><h3>ClinicalTrials.gov</h3><p>Trial discovery and registry facts. Sponsor/investigator narrative is not efficacy or safety evidence.</p><span class="pill ">Current adapter</span></article><article><small>AU regulatory plane · Future</small><h3>TGA and PBS</h3><p>Australian regulatory/medicine authority integration needs separate connector, validation and licensing controls.</p><span class="pill planned">Not connected</span></article><article><small>Terminology plane · Future</small><h3>SNOMED CT-AU / AMT / NCTS</h3><p>Australian terminologies aid normalization; they do not independently establish therapeutic evidence.</p><span class="pill planned">Not connected</span></article><article><small>Clinical data plane · Out of scope</small><h3>FHIR / SMART</h3><p>Patient and EHR information is not automatically evidence. No patient-record workspace is included.</p><span class="pill planned">No PHI workflow</span></article><article><small>Research data plane · Future</small><h3>OMOP cohorts</h3><p>Observational data requires separate authority and processing approvals.</p><span class="pill planned">Not connected</span></article></div>
+<div class="directory"><article><small>Evidence plane · Alpha adapter</small><h3>PubMed / NLM</h3><p>Indexed biomedical literature with bounded extractive source support. Not a clinical practice guideline or validated certainty assessment.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · Alpha adapter</small><h3>ClinicalTrials.gov</h3><p>Trial discovery and registry facts. Sponsor/investigator narrative is not efficacy or safety evidence.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · AU integration planned</small><h3>TGA and PBS</h3><p>Australian regulatory/medicine authority integration needs separate connector, validation and licensing controls.</p><span class="pill planned">Not connected</span></article><article><small>Terminology plane · Future</small><h3>SNOMED CT-AU / AMT / NCTS</h3><p>Australian terminologies aid normalization; they do not independently establish therapeutic evidence.</p><span class="pill planned">Not connected</span></article><article><small>Clinical data plane · Out of scope</small><h3>FHIR / SMART</h3><p>Patient and EHR information is not automatically evidence. No patient-record workspace is included.</p><span class="pill planned">No PHI workflow</span></article><article><small>Research data plane · Future</small><h3>OMOP cohorts</h3><p>Observational data requires separate authority and processing approvals.</p><span class="pill planned">Not connected</span></article></div>
 </section>
 </main><footer class="footer shell"><span>Medical AI · Evidence Atlas · Engineering alpha / no clinical release</span><span>A model is never evidence.</span></footer>
 
@@ -147,8 +153,103 @@ const sources = document.getElementById('sources');
 const trace = document.getElementById('trace');
 const submit = document.getElementById('submit');
 function safeSourceUrl(value) {
-  try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; }
+  if (typeof value !== 'string' || !/^https:\/\//i.test(value) || /[\s\x00-\x1f\x7f\\]/u.test(value)) return null;
+  const authority = value.match(/^https:\/\/([^/?#]+)/i)?.[1];
+  if (!authority || !/^[A-Za-z0-9.:[\]-]+$/.test(authority)) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname && !url.username && !url.password
+      && /^[A-Za-z0-9.:[\]-]+$/.test(url.hostname) && url.port !== '0' ? url.href : null;
+  }
   catch { return null; }
+}
+function appendSourceLink(parent, source, label) {
+  const href = safeSourceUrl(source.stable_url);
+  if (!href) return appendText(parent, 'span', 'Source link withheld: invalid or non-HTTPS URL.');
+  const link = appendText(parent, 'a', label);
+  link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  return link;
+}
+const supportedStates = new Set(['ANSWER_SUPPORTED', 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS']);
+const terminalStates = new Set(['EVIDENCE_INSUFFICIENT', 'EVIDENCE_CONFLICTING', 'SOURCE_OUTDATED',
+  'POPULATION_MISMATCH', 'NO_AUTHORITATIVE_SOURCE', 'JURISDICTION_UNCLEAR', 'PROVENANCE_INCOMPLETE',
+  'HIGH_CONSEQUENCE_VERIFICATION_FAILED', 'OUTSIDE_VALIDATED_CAPABILITY', 'SOURCE_UNAVAILABLE', 'INFLUENCE_DENIED']);
+function requireIntegrity(condition) { if (!condition) throw new Error('Response provenance is inconsistent'); }
+function idSet(ids, required = false) {
+  requireIntegrity(Array.isArray(ids) && (!required || ids.length > 0));
+  requireIntegrity(ids.every(id => typeof id === 'string' && id.length > 0 && id === id.trim()));
+  const set = new Set(ids); requireIntegrity(set.size === ids.length); return set;
+}
+function recordMap(records, key) {
+  requireIntegrity(Array.isArray(records));
+  idSet(records.map(record => record?.[key]));
+  return new Map(records.map(record => [record[key], record]));
+}
+function sameIds(a, b) { return a.size === b.size && [...a].every(id => b.has(id)); }
+function validateResponse(data) {
+  // Defense in depth for a response snapshot. This never issues medical authority
+  // or verifies live revocation; those remain controller checks on the server.
+  try {
+    const supported = supportedStates.has(data.status);
+    requireIntegrity(supported || terminalStates.has(data.status));
+    const sm = recordMap(data.sources, 'source_id'), cm = recordMap(data.claims, 'claim_id');
+    const em = recordMap(data.evidence_objects, 'evidence_id'), pm = recordMap(data.passages, 'passage_id');
+    recordMap(data.citation_mappings, 'mapping_id');
+    const dm = recordMap(data.influence_decisions, 'decision_id'), t = data.trace;
+    requireIntegrity(supported === (cm.size > 0) && t.final_status === data.status);
+    requireIntegrity(sameIds(idSet(t.authorization_decision_ids), new Set(dm.keys())));
+    const ts = idSet(t.source_ids), te = idSet(t.evidence_ids), tc = idSet(t.candidate_claim_ids);
+    const usedSources = new Set(), usedEvidence = new Set(), usedPassages = new Set(), pairs = new Set();
+    for (const source of sm.values()) {
+      requireIntegrity(safeSourceUrl(source.stable_url) && source.provenance_complete === true && source.superseded === false);
+    }
+    for (const claim of cm.values()) {
+      requireIntegrity(claim.verification_status === 'PASS' && claim.entailment_status === 'SUPPORTED_EXACT_PASSAGE'
+        && typeof claim.claim_text === 'string' && claim.claim_text.trim() && claim.consequence_level !== 'HIGH');
+      const sids = idSet(claim.source_ids, true), eids = idSet(claim.evidence_ids, true), evidenceSources = new Set();
+      requireIntegrity(tc.has(claim.claim_id) && t.verification_results?.[claim.claim_id] === 'PASS');
+      requireIntegrity([...sids].every(id => sm.has(id) && ts.has(id)));
+      for (const eid of eids) {
+        requireIntegrity(em.has(eid) && te.has(eid));
+        const unit = em.get(eid), pids = idSet(unit.passage_ids, true);
+        requireIntegrity(sids.has(unit.source_id) && unit.proposition === claim.claim_text);
+        for (const pid of pids) {
+          const passage = pm.get(pid);
+          requireIntegrity(passage && passage.source_id === unit.source_id && typeof passage.locator === 'string'
+            && passage.locator.trim() && typeof passage.section === 'string' && passage.section.trim()
+            && typeof passage.text === 'string' && passage.text.includes(claim.claim_text));
+          usedPassages.add(pid);
+        }
+        evidenceSources.add(unit.source_id); usedEvidence.add(eid);
+        pairs.add(JSON.stringify([claim.claim_id, eid]));
+      }
+      requireIntegrity(sameIds(evidenceSources, sids));
+      sids.forEach(id => usedSources.add(id));
+      const decisions = data.influence_decisions.filter(d => d.object_id === claim.claim_id && d.status === 'ALLOW');
+      requireIntegrity(decisions.length === 1);
+      const d = decisions[0], a = d.authorization, ev = d.evaluated_dimensions, tr = d.transition_authorization;
+      requireIntegrity(a && a.state === 'ACTIVE' && a.object_id === claim.claim_id && a.decision_id === d.decision_id
+        && a.proposition_id === d.proposition_id && d.proposition_id === 'user-output:' + claim.claim_id
+        && typeof d.policy_version === 'string' && d.policy_version.length > 0 && Array.isArray(d.reasons) && d.reasons.length === 0
+        && tr?.policy_version === d.policy_version && tr.decision === 'ALLOW'
+        && tr.transition?.source_plane === 'EVIDENCE' && tr.transition?.target_plane === 'EVIDENCE'
+        && tr.transition?.information_class === 'PUBLIC' && ev?.data_plane === 'EVIDENCE' && ev.information_class === 'PUBLIC'
+        && ev.evidence_authority === 'APPROVED' && ev.information_handling_authority === 'APPROVED'
+        && ['provenance', 'validation', 'safety', 'monitoring'].every(key => ev[key] === 'PASS'));
+    }
+    const mapped = new Set();
+    for (const mapping of data.citation_mappings) {
+      const key = JSON.stringify([mapping.claim_id, mapping.evidence_id]);
+      requireIntegrity(pairs.has(key) && !mapped.has(key));
+      const unit = em.get(mapping.evidence_id), claim = cm.get(mapping.claim_id);
+      requireIntegrity(mapping.verified === true && mapping.entailment_status === claim.entailment_status
+        && mapping.source_id === unit.source_id && sameIds(idSet(mapping.passage_ids, true), new Set(unit.passage_ids)));
+      mapped.add(key);
+    }
+    requireIntegrity(sameIds(mapped, pairs) && sameIds(usedSources, new Set(sm.keys()))
+      && sameIds(usedEvidence, new Set(em.keys())) && sameIds(usedPassages, new Set(pm.keys())));
+    return true;
+  } catch { return false; }
 }
 const tabs = [...document.querySelectorAll('[data-view]')];
 const names = ['search','map','directory'];
@@ -185,6 +286,108 @@ function appendText(parent, tag, text, cls) {
   return el;
 }
 
+function recorded(value) { return typeof value === 'string' && value.trim() ? value : 'Not supplied'; }
+function passportFact(parent, label, value) { appendText(parent, 'p', `${label}: ${recorded(value)}`, 'meta'); }
+function appendPassport(parent, claim, data) {
+  const passport = appendText(parent, 'details', '', 'passport');
+  appendText(passport, 'summary', 'Evidence Passport · inspect passages and decisions');
+  appendText(passport, 'p', 'This is the recorded response snapshot. Extractive matching and runtime authorization do not establish study quality, clinical suitability or later revocation state.', 'meta');
+  passportFact(passport, 'Claim ID', claim.claim_id);
+  passportFact(passport, 'Recorded verifier outcome', claim.verification_status);
+  passportFact(passport, 'Recorded entailment', claim.entailment_status);
+  passportFact(passport, 'Evidence certainty', claim.evidence_certainty);
+  passportFact(passport, 'Claim jurisdiction', claim.jurisdiction);
+  const sourceMap = new Map(data.sources.map(source => [source.source_id, source]));
+  const passageMap = new Map(data.passages.map(passage => [passage.passage_id, passage]));
+  const unitMap = new Map(data.evidence_objects.map(unit => [unit.evidence_id, unit]));
+  for (const mapping of data.citation_mappings.filter(item => item.claim_id === claim.claim_id)) {
+    const source = sourceMap.get(mapping.source_id), unit = unitMap.get(mapping.evidence_id);
+    appendText(passport, 'h3', 'Source and passage mapping');
+    appendSourceLink(passport, source, recorded(source.title));
+    passportFact(passport, 'Source ID', source.source_id);
+    passportFact(passport, 'Source authority (recorded)', source.authority);
+    passportFact(passport, 'Source jurisdiction', source.jurisdiction);
+    passportFact(passport, 'Source version', source.version);
+    passportFact(passport, 'Retrieved at', source.retrieved_at);
+    passportFact(passport, 'Publication date', source.publication_date);
+    passportFact(passport, 'Evidence ID', unit.evidence_id);
+    passportFact(passport, 'Evidence type', unit.evidence_type);
+    passportFact(passport, 'Mapping ID', mapping.mapping_id);
+    passportFact(passport, 'Mapping entailment (recorded)', mapping.entailment_status);
+    for (const pid of mapping.passage_ids) {
+      const passage = passageMap.get(pid);
+      passportFact(passport, 'Passage ID', pid);
+      passportFact(passport, 'Section', passage.section);
+      passportFact(passport, 'Locator', passage.locator);
+      appendText(passport, 'p', 'Retrieved passage; the exact claim text is highlighted.', 'meta');
+      const quote = appendText(passport, 'blockquote', '');
+      const start = passage.text.indexOf(claim.claim_text);
+      quote.appendChild(document.createTextNode(passage.text.slice(0, start)));
+      appendText(quote, 'mark', claim.claim_text);
+      quote.appendChild(document.createTextNode(passage.text.slice(start + claim.claim_text.length)));
+    }
+  }
+  const decision = data.influence_decisions.find(d => d.object_id === claim.claim_id && d.status === 'ALLOW');
+  appendText(passport, 'h3', 'Recorded runtime decision');
+  passportFact(passport, 'Decision ID', decision.decision_id);
+  passportFact(passport, 'Decision', decision.status);
+  passportFact(passport, 'Decision time', decision.created_at);
+  passportFact(passport, 'Authorization ID', decision.authorization.authorization_id);
+  passportFact(passport, 'Authorization state at response', decision.authorization.state);
+  passportFact(passport, 'Data plane', decision.evaluated_dimensions.data_plane);
+  passportFact(passport, 'Influence policy version', decision.policy_version);
+  // These fields are absent from the current response contract. Never invent them.
+  passportFact(passport, 'Policy digest', null);
+  passportFact(passport, 'Source admission rule and tier', null);
+  for (const [field, label] of Object.entries({ evidence_authority: 'Evidence authority', information_handling_authority: 'Information-handling authority', provenance: 'Provenance', validation: 'Validation', safety: 'Safety', monitoring: 'Monitoring' })) {
+    passportFact(passport, label + ' (recorded)', decision.evaluated_dimensions[field]);
+  }
+  passportFact(passport, 'Trace ID', data.trace.trace_id);
+  passportFact(passport, 'Response time', data.trace.timestamp);
+}
+
+function renderBoundaries(data, integrity) {
+  const panel = document.getElementById('boundaries');
+  panel.textContent = '';
+  function row(state, label, explanation) {
+    const item = appendText(panel, 'div', '', 'boundary-row'); item.dataset.boundaryState = state;
+    appendText(item, 'strong', `${state === 'not-implemented' ? 'Not implemented' : state === 'failed' ? 'Failed' : 'Unknown'} · ${label}`, 'boundary-label');
+    appendText(item, 'p', explanation);
+  }
+  if (!integrity) {
+    row('failed', 'Response integrity', 'Claims, sources, passages or recorded decisions did not form a consistent response. No claim is shown.');
+    row('unknown', 'Gate outcomes', 'The inconsistent response cannot establish which upstream gates passed.');
+  } else {
+    const failures = {
+      EVIDENCE_INSUFFICIENT: ['Answer support', 'No supported claim was returned in this run. This does not establish that no evidence exists.'],
+      EVIDENCE_CONFLICTING: ['Conflict check', 'The recorded outcome reports conflicting evidence.'],
+      SOURCE_OUTDATED: ['Source freshness', 'The recorded outcome reports an outdated source.'],
+      POPULATION_MISMATCH: ['Population match', 'The recorded outcome reports a population mismatch.'],
+      NO_AUTHORITATIVE_SOURCE: ['Required source', 'A source required for this question was not available or admitted.'],
+      PROVENANCE_INCOMPLETE: ['Provenance', 'The server could not establish complete output provenance.'],
+      HIGH_CONSEQUENCE_VERIFICATION_FAILED: ['High-consequence verification', 'The required verification did not pass; no claim is shown.'],
+      OUTSIDE_VALIDATED_CAPABILITY: ['Intended-use or privacy routing', 'The request was blocked by the recorded routing outcome.'],
+      SOURCE_UNAVAILABLE: ['Retrieval', 'The required source could not be retrieved for this run.'],
+      INFLUENCE_DENIED: ['Influence authorization', 'The server withheld influence authorization. Inspect recorded reasons in the trace.'],
+    };
+    if (failures[data.status]) row('failed', ...failures[data.status]);
+    if (data.status === 'JURISDICTION_UNCLEAR') row('unknown', 'Jurisdiction', 'The applicable jurisdiction was not established.');
+    if (!data.influence_decisions.length) row('unknown', 'Authority gate outcomes', 'No individual influence decision was supplied for this response; a missing outcome is not a pass.');
+    for (const decision of data.influence_decisions) {
+      for (const [key, label] of Object.entries({ evidence_authority: 'Evidence authority', information_handling_authority: 'Information handling', provenance: 'Provenance', validation: 'Validation', safety: 'Safety', monitoring: 'Monitoring' })) {
+        const value = decision.evaluated_dimensions?.[key];
+        if (['FAIL', 'DENIED', 'REVOKED'].includes(value)) row('failed', label, `Recorded decision ${decision.decision_id}: ${value}.`);
+        else if (!['PASS', 'APPROVED'].includes(value)) row('unknown', label, `Decision ${decision.decision_id} does not record an affirmative outcome for this gate.`);
+      }
+    }
+    row('unknown', 'Clinical certainty and applicability', 'An exact passage match does not establish study quality, GRADE certainty or suitability for a patient. No such assessment is established by this response.');
+    row('unknown', 'Source currency and ongoing monitoring', 'This snapshot does not establish comprehensive retraction review, current source validity or authorization after the response time. Re-run the query to obtain a new snapshot.');
+  }
+  row('not-implemented', 'Australian regulatory and subsidy grounding', 'This build has no TGA or PBS connector. Literature and registry records cannot establish Australian approval or subsidy status.');
+  row('not-implemented', 'Dedicated conflict and population gates', 'This build has no dedicated conflict-resolution or population-mismatch gate. Inspect source populations and disagreements directly; a supported extract does not settle either question.');
+  row('not-implemented', 'Independent high-consequence verification', 'The current extractive runtime has no independent clinical second-verification workflow. Dosing, prescribing and patient-specific treatment selection remain outside its supported scope.');
+}
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   submit.disabled = true;
@@ -205,17 +408,16 @@ form.addEventListener('submit', async (event) => {
     });
     if (!response.ok) throw new Error(response.status === 401 ? 'Pilot session ended; please sign in again.' : `Request failed (${response.status})`);
     const data = await response.json();
-    statusEl.textContent = `Result state: ${data.status}`;
+    const integrity = validateResponse(data);
+    const displayStatus = integrity ? data.status : 'PROVENANCE_INCOMPLETE';
+    statusEl.textContent = `Result state: ${displayStatus}`;
     const state = document.getElementById('state-banner');
     state.hidden = false;
-    document.getElementById('state-code').textContent = String(data.status || 'UNKNOWN');
-    state.className = 'state ' + (data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS' ? '' : data.status === 'OUTSIDE_VALIDATED_CAPABILITY' || data.status === 'INFLUENCE_DENIED' || data.status === 'HIGH_CONSEQUENCE_VERIFICATION_FAILED' ? 'blocked' : 'caution');
+    document.getElementById('state-code').textContent = displayStatus;
+    state.className = 'state ' + (supportedStates.has(displayStatus) ? '' : 'caution');
     // Render structured verified claims rather than raw Markdown text or untrusted HTML.
     answer.textContent = '';
-    const supported = data.status === 'ANSWER_SUPPORTED' || data.status === 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS';
-    const passedClaims = supported && Array.isArray(data.claims)
-      ? data.claims.filter(c => c.verification_status === 'PASS' && Array.isArray(c.source_ids) && c.source_ids.length > 0)
-      : [];
+    const passedClaims = integrity && supportedStates.has(data.status) ? data.claims : [];
     if (passedClaims.length === 0) {
       const descriptions = {
         EVIDENCE_INSUFFICIENT: 'No authorized claim was supported by the available evidence.',
@@ -230,7 +432,8 @@ form.addEventListener('submit', async (event) => {
         SOURCE_UNAVAILABLE: 'The required evidence source is unavailable; no claim was invented.',
         INFLUENCE_DENIED: 'Evidence influence was denied; no claim is shown.'
       };
-      appendText(answer, 'p', descriptions[data.status] || 'No authorized medical claim was returned.');
+      appendText(answer, 'p', descriptions[displayStatus] || 'No authorized medical claim was returned.');
+      if (!integrity) appendText(answer, 'p', 'Response integrity failed. Claims and source details were withheld; re-run the query.');
     } else {
       const list = document.createElement('ul');
       const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
@@ -239,34 +442,34 @@ form.addEventListener('submit', async (event) => {
         item.appendChild(document.createTextNode(claim.claim_text + ' '));
         (claim.source_ids || []).forEach((sid, idx) => {
           const src = sourceMap.get(sid);
-          if (!src) return;
-          const link = document.createElement('a');
-          const safeUrl = safeSourceUrl(src.stable_url); if (!safeUrl) return; link.href = safeUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
-          link.textContent = src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id);
-          item.appendChild(link);
+          appendSourceLink(item, src, src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id));
           if (idx < claim.source_ids.length - 1) item.appendChild(document.createTextNode(' '));
         });
+        appendPassport(item, claim, data);
         list.appendChild(item);
       });
       answer.appendChild(list);
     }
-    if (data.sources.length === 0) {
+    if (!integrity || data.sources.length === 0) {
       appendText(sources, 'p', 'No admitted source was used for this answer.');
     } else {
       data.sources.forEach(src => {
         const box = document.createElement('div'); box.className = 'source';
-        const link = document.createElement('a'); link.href = src.stable_url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = src.title; box.appendChild(link);
+        appendSourceLink(box, src, src.title);
         appendText(box, 'div', `${src.authority} · ${src.source_type} · ${src.jurisdiction}`, 'meta');
         appendText(box, 'div', Object.entries(src.identifiers).map(([k,v]) => `${k}: ${v}`).join(' · '), 'meta');
         sources.appendChild(box);
       });
     }
+    renderBoundaries(data, integrity);
+    if (integrity) {
     appendText(trace, 'p', `Trace ID: ${data.trace.trace_id}`);
     appendText(trace, 'p', `Consequence: ${data.trace.query_plan.consequence_level}; source classes: ${data.trace.query_plan.required_source_classes.join(', ')}`);
     appendText(trace, 'p', `Connectors: ${data.trace.connectors_used.join(', ') || 'none'}; source IDs: ${data.trace.source_ids.join(', ') || 'none'}`);
     appendText(trace, 'p', `Safety flags: ${data.trace.safety_flags.join(', ') || 'none'}`);
     appendText(trace, 'p', `Influence decisions: ${Array.isArray(data.influence_decisions) ? data.influence_decisions.map(d => d.status + (Array.isArray(d.reasons) && d.reasons.length ? ' (' + d.reasons.join(', ') + ')' : '')).join('; ') || 'none' : 'not supplied'}`);
     appendText(trace, 'p', `Authorization decision IDs: ${(data.trace.authorization_decision_ids || []).join(', ') || 'none'}`);
+    } else appendText(trace, 'p', 'Trace details withheld because response consistency could not be checked.');
     result.hidden = false;
     document.getElementById('answer-heading').focus?.();
   } catch (err) {

@@ -8,6 +8,10 @@ on:
     paths:
       - src/medical_ai/static/index.html
       - scripts/evidence_atlas_visual.cjs
+      - scripts/evidence_atlas_dom.cjs
+      - scripts/provenance_test_cases.cjs
+      - tests/browser_fixture.py
+      - src/medical_ai/**/*.py
       - .github/workflows/evidence-atlas-visual.yml
 
 permissions:
@@ -24,15 +28,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the project for synthetic engine fixtures
+        run: python -m pip install -e '.[dev]'
       - name: Install pinned screenshot tooling
         run: |
           mkdir -p /tmp/medical-ai-visual
-          npm install --prefix /tmp/medical-ai-visual --no-save playwright@1.56.1
+          npm install --prefix /tmp/medical-ai-visual --no-save playwright@1.56.1 jsdom@26.1.0
           /tmp/medical-ai-visual/node_modules/.bin/playwright install chromium
       - name: Capture exact-head UI and exercise interaction guards
         env:
           NODE_PATH: /tmp/medical-ai-visual/node_modules
-        run: node scripts/evidence_atlas_visual.cjs
+        run: |
+          node scripts/evidence_atlas_dom.cjs
+          node scripts/evidence_atlas_visual.cjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,3 +1,6 @@
+> **21 October 2026 read-only status update, base `9aaf79627acf2bdc85940764aebd4eb2737e8203`.** Issue #2 is currently open, superseding the closed-state observation below. Issue #26 remains open and requires preservation of the original full owner-approved contract; this checkpoint and the A1 review summary are not substitutes. Ruleset `24023881` still lists only deletion and force-push prohibitions. Required PR/CI enforcement is not established, and the separate branch-protection endpoint returned 403. G0 is unresolved and A1 remains gated. The separately authorised output-provenance repair and inspection UI do not implement A1, import the missing contract, change GitHub rules or grant release authority.
+
+
 # Alpha3 Tranche A — G0 Governance and Revision-Bound Checkpoint
 
 **Recorded:** 11 October 2026 (Australia/Darwin)  
