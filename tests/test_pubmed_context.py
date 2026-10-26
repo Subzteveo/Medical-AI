@@ -16,6 +16,7 @@ def xml_abstract(*sections):
 
 class FixtureConnector(PubMedConnector):
     def __init__(self, xml):
+        super().__init__()
         self.xml = xml
 
     async def search_and_fetch(self, query, limit=5):
