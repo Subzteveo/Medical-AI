@@ -152,3 +152,46 @@ async def test_authenticated_api_rechecks_output_and_live_authorization(supporte
         assert data["status"] in {"PROVENANCE_INCOMPLETE", "INFLUENCE_DENIED"}
         assert not data["claims"] and not data["sources"]
         assert original_text not in response.text
+
+
+@pytest.mark.parametrize("separator", ["\n- ", "\r\n- ", "\r- ", "\n1) ", "\n# "])
+async def test_multiline_source_claim_is_one_markdown_list_item(fake_connector, separator):
+    """One authorised claim must remain one Markdown item even with source line breaks."""
+    text = (
+        "Treatment X reduced symptom scores" + separator
+        + "additional recorded context compared with placebo in the studied adult population."
+    )
+    fake_connector.passages[0].text = text
+    engine = EvidenceEngine(fake_connector)
+    response = await engine.answer(QUESTION)
+
+    assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert len(response.claims) == 1
+    assert response.claims[0].claim_text == text
+    assert response.passages[0].text == text
+
+    claim_block = response.answer_markdown.split("\n\n### Sources", 1)[0].split(
+        "### Evidence-bound answer\n\n", 1
+    )[1]
+    assert claim_block.startswith("- ")
+    assert len(claim_block.splitlines()) == 1, claim_block
+    assert "additional recorded context" in claim_block
+
+    checked = engine.revalidate_output(response)
+    assert checked.status == response.status
+    assert checked.answer_markdown == response.answer_markdown
+
+
+async def test_multiline_source_title_and_identifier_remain_one_markdown_item(fake_connector):
+    """Untrusted source display fields cannot forge extra Markdown source/citation items."""
+    original_title = "Evidence about treatment X\n- apparent additional citation"
+    fake_connector.sources[0].title = original_title
+    fake_connector.sources[0].identifiers["PMID"] = "123\n- apparent additional reference"
+    response = await EvidenceEngine(fake_connector).answer(QUESTION)
+
+    assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert response.sources[0].title == original_title
+    assert response.sources[0].identifiers["PMID"].endswith("additional reference")
+    claim_block, source_block = response.answer_markdown.split("\n\n### Sources\n", 1)
+    assert len(claim_block.split("### Evidence-bound answer\n\n", 1)[1].splitlines()) == 1
+    assert len(source_block.split("\n\n*Alpha2", 1)[0].splitlines()) == 1
