@@ -41,12 +41,17 @@ app = FastAPI(
 )
 
 @app.exception_handler(RequestValidationError)
-async def credential_validation_error(request: Request, exc: RequestValidationError):
-    # Default validation responses include rejected input values, which can be credentials.
-    if request.url.path == "/access/session":
+async def sensitive_validation_error(request: Request, exc: RequestValidationError):
+    # Default validation responses echo rejected input; this can include credentials
+    # or patient-identifying text submitted despite the evidence-query prohibition.
+    sensitive_paths = {
+        "/access/session": "Invalid pilot credential request",
+        "/v1/evidence/query": "Invalid evidence query request",
+    }
+    if request.url.path in sensitive_paths:
         return JSONResponse(
             status_code=422,
-            content={"detail": "Invalid pilot credential request"},
+            content={"detail": sensitive_paths[request.url.path]},
             headers={"Cache-Control": "no-store"},
         )
     return await request_validation_exception_handler(request, exc)
@@ -200,8 +205,10 @@ def protected_docs(_participant=Depends(require_pilot_participant)):
 @app.post("/v1/evidence/query", response_model=EvidenceAnswer)
 async def query(
     req: QueryRequest,
+    response: Response,
     _participant=Depends(require_pilot_participant),
 ):
+    response.headers["Cache-Control"] = "no-store"
     engine = build_engine()
     answer = await engine.answer(req.question, user_mode=req.user_mode, jurisdiction=req.jurisdiction, limit=req.limit)
     return engine.revalidate_output(answer)
