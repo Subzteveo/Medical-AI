@@ -10,7 +10,7 @@ from .provenance import safe_source_url, validate_output_provenance
 
 def _escape_markdown_text(value: str) -> str:
     escaped = " ".join(value.splitlines()).replace("\\", "\\\\")
-    for ch in (chr(96), "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "!", ">", "<", "|"):
+    for ch in (chr(96), "*", "_", "~", "{", "}", "[", "]", "(", ")", "#", "+", "!", ">", "<", "|"):
         escaped = escaped.replace(ch, f"\\{ch}")
     return escaped
 
