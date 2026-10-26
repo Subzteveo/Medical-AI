@@ -77,6 +77,7 @@ def test_valid_invited_participant_can_use_direct_api(configured_access):
         headers={"Authorization": f"Bearer {VALID_TOKEN}"},
     )
     assert response.status_code == 200
+    assert response.headers.get("Cache-Control") == "no-store"
     assert response.json()["trace"]["query_plan"]["user_mode"] == "student"
 
 
