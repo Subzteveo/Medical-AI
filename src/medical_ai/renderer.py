@@ -90,7 +90,12 @@ def render_answer(
                 f"({_safe_markdown_url(source.stable_url)})"
             )
         citation = " " + " ".join(refs) if refs else ""
-        lines.append(f"- {_escape_markdown_text(claim.claim_text)}{citation}")
+        attribution = ""
+        if len(claim.source_ids) == 1:
+            source = source_map[claim.source_ids[0]]
+            if source.source_type == "indexed_biomedical_literature":
+                attribution = f"PubMed abstract (PMID {source.record_id}): "
+        lines.append(f"- {_escape_markdown_text(attribution + claim.claim_text)}{citation}")
 
     lines.extend(["", "### Sources"])
     for source in sources:
@@ -119,8 +124,8 @@ def render_answer(
             [
                 "",
                 (
-                    "*Alpha2 literature limitation: claims are extractive sentences from "
-                    + "admitted PubMed abstract passages; study quality, GRADE certainty "
+                    "*Alpha2 literature limitation: results reproduce complete abstracts from "
+                    + "admitted PubMed records, attributed to their publications; study quality, GRADE certainty "
                     + "and clinical recommendations are not yet synthesized.*"
                 ),
             ]

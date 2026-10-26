@@ -439,6 +439,10 @@ form.addEventListener('submit', async (event) => {
       const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
       passedClaims.forEach(claim => {
         const item = document.createElement('li');
+        const publication = claim.source_ids.length === 1 ? sourceMap.get(claim.source_ids[0]) : null;
+        if (publication?.source_type === 'indexed_biomedical_literature') {
+          appendText(item, 'strong', `PubMed abstract (PMID ${publication.record_id}): `);
+        }
         item.appendChild(document.createTextNode(claim.claim_text + ' '));
         (claim.source_ids || []).forEach((sid, idx) => {
           const src = sourceMap.get(sid);

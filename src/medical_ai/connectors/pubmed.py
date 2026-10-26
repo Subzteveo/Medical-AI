@@ -144,16 +144,24 @@ class PubMedConnector:
                 text=title,
                 locator="ArticleTitle",
             ))
-            for idx, abstract in enumerate(art.findall("Abstract/AbstractText")):
-                text = _text(abstract)
-                if not text:
-                    continue
-                label = abstract.attrib.get("Label") or abstract.attrib.get("NlmCategory") or "ABSTRACT"
+            # Keep all abstract sections together: lexical sentence selection can
+            # drop design, population or a qualification in another section.
+            abstracts = [node for node in art.findall("Abstract/AbstractText") if _text(node)]
+            source.raw_metadata["abstract_labels"] = [
+                node.attrib.get("Label") or node.attrib.get("NlmCategory") or "ABSTRACT"
+                for node in abstracts
+            ]
+            text = "\n\n".join(
+                f"{label}: {_text(node)}" if label else _text(node)
+                for node in abstracts
+                for label in [node.attrib.get("Label") or node.attrib.get("NlmCategory")]
+            )
+            if text:
                 passages.append(Passage(
-                    passage_id=_hash_id("passage", f"{source_id}:{idx}:{text}"),
+                    passage_id=_hash_id("passage", f"{source_id}:abstract:{text}"),
                     source_id=source_id,
-                    section=label,
+                    section="ABSTRACT",
                     text=text,
-                    locator=f"AbstractText[{idx}]",
+                    locator="Article/Abstract",
                 ))
         return sources, passages

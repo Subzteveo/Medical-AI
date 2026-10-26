@@ -31,7 +31,7 @@ class FakePubMedConnector:
         )]
         self.passages = passages if passages is not None else [Passage(
             passage_id="p1", source_id="pubmed:123", section="RESULTS",
-            text="Treatment X reduced symptom scores compared with placebo in the studied adult population. The study did not evaluate children.",
+            text="Treatment X reduced symptom scores compared with placebo in the studied adult population. The study did not evaluate other populations.",
             locator="AbstractText[0]"
         )]
 

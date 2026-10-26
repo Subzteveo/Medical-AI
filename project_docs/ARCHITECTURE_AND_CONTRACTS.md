@@ -45,7 +45,7 @@ Every connector exposes `name`, `version`, `source_class`, `phi_approved` and `s
 
 ### PubMed
 
-Purpose: biomedical literature discovery and abstract-level evidence extraction. Source class: `biomedical_literature`. PHI route: not approved.
+Purpose: biomedical literature discovery and abstract-level evidence extraction. PubMed retains all nonempty AbstractText sections in source order, separated by two newlines, as one Article/Abstract passage. Extraction preserves that whole passage; the browser and Markdown identify it as a publication abstract. Original section labels prefix their sections and remain in source metadata. This prevents keyword matching from discarding neighbouring qualifications, but does not assess study quality or semantic entailment. Source class: `biomedical_literature`. PHI route: not approved.
 
 ### ClinicalTrials.gov
 
