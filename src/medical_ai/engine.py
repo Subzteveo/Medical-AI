@@ -409,7 +409,7 @@ class EvidenceEngine:
         return {
             "engine": self.version,
             "connector": connector.version if connector is not None else "none",
-            "planner": "alpha2.1-policy-bound",
+            "planner": "alpha2.1-interaction-context",
             "extractor": "alpha2.1-extractive-safety-filtered",
             "claim_builder": "alpha2.1-claim-consequence",
             "verifier": "alpha2.1-exact-passage-high-consequence",

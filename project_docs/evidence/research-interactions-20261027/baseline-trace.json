@@ -1,0 +1,80 @@
+{
+  "baseline": "a55b0eb0b2fa9d1b04c9737196c1468d2877569c",
+  "pmid": "37249199",
+  "query": "Find literature about mindfulness and attention",
+  "query_classification": [
+    "MODERATE",
+    []
+  ],
+  "abstract_classification": [
+    "HIGH",
+    [
+      "drug_interaction"
+    ]
+  ],
+  "claims": [
+    {
+      "consequence": "HIGH",
+      "verification": "FAIL",
+      "entailment": "SUPPORTED_EXTRACTIVELY"
+    }
+  ],
+  "trace": {
+    "trace_id": "6926e858-9afa-4aa8-83a7-1bbcffc9e1c4",
+    "timestamp": "2026-10-26T20:11:25.758541Z",
+    "query_plan": {
+      "intent": [
+        "EVIDENCE_SYNTHESIS"
+      ],
+      "user_mode": "clinician",
+      "patient_specific": false,
+      "known_user_facts": [],
+      "unknown_material_facts": [],
+      "jurisdiction": "AU",
+      "jurisdiction_material": false,
+      "temporal_sensitivity": "moderate",
+      "consequence_level": "MODERATE",
+      "required_source_classes": [
+        "biomedical_literature"
+      ],
+      "retrieval_questions": [
+        "Find literature about mindfulness and attention"
+      ],
+      "required_second_pass": false,
+      "safety_flags": []
+    },
+    "retrieval_query_digests": [
+      "hmac-sha256:8530d0c7f38805591f8755959bd0e22db12e877e84b5ba205b3ed6eaf3975400"
+    ],
+    "connectors_used": [
+      "pubmed-eutils"
+    ],
+    "source_ids": [
+      "pubmed:37249199"
+    ],
+    "evidence_ids": [
+      "ev_bf7670b2ed642248"
+    ],
+    "candidate_claim_ids": [
+      "clm_2d9fdc53b6d8bbce"
+    ],
+    "verification_results": {
+      "clm_2d9fdc53b6d8bbce": "FAIL"
+    },
+    "safety_flags": [],
+    "component_versions": {
+      "engine": "0.2.0-influence-control-core",
+      "connector": "alpha2.1-red-remediation",
+      "planner": "alpha2.1-policy-bound",
+      "extractor": "alpha2.1-extractive-safety-filtered",
+      "claim_builder": "alpha2.1-claim-consequence",
+      "verifier": "alpha2.1-exact-passage-high-consequence",
+      "influence_controller": "medical-ai-influence-v0.2-typesafe",
+      "renderer": "alpha2.1"
+    },
+    "final_status": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+    "authorization_decision_ids": []
+  },
+  "visible_claims": 0,
+  "scope": "Original XML replay through unchanged runtime; live browser run separate"
+}

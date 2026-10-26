@@ -1,0 +1,64 @@
+.........FFFF..............................FFFF......................    [100%]
+=================================== FAILURES ===================================
+__________________ test_query_classification[prefixed-factor] __________________
+tests/test_interaction_context.py:49: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Do not match only the benign suffix of a compound factor expression
+E   assert ('drug_interaction' in []) is True
+______________ test_query_classification[prefixed-unknown-factor] ______________
+tests/test_interaction_context.py:49: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Unknown prefix does not require medicine recognition
+E   assert ('drug_interaction' in []) is True
+_______________ test_query_classification[spaced-prefix-factor] ________________
+tests/test_interaction_context.py:49: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Whitespace cannot hide a preceding operand
+E   assert ('drug_interaction' in []) is True
+_______________ test_query_classification[symbol-prefix-factor] ________________
+tests/test_interaction_context.py:49: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: A multiplication symbol cannot hide a preceding operand
+E   assert ('drug_interaction' in []) is True
+____________ test_complete_abstract_classification[prefixed-factor] ____________
+tests/test_interaction_context.py:63: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED, reason
+E   AssertionError: Do not match only the benign suffix of a compound factor expression
+E   assert <AnswerStatus...ALIFICATIONS'> == <AnswerStatus...ATION_FAILED'>
+E
+E     - HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E     + ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+________ test_complete_abstract_classification[prefixed-unknown-factor] ________
+tests/test_interaction_context.py:63: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED, reason
+E   AssertionError: Unknown prefix does not require medicine recognition
+E   assert <AnswerStatus...ALIFICATIONS'> == <AnswerStatus...ATION_FAILED'>
+E
+E     - HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E     + ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+_________ test_complete_abstract_classification[spaced-prefix-factor] __________
+tests/test_interaction_context.py:63: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED, reason
+E   AssertionError: Whitespace cannot hide a preceding operand
+E   assert <AnswerStatus...ALIFICATIONS'> == <AnswerStatus...ATION_FAILED'>
+E
+E     - HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E     + ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+_________ test_complete_abstract_classification[symbol-prefix-factor] __________
+tests/test_interaction_context.py:63: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED, reason
+E   AssertionError: A multiplication symbol cannot hide a preceding operand
+E   assert <AnswerStatus...ALIFICATIONS'> == <AnswerStatus...ATION_FAILED'>
+E
+E     - HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E     + ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+=========================== short test summary info ============================
+FAILED tests/test_interaction_context.py::test_query_classification[prefixed-factor]
+FAILED tests/test_interaction_context.py::test_query_classification[prefixed-unknown-factor]
+FAILED tests/test_interaction_context.py::test_query_classification[spaced-prefix-factor]
+FAILED tests/test_interaction_context.py::test_query_classification[symbol-prefix-factor]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[prefixed-factor]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[prefixed-unknown-factor]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[spaced-prefix-factor]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[symbol-prefix-factor]
+8 failed, 61 passed in 0.32s

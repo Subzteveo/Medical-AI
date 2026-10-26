@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "command": [
+        "python",
+        "-m",
+        "pyright",
+        "--project",
+        "pyproject.toml"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "0 errors, 0 warnings, 0 informations\n"
+    },
+    {
+      "command": [
+        "python",
+        "scripts/verify_influence_boundary.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Influence boundary static guard passed: 5 authoritative files checked; renderer, output, and capability construction paths are singular.\n"
+    }
+  ],
+  "claims": {
+    "no_untyped_alternate_render_or_capability_path": "PASSED",
+    "strict_static_typing": "PASSED"
+  },
+  "generated_at": "2026-10-26T20:22:44.316191+00:00",
+  "limitations": [
+    "This is revision-bound engineering evidence, not proof of medical correctness.",
+    "The guard proves properties of the inspected source revision and cannot authorize future revisions.",
+    "Runtime external inputs still require validation at their explicit trust boundaries."
+  ],
+  "revision": "8efd7b047804b85bf61015056b906f4e08c7073c",
+  "schema_version": "medical-ai-type-safety-evidence-v0.1",
+  "scope": "authoritative medical influence control path",
+  "verdict": "PASSED"
+}
