@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "name": "supported",
+      "question": "How does mindfulness meditation work proposing mechanisms of action from a conceptual and neural perspective",
+      "status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "claims": 1,
+      "connectors": [
+        "pubmed-eutils"
+      ],
+      "http_status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "name": "context-hold",
+      "question": "Find literature about mindfulness and attention",
+      "status": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "claims": 0,
+      "connectors": [
+        "pubmed-eutils"
+      ],
+      "http_status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "name": "unsupported",
+      "question": "Is mindfulness approved by the TGA?",
+      "status": "NO_AUTHORITATIVE_SOURCE",
+      "claims": 0,
+      "connectors": [],
+      "http_status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "name": "unsafe",
+      "question": "What dose of warfarin should my patient take?",
+      "status": "OUTSIDE_VALIDATED_CAPABILITY",
+      "claims": 0,
+      "connectors": [],
+      "http_status": 200,
+      "cache_control": "no-store"
+    }
+  ],
+  "errors": [],
+  "code_revision": "c9ff9b3d6ef36b632bbbab633589686258359e96",
+  "supported_source_retrieved_at": "2026-10-26T19:31:57.654598+00:00"
+}

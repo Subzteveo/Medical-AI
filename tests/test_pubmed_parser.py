@@ -6,4 +6,4 @@ def test_pubmed_xml_maps_to_source_and_passage():
     sources, passages = PubMedConnector._parse_pubmed_xml(XML)
     assert sources[0].identifiers["DOI"] == "10.1/example"
     assert sources[0].identifiers["PMC"] == "PMC999"
-    assert any(p.text == "Example result sentence." for p in passages)
+    assert any(p.text == "RESULTS: Example result sentence." for p in passages)

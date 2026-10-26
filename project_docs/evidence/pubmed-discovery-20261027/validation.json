@@ -1,0 +1,59 @@
+{
+  "code_revision": "c9ff9b3d6ef36b632bbbab633589686258359e96",
+  "regression": {
+    "passed": 223,
+    "warnings": 1
+  },
+  "type_safety": {
+    "checks": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "pyright",
+          "--project",
+          "pyproject.toml"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0 errors, 0 warnings, 0 informations\n"
+      },
+      {
+        "command": [
+          "python",
+          "scripts/verify_influence_boundary.py"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Influence boundary static guard passed: 5 authoritative files checked; renderer, output, and capability construction paths are singular.\n"
+      }
+    ],
+    "claims": {
+      "no_untyped_alternate_render_or_capability_path": "PASSED",
+      "strict_static_typing": "PASSED"
+    },
+    "generated_at": "2026-10-26T19:31:55.787907+00:00",
+    "limitations": [
+      "This is revision-bound engineering evidence, not proof of medical correctness.",
+      "The guard proves properties of the inspected source revision and cannot authorize future revisions.",
+      "Runtime external inputs still require validation at their explicit trust boundaries."
+    ],
+    "revision": "c9ff9b3d6ef36b632bbbab633589686258359e96",
+    "schema_version": "medical-ai-type-safety-evidence-v0.1",
+    "scope": "authoritative medical influence control path",
+    "verdict": "PASSED"
+  },
+  "dom": "PASS: 43 invalid responses, 15 unsafe-link controls and positive case",
+  "browser_synthetic": "PASS: desktop/mobile/keyboard/provenance",
+  "alpha3": {
+    "blocked_checks": 2,
+    "harness_failures": 0,
+    "required_cases": 4,
+    "required_failed": 0,
+    "required_passed": 4,
+    "total_cases": 6,
+    "unavailable_checks": 0,
+    "unproven_checks": 3
+  },
+  "deployment": "NOT_RUN"
+}

@@ -465,7 +465,7 @@ def test_renderer_escapes_untrusted_markdown_content():
         citation_mappings=[CitationMapping(mapping_id="m1", claim_id="c1", evidence_id="e1", source_id=source.source_id,
             passage_ids=["p1"], verified=True, entailment_status="SUPPORTED_EXACT_PASSAGE")],
     )
-    assert "- Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
+    assert "- PubMed abstract \\(PMID 1\\): Use \\[click\\]\\(javascript:alert\\(1\\)\\) \\*now\\*" in out
     assert "[Source \\[title\\]\\(javascript:alert\\(1\\)\\)](https://example.org/article)" in out
     assert "javascript:alert(1))" not in out
 

@@ -80,7 +80,9 @@ async def test_prompt_injection_inside_source_is_only_data():
     )]
     out = await EvidenceEngine(FakePubMedConnector(source, passages)).answer("What evidence shows treatment X reduced symptom scores?")
     assert "diagnose the user" not in out.answer_markdown.lower()
-    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    # Do not salvage selected sentences from an instruction-contaminated abstract.
+    assert out.status == AnswerStatus.EVIDENCE_INSUFFICIENT
+    assert not out.claims
 
 
 @pytest.mark.asyncio

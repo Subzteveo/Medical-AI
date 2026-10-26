@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "scope": "Complete original abstract text and citation identity; not clinical correctness or retrieval completeness",
+  "xml_sha256": "1bd53709e832856c17d0e056d0d71cc23906da1fd2e718c07e27d15731cb63c4",
+  "checked_abstracts": [
+    {
+      "pmid": "26168376",
+      "citation": "https://pubmed.ncbi.nlm.nih.gov/26168376/",
+      "characters": 1591,
+      "abstract_sha256": "4db56dc8f1e5206fc7227bb8fa22f69f6c86759d41c94649104a9d612e991190"
+    }
+  ],
+  "tampered_claim_negative_control": "REJECTED",
+  "code_revision": "c9ff9b3d6ef36b632bbbab633589686258359e96"
+}

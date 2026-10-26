@@ -1,0 +1,47 @@
+FF.F                                                                     [100%]
+=================================== FAILURES ===================================
+________ test_whole_abstract_keeps_design_population_and_qualification _________
+
+    async def test_whole_abstract_keeps_design_population_and_qualification():
+        text = ('This cross-sectional study sampled 30 university students. '
+                'Mindfulness was associated with attention. '
+                'This association does not establish causation or generalise to other populations.')
+        answer = await EvidenceEngine(FixtureConnector(xml_abstract(('ABSTRACT', text)))).answer('Find literature about mindfulness and attention')
+        assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+>       assert [c.claim_text for c in answer.claims] == [text]
+E       AssertionError: assert ['Mindfulness...h attention.'] == ['This cross-...populations.']
+E         
+E         At index 0 diff: 'Mindfulness was associated with attention.' != 'This cross-sectional study sampled 30 university students. Mindfulness was associated with attention. This association does not establish causation or generalise to other populations.'
+E         Use -v to get more diff
+
+tests/test_pubmed_context.py:28: AssertionError
+_________ test_structured_abstract_keeps_qualifier_in_separate_section _________
+
+    async def test_structured_abstract_keeps_qualifier_in_separate_section():
+        methods = 'We surveyed 30 university students at one time point.'
+        results = 'Mindfulness was associated with attention.'
+        conclusion = 'Causal effects cannot be inferred from this design.'
+        answer = await EvidenceEngine(FixtureConnector(xml_abstract(('METHODS', methods), ('RESULTS', results), ('CONCLUSIONS', conclusion)))).answer('Find literature about mindfulness and attention')
+>       assert [c.claim_text for c in answer.claims] == ['\n\n'.join([methods, results, conclusion])]
+E       AssertionError: assert ['Mindfulness...h attention.'] == ['We surveyed...this design.']
+E         
+E         At index 0 diff: 'Mindfulness was associated with attention.' != 'We surveyed 30 university students at one time point.\n\nMindfulness was associated with attention.\n\nCausal effects cannot be inferred from this design.'
+E         Use -v to get more diff
+
+tests/test_pubmed_context.py:37: AssertionError
+____ test_high_consequence_context_cannot_be_dropped_for_matching_sentence _____
+
+    async def test_high_consequence_context_cannot_be_dropped_for_matching_sentence():
+        text = 'Mindfulness was associated with attention. Warfarin dose adjustment is discussed elsewhere.'
+        answer = await EvidenceEngine(FixtureConnector(xml_abstract(('ABSTRACT', text)))).answer('Find literature about mindfulness and attention')
+>       assert answer.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E       AssertionError: assert <AnswerStatus...ALIFICATIONS'> == <AnswerStatus...ATION_FAILED'>
+E         
+E         - HIGH_CONSEQUENCE_VERIFICATION_FAILED
+E         + ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+
+tests/test_pubmed_context.py:51: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_pubmed_context.py::test_whole_abstract_keeps_design_population_and_qualification
+FAILED tests/test_pubmed_context.py::test_structured_abstract_keeps_qualifier_in_separate_section
+FAILED tests/test_pubmed_context.py::test_high_consequence_context_cannot_be_dropped_for_matching_sentence

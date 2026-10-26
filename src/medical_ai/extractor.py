@@ -45,7 +45,8 @@ def extract_evidence(question: str, sources: list[SourceRecord], passages: list[
             continue
         # Registry fields may contain sentence punctuation. Keep their attribution
         # intact so title text cannot become a standalone efficacy claim.
-        sentences = [p.text.strip()] if src.source_type == "clinical_trial_registry" else _split_sentences(p.text.strip())
+        # PubMed abstracts stay whole so matching sentences cannot lose context.
+        sentences = [p.text.strip()] if src.source_type in {"clinical_trial_registry", "indexed_biomedical_literature"} else _split_sentences(p.text.strip())
         for sentence in sentences:
             sentence = sentence.strip()
             if len(sentence) < 20 or UNTRUSTED_INSTRUCTION.search(sentence):
@@ -69,12 +70,12 @@ def extract_evidence(question: str, sources: list[SourceRecord], passages: list[
             source_id=p.source_id,
             passage_ids=[p.passage_id],
             proposition=sentence,
-            evidence_type="trial_registry_fact" if is_registry else "abstract_sentence",
+            evidence_type="trial_registry_fact" if is_registry else "abstract_passage",
             jurisdiction=src.jurisdiction,
             limitations=(
                 ["ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."]
                 if is_registry else
-                ["Alpha2.x is extractive and does not independently assess study quality or GRADE certainty."]
+                ["Abstract text is attributed to its publication, not independently established medical fact. Study quality, applicability and GRADE certainty are not assessed."]
             ),
         ))
         if len(units) >= max_units:
