@@ -154,7 +154,7 @@ async def test_authenticated_api_rechecks_output_and_live_authorization(supporte
         assert original_text not in response.text
 
 
-@pytest.mark.parametrize("separator", ["\n- ", "\r\n- ", "\r- ", "\n1. ", "\n# "])
+@pytest.mark.parametrize("separator", ["\n- ", "\r\n- ", "\r- ", "\n1) ", "\n# "])
 async def test_multiline_source_claim_is_one_markdown_list_item(fake_connector, separator):
     """One authorised claim must remain one Markdown item even with source line breaks."""
     text = (
