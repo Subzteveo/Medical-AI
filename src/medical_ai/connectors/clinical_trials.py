@@ -65,7 +65,8 @@ class ClinicalTrialsConnector:
             nct_id = identification.get("nctId")
             if not nct_id:
                 continue
-            title = identification.get("briefTitle") or identification.get("officialTitle") or nct_id
+            title_key = "briefTitle" if identification.get("briefTitle") else ("officialTitle" if identification.get("officialTitle") else "nctId")
+            title = identification[title_key]
             org = _nested(identification, "organization", "fullName", default="Study sponsor/investigator")
             overall_status = status.get("overallStatus")
             study_type = design.get("studyType")
@@ -101,23 +102,23 @@ class ClinicalTrialsConnector:
             )
             sources.append(src)
 
-            structured_facts = [f"ClinicalTrials.gov lists {nct_id} with the title: {title}."]
+            structured_facts = [(f"ClinicalTrials.gov lists {nct_id} with the title: {title}.", f"identificationModule.{title_key}")]
             if overall_status:
-                structured_facts.append(f"The registry status for {nct_id} is {overall_status}.")
+                structured_facts.append((f"The registry status for {nct_id} is {overall_status}.", "statusModule.overallStatus"))
             if study_type:
-                structured_facts.append(f"The registered study type for {nct_id} is {study_type}.")
+                structured_facts.append((f"The registered study type for {nct_id} is {study_type}.", "designModule.studyType"))
             if phases:
-                structured_facts.append(f"The registered phase for {nct_id} is {', '.join(phases)}.")
+                structured_facts.append((f"The registered phase for {nct_id} is {', '.join(phases)}.", "designModule.phases"))
             if conditions:
-                structured_facts.append(f"The registered conditions for {nct_id} include {', '.join(conditions)}.")
+                structured_facts.append((f"The registered conditions for {nct_id} include {', '.join(conditions)}.", "conditionsModule.conditions"))
 
-            for idx, text in enumerate(structured_facts):
+            for idx, (text, field_path) in enumerate(structured_facts):
                 passages.append(Passage(
                     passage_id=_hash_id("passage", f"{nct_id}:fact:{idx}:{text}"),
                     source_id=src.source_id,
                     section="REGISTRY_FACT",
                     text=text,
-                    locator=f"protocolSection.fact[{idx}]",
+                    locator=f"protocolSection.{field_path}",
                 ))
 
             # Preserve sponsor/investigator narrative for inspection/provenance,
