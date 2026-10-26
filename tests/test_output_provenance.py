@@ -195,3 +195,26 @@ async def test_multiline_source_title_and_identifier_remain_one_markdown_item(fa
     claim_block, source_block = response.answer_markdown.split("\n\n### Sources\n", 1)
     assert len(claim_block.split("### Evidence-bound answer\n\n", 1)[1].splitlines()) == 1
     assert len(source_block.split("\n\n*Alpha2", 1)[0].splitlines()) == 1
+
+@pytest.mark.parametrize("field", ["claim", "title", "identifier"])
+async def test_source_strikethrough_delimiters_are_literal_in_markdown(fake_connector, field):
+    """Source markup must not visually negate evidence text or source metadata."""
+    original = "Treatment X ~~reduced~~ symptom scores compared with placebo in studied adults."
+    if field == "claim":
+        fake_connector.passages[0].text = original
+    elif field == "title":
+        fake_connector.sources[0].title = "Study of ~~ineffective~~ treatment X"
+    else:
+        fake_connector.sources[0].identifiers["PMID"] = "123~~withdrawn~~"
+
+    response = await EvidenceEngine(fake_connector).answer(QUESTION)
+    assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert r"\~\~" in response.answer_markdown
+    assert "~~" not in response.answer_markdown
+    if field == "claim":
+        assert response.claims[0].claim_text == original
+        assert response.passages[0].text == original
+    elif field == "title":
+        assert "~~ineffective~~" in response.sources[0].title
+    else:
+        assert "~~withdrawn~~" in response.sources[0].identifiers["PMID"]
