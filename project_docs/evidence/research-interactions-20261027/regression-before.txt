@@ -1,0 +1,103 @@
+FFFFF..................FFFFFFFFF.......................                  [100%]
+=================================== FAILURES ===================================
+_____________________ test_query_classification[variables] _____________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Explicit non-pharmacological operands
+E   assert ('drug_interaction' in ['drug_interaction']) is False
+____________________ test_query_classification[statistics] _____________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Explicit demographic statistical factors
+E   assert ('drug_interaction' in ['drug_interaction']) is False
+________________ test_query_classification[negated-statistics] _________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Negation does not change the resolved operands
+E   assert ('drug_interaction' in ['drug_interaction']) is False
+_____________________ test_query_classification[anaphora] ______________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Complete immediately preceding variable enumeration
+E   assert ('drug_interaction' in ['drug_interaction']) is False
+_________________ test_query_classification[grouped-anaphora] __________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Grouped enumeration, abbreviation and e.g. stay intact
+E   assert ('drug_interaction' in ['drug_interaction']) is False
+_______________________ test_query_classification[dose] ________________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Other high-consequence checks remain independent
+E   assert ('drug_interaction' in ['medication_dose', 'drug_interaction']) is False
+_____________________ test_query_classification[pregnancy] _____________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Other high-consequence checks remain independent
+E   assert ('drug_interaction' in ['drug_interaction', 'pregnancy']) is False
+____________________ test_query_classification[paediatric] _____________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Complete population context retained
+E   assert ('drug_interaction' in ['drug_interaction', 'paediatrics']) is False
+__________________ test_query_classification[anticoagulation] __________________
+tests/test_interaction_context.py:42: in test_query_classification
+    assert ('drug_interaction' in categories) is interaction, reason
+E   AssertionError: Separate high-consequence category remains high
+E   assert ('drug_interaction' in ['drug_interaction', 'anticoagulation']) is False
+_______________ test_complete_abstract_classification[variables] _______________
+tests/test_interaction_context.py:60: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS, reason
+E   AssertionError: Explicit non-pharmacological operands
+E   assert <AnswerStatus...ATION_FAILED'> == <AnswerStatus...ALIFICATIONS'>
+E
+E     - ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+E     + HIGH_CONSEQUENCE_VERIFICATION_FAILED
+______________ test_complete_abstract_classification[statistics] _______________
+tests/test_interaction_context.py:60: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS, reason
+E   AssertionError: Explicit demographic statistical factors
+E   assert <AnswerStatus...ATION_FAILED'> == <AnswerStatus...ALIFICATIONS'>
+E
+E     - ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+E     + HIGH_CONSEQUENCE_VERIFICATION_FAILED
+__________ test_complete_abstract_classification[negated-statistics] ___________
+tests/test_interaction_context.py:60: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS, reason
+E   AssertionError: Negation does not change the resolved operands
+E   assert <AnswerStatus...ATION_FAILED'> == <AnswerStatus...ALIFICATIONS'>
+E
+E     - ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+E     + HIGH_CONSEQUENCE_VERIFICATION_FAILED
+_______________ test_complete_abstract_classification[anaphora] ________________
+tests/test_interaction_context.py:60: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS, reason
+E   AssertionError: Complete immediately preceding variable enumeration
+E   assert <AnswerStatus...ATION_FAILED'> == <AnswerStatus...ALIFICATIONS'>
+E
+E     - ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+E     + HIGH_CONSEQUENCE_VERIFICATION_FAILED
+___________ test_complete_abstract_classification[grouped-anaphora] ____________
+tests/test_interaction_context.py:60: in test_complete_abstract_classification
+    assert out.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS, reason
+E   AssertionError: Grouped enumeration, abbreviation and e.g. stay intact
+E   assert <AnswerStatus...ATION_FAILED'> == <AnswerStatus...ALIFICATIONS'>
+E
+E     - ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+E     + HIGH_CONSEQUENCE_VERIFICATION_FAILED
+=========================== short test summary info ============================
+FAILED tests/test_interaction_context.py::test_query_classification[variables]
+FAILED tests/test_interaction_context.py::test_query_classification[statistics]
+FAILED tests/test_interaction_context.py::test_query_classification[negated-statistics]
+FAILED tests/test_interaction_context.py::test_query_classification[anaphora]
+FAILED tests/test_interaction_context.py::test_query_classification[grouped-anaphora]
+FAILED tests/test_interaction_context.py::test_query_classification[dose] - A...
+FAILED tests/test_interaction_context.py::test_query_classification[pregnancy]
+FAILED tests/test_interaction_context.py::test_query_classification[paediatric]
+FAILED tests/test_interaction_context.py::test_query_classification[anticoagulation]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[variables]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[statistics]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[negated-statistics]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[anaphora]
+FAILED tests/test_interaction_context.py::test_complete_abstract_classification[grouped-anaphora]
+14 failed, 41 passed in 0.26s

@@ -1,0 +1,76 @@
+{
+  "result": "PASS",
+  "scope": "Complete original abstract text and citation identity; not clinical correctness or retrieval completeness",
+  "xml_sha256": "ce1cd005f6fd796f6af3fdd3d40934c86aac33e0433138b02e0fd34b5247c0b9",
+  "checked_abstracts": [
+    {
+      "pmid": "37249199",
+      "citation": "https://pubmed.ncbi.nlm.nih.gov/37249199/",
+      "characters": 1831,
+      "abstract_sha256": "06241ca41a86e1b8febf7463bb3bf421c512d898ebebd609959083eba827b62b"
+    }
+  ],
+  "classification": [
+    "MODERATE",
+    []
+  ],
+  "trace": {
+    "trace_id": "1975c50d-ecc8-4908-b3c5-f1e3563cd080",
+    "timestamp": "2026-10-26T20:14:26.801686Z",
+    "query_plan": {
+      "intent": [
+        "EVIDENCE_SYNTHESIS"
+      ],
+      "user_mode": "clinician",
+      "patient_specific": false,
+      "known_user_facts": [],
+      "unknown_material_facts": [],
+      "jurisdiction": "AU",
+      "jurisdiction_material": false,
+      "temporal_sensitivity": "moderate",
+      "consequence_level": "MODERATE",
+      "required_source_classes": [
+        "biomedical_literature"
+      ],
+      "retrieval_questions": [
+        "Find literature about mindfulness and attention"
+      ],
+      "required_second_pass": false,
+      "safety_flags": []
+    },
+    "retrieval_query_digests": [
+      "hmac-sha256:94fb35615a9df61e32f1641fd4fb12682c8308e6257f89262b1a6791cff44e5a"
+    ],
+    "connectors_used": [
+      "pubmed-eutils"
+    ],
+    "source_ids": [
+      "pubmed:37249199"
+    ],
+    "evidence_ids": [
+      "ev_bf7670b2ed642248"
+    ],
+    "candidate_claim_ids": [
+      "clm_2d9fdc53b6d8bbce"
+    ],
+    "verification_results": {
+      "clm_2d9fdc53b6d8bbce": "PASS"
+    },
+    "safety_flags": [],
+    "component_versions": {
+      "engine": "0.2.0-influence-control-core",
+      "connector": "alpha2.1-red-remediation",
+      "planner": "alpha2.1-interaction-context",
+      "extractor": "alpha2.1-extractive-safety-filtered",
+      "claim_builder": "alpha2.1-claim-consequence",
+      "verifier": "alpha2.1-exact-passage-high-consequence",
+      "influence_controller": "medical-ai-influence-v0.2-typesafe",
+      "renderer": "alpha2.1"
+    },
+    "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+    "authorization_decision_ids": [
+      "abbdef82-b5ab-4608-ab25-089befe271d4"
+    ]
+  },
+  "mode": "captured original XML replay, not live browser"
+}

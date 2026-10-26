@@ -1,0 +1,238 @@
+{
+  "blocked_checks": [
+    "ALPHA3-FIX-005-CONFLICT-BLOCKED",
+    "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED"
+  ],
+  "case_results": [
+    {
+      "authoritative_recall_at_k": 1.0,
+      "authoritative_recall_k": 5,
+      "case_id": "ALPHA3-FIX-001-SUPPORTED",
+      "citation_linkage_complete": true,
+      "claim_ids": [
+        "clm_66338d3185252dae"
+      ],
+      "evidence_ids": [
+        "ev_89fd67aa04cedbd9"
+      ],
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-supported-001"
+      ],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": null,
+      "expected_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "failures": [],
+      "first_authoritative_source_rank": 1,
+      "influence_authorized": true,
+      "normalized_query": "treatment X reduces symptom scores",
+      "notes": [],
+      "observed_failure_code": null,
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [
+        "pubmed:alpha3-supported-001"
+      ],
+      "observed_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "outcome": "PASS",
+      "provenance_complete": true,
+      "raw_query": "What evidence shows treatment X reduces symptom scores?"
+    },
+    {
+      "authoritative_recall_at_k": null,
+      "authoritative_recall_k": null,
+      "case_id": "ALPHA3-FIX-002-PROVENANCE-INCOMPLETE",
+      "citation_linkage_complete": false,
+      "claim_ids": [],
+      "evidence_ids": [],
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": "PROVENANCE_INCOMPLETE",
+      "expected_terminal_state": "PROVENANCE_INCOMPLETE",
+      "failures": [],
+      "first_authoritative_source_rank": null,
+      "influence_authorized": null,
+      "normalized_query": "treatment X reduces symptom scores",
+      "notes": [],
+      "observed_failure_code": "PROVENANCE_INCOMPLETE",
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [],
+      "observed_terminal_state": "PROVENANCE_INCOMPLETE",
+      "outcome": "PASS",
+      "provenance_complete": null,
+      "raw_query": "What evidence shows treatment X reduces symptom scores?"
+    },
+    {
+      "authoritative_recall_at_k": null,
+      "authoritative_recall_k": null,
+      "case_id": "ALPHA3-FIX-003-SOURCE-UNAVAILABLE",
+      "citation_linkage_complete": false,
+      "claim_ids": [],
+      "evidence_ids": [],
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": "CONNECTOR_ERROR:OSError",
+      "expected_terminal_state": "SOURCE_UNAVAILABLE",
+      "failures": [],
+      "first_authoritative_source_rank": null,
+      "influence_authorized": null,
+      "normalized_query": "exists treatment X",
+      "notes": [],
+      "observed_failure_code": "CONNECTOR_ERROR:OSError",
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [],
+      "observed_terminal_state": "SOURCE_UNAVAILABLE",
+      "outcome": "PASS",
+      "provenance_complete": null,
+      "raw_query": "What evidence exists for treatment X?"
+    },
+    {
+      "authoritative_recall_at_k": 1.0,
+      "authoritative_recall_k": 5,
+      "case_id": "ALPHA3-FIX-004-HIGH-CONSEQUENCE-FAIL-CLOSED",
+      "citation_linkage_complete": false,
+      "claim_ids": [],
+      "evidence_ids": [],
+      "expectation_tier": "REQUIRED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-high-risk-004"
+      ],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "expected_terminal_state": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "failures": [],
+      "first_authoritative_source_rank": 1,
+      "influence_authorized": null,
+      "normalized_query": "dose treatment X should be started",
+      "notes": [],
+      "observed_failure_code": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [
+        "pubmed:alpha3-high-risk-004"
+      ],
+      "observed_terminal_state": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+      "outcome": "PASS",
+      "provenance_complete": null,
+      "raw_query": "What dose of treatment X should be started?"
+    },
+    {
+      "authoritative_recall_at_k": 1.0,
+      "authoritative_recall_k": 5,
+      "case_id": "ALPHA3-FIX-005-CONFLICT-BLOCKED",
+      "citation_linkage_complete": true,
+      "claim_ids": [
+        "clm_911ac10c21fba608",
+        "clm_d1427aca87cccf2a"
+      ],
+      "evidence_ids": [
+        "ev_4dcbbcb278ecdb84",
+        "ev_689f02a4565d3881"
+      ],
+      "expectation_tier": "BLOCKED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-conflict-pos-005",
+        "pubmed:alpha3-conflict-neg-005"
+      ],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": "EVIDENCE_CONFLICTING",
+      "expected_terminal_state": "EVIDENCE_CONFLICTING",
+      "failures": [],
+      "first_authoritative_source_rank": 1,
+      "influence_authorized": true,
+      "normalized_query": "treatment X reduce symptom scores compared placebo",
+      "notes": [
+        "Current pipeline has no distinct EVIDENCE_CONFLICTING terminal state.",
+        "observed ANSWER_SUPPORTED_WITH_QUALIFICATIONS while target state remains EVIDENCE_CONFLICTING"
+      ],
+      "observed_failure_code": null,
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [
+        "pubmed:alpha3-conflict-pos-005",
+        "pubmed:alpha3-conflict-neg-005"
+      ],
+      "observed_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "outcome": "BLOCKED",
+      "provenance_complete": true,
+      "raw_query": "Does treatment X reduce symptom scores compared with placebo?"
+    },
+    {
+      "authoritative_recall_at_k": 1.0,
+      "authoritative_recall_k": 5,
+      "case_id": "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED",
+      "citation_linkage_complete": true,
+      "claim_ids": [
+        "clm_281b7f2315e1e46a"
+      ],
+      "evidence_ids": [
+        "ev_a25ea40cbf75d80e"
+      ],
+      "expectation_tier": "BLOCKED",
+      "expected_authoritative_source_ids": [
+        "pubmed:alpha3-population-006"
+      ],
+      "expected_authority_or_source_class": "biomedical_literature",
+      "expected_failure_code": "POPULATION_MISMATCH",
+      "expected_terminal_state": "POPULATION_MISMATCH",
+      "failures": [],
+      "first_authoritative_source_rank": 1,
+      "influence_authorized": true,
+      "normalized_query": "treatment X reduces symptom scores adults over 80 years old",
+      "notes": [
+        "Current pipeline does not emit POPULATION_MISMATCH for older-adult applicability gaps.",
+        "observed ANSWER_SUPPORTED_WITH_QUALIFICATIONS while target state remains POPULATION_MISMATCH"
+      ],
+      "observed_failure_code": null,
+      "observed_required_source_classes": [
+        "biomedical_literature"
+      ],
+      "observed_source_ids": [
+        "pubmed:alpha3-population-006"
+      ],
+      "observed_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "outcome": "BLOCKED",
+      "provenance_complete": true,
+      "raw_query": "What evidence shows treatment X reduces symptom scores in adults over 80 years old?"
+    }
+  ],
+  "case_set_id": "alpha3-evidence-fidelity-engineering-fixtures",
+  "case_set_version": "v0.1.0",
+  "counts": {
+    "blocked_checks": 2,
+    "harness_failures": 0,
+    "required_cases": 4,
+    "required_failed": 0,
+    "required_passed": 4,
+    "total_cases": 6,
+    "unavailable_checks": 0,
+    "unproven_checks": 3
+  },
+  "evaluation_scope": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
+  "failures": [],
+  "generated_at": "2026-10-26T20:15:52.133704Z",
+  "harness_failures": [],
+  "metric_boundary": "Synthetic fixture source order after pipeline admission, as recorded in trace.source_ids; not live retrieval or ranking performance. Normalization is observed in the fixture connector.",
+  "report_version": "alpha3-evidence-fidelity-report-v0.2",
+  "repository_commit_sha": "d9f190736cd42330b2e21b651e848ff7bf6f7499",
+  "runner_configuration": {
+    "module": "medical_ai.evals.alpha3_evidence_fidelity",
+    "python": "3.12.14"
+  },
+  "runner_version": "alpha3-evidence-fidelity-harness-v0.2",
+  "unavailable_checks": [],
+  "unproven_checks": [
+    "current_pipeline_live_retrieval_recall",
+    "live_source_ranking",
+    "clinical_claim_to_passage_entailment"
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "revision": "d9f190736cd42330b2e21b651e848ff7bf6f7499",
+  "cases": [
+    {
+      "name": "broad",
+      "xml_sha256": "0cb3651c011715856a848f7e81e804abb752c3bb826f924f39a568155832d280",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=33223537%2C26168376%2C37249199&retmode=xml",
+      "retrieved_at": "2026-10-26T20:16:27.920499+00:00",
+      "trace": {
+        "trace_id": "6c32a2fb-fc25-4dd8-a459-fc7e4ce532e9",
+        "timestamp": "2026-10-26T20:16:28.060216Z",
+        "query_plan": {
+          "intent": [
+            "EVIDENCE_SYNTHESIS"
+          ],
+          "user_mode": "clinician",
+          "patient_specific": false,
+          "known_user_facts": [],
+          "unknown_material_facts": [],
+          "jurisdiction": "AU",
+          "jurisdiction_material": false,
+          "temporal_sensitivity": "moderate",
+          "consequence_level": "MODERATE",
+          "required_source_classes": [
+            "biomedical_literature"
+          ],
+          "retrieval_questions": [
+            "Find literature about mindfulness and attention"
+          ],
+          "required_second_pass": false,
+          "safety_flags": []
+        },
+        "retrieval_query_digests": [
+          "hmac-sha256:40d425e007963284fed7d35dcfeaff77468f2ccf5b096df290f747f156e9a2a3"
+        ],
+        "connectors_used": [
+          "pubmed-eutils"
+        ],
+        "source_ids": [
+          "pubmed:33223537",
+          "pubmed:26168376",
+          "pubmed:37249199"
+        ],
+        "evidence_ids": [
+          "ev_8a5da3f111c8cf2f",
+          "ev_bf574288252c5910",
+          "ev_bf7670b2ed642248"
+        ],
+        "candidate_claim_ids": [
+          "clm_b7c695ac27e9198c",
+          "clm_a44c1e1e98df3d4d",
+          "clm_2d9fdc53b6d8bbce"
+        ],
+        "verification_results": {
+          "clm_b7c695ac27e9198c": "PASS",
+          "clm_a44c1e1e98df3d4d": "PASS",
+          "clm_2d9fdc53b6d8bbce": "PASS"
+        },
+        "safety_flags": [],
+        "component_versions": {
+          "engine": "0.2.0-influence-control-core",
+          "connector": "alpha2.1-red-remediation",
+          "planner": "alpha2.1-interaction-context",
+          "extractor": "alpha2.1-extractive-safety-filtered",
+          "claim_builder": "alpha2.1-claim-consequence",
+          "verifier": "alpha2.1-exact-passage-high-consequence",
+          "influence_controller": "medical-ai-influence-v0.2-typesafe",
+          "renderer": "alpha2.1"
+        },
+        "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+        "authorization_decision_ids": [
+          "aec7fe51-192f-4e96-8f9a-78fbfabdfb31",
+          "bf082bd8-4e19-470c-9ee3-825bb29716fb",
+          "79189667-1b75-4d6b-961d-15952c4bef50"
+        ]
+      },
+      "fidelity": {
+        "result": "PASS",
+        "scope": "Complete original abstract text and citation identity; not clinical correctness or retrieval completeness",
+        "xml_sha256": "0cb3651c011715856a848f7e81e804abb752c3bb826f924f39a568155832d280",
+        "checked_abstracts": [
+          {
+            "pmid": "26168376",
+            "citation": "https://pubmed.ncbi.nlm.nih.gov/26168376/",
+            "characters": 1591,
+            "abstract_sha256": "4db56dc8f1e5206fc7227bb8fa22f69f6c86759d41c94649104a9d612e991190"
+          },
+          {
+            "pmid": "33223537",
+            "citation": "https://pubmed.ncbi.nlm.nih.gov/33223537/",
+            "characters": 1785,
+            "abstract_sha256": "23a2486bce14cf46a222e444e79bda9e229586d63ae34199c4c7cb1fa32ff8a6"
+          },
+          {
+            "pmid": "37249199",
+            "citation": "https://pubmed.ncbi.nlm.nih.gov/37249199/",
+            "characters": 1831,
+            "abstract_sha256": "06241ca41a86e1b8febf7463bb3bf421c512d898ebebd609959083eba827b62b"
+          }
+        ]
+      },
+      "original_fields": [
+        {
+          "pmid": "33223537",
+          "headings": [
+            "ABSTRACT"
+          ],
+          "title_match": true
+        },
+        {
+          "pmid": "26168376",
+          "headings": [
+            "ABSTRACT"
+          ],
+          "title_match": true
+        },
+        {
+          "pmid": "37249199",
+          "headings": [
+            "ABSTRACT"
+          ],
+          "title_match": true
+        }
+      ],
+      "tampered_claim_negative_control": "REJECTED",
+      "candidate_diagnostics": [
+        {
+          "claim_id": "clm_b7c695ac27e9198c",
+          "sources": [
+            "pubmed:26168376"
+          ],
+          "categories": [],
+          "consequence": "MODERATE",
+          "verification": "PASS",
+          "entailment": "SUPPORTED_EXACT_PASSAGE"
+        },
+        {
+          "claim_id": "clm_a44c1e1e98df3d4d",
+          "sources": [
+            "pubmed:33223537"
+          ],
+          "categories": [],
+          "consequence": "MODERATE",
+          "verification": "PASS",
+          "entailment": "SUPPORTED_EXACT_PASSAGE"
+        },
+        {
+          "claim_id": "clm_2d9fdc53b6d8bbce",
+          "sources": [
+            "pubmed:37249199"
+          ],
+          "categories": [],
+          "consequence": "MODERATE",
+          "verification": "PASS",
+          "entailment": "SUPPORTED_EXACT_PASSAGE"
+        }
+      ]
+    },
+    {
+      "name": "target",
+      "xml_sha256": "ac3ac75db291e6c7794990f523e5641e9fc172c06d784364a91cb6e5b193e1a2",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=37249199%2C36767238&retmode=xml",
+      "retrieved_at": "2026-10-26T20:16:35.321247+00:00",
+      "trace": {
+        "trace_id": "35ccfef0-8c0d-4475-b16b-817a92460a25",
+        "timestamp": "2026-10-26T20:16:35.396970Z",
+        "query_plan": {
+          "intent": [
+            "EVIDENCE_SYNTHESIS"
+          ],
+          "user_mode": "clinician",
+          "patient_specific": false,
+          "known_user_facts": [],
+          "unknown_material_facts": [],
+          "jurisdiction": "AU",
+          "jurisdiction_material": false,
+          "temporal_sensitivity": "moderate",
+          "consequence_level": "MODERATE",
+          "required_source_classes": [
+            "biomedical_literature"
+          ],
+          "retrieval_questions": [
+            "Nursing students perceived stress social support self-efficacy resilience mindfulness and psychological well-being A structural equation model"
+          ],
+          "required_second_pass": false,
+          "safety_flags": []
+        },
+        "retrieval_query_digests": [
+          "hmac-sha256:b55da21f252f7c122208e27134ecc5519b86eae8061a6a6be8a672f14843f5b0"
+        ],
+        "connectors_used": [
+          "pubmed-eutils"
+        ],
+        "source_ids": [
+          "pubmed:37249199",
+          "pubmed:36767238"
+        ],
+        "evidence_ids": [
+          "ev_bf7670b2ed642248",
+          "ev_2a8d35aa9594c5d6"
+        ],
+        "candidate_claim_ids": [
+          "clm_2d9fdc53b6d8bbce",
+          "clm_51f6b36f448af7ad"
+        ],
+        "verification_results": {
+          "clm_2d9fdc53b6d8bbce": "PASS",
+          "clm_51f6b36f448af7ad": "PASS"
+        },
+        "safety_flags": [],
+        "component_versions": {
+          "engine": "0.2.0-influence-control-core",
+          "connector": "alpha2.1-red-remediation",
+          "planner": "alpha2.1-interaction-context",
+          "extractor": "alpha2.1-extractive-safety-filtered",
+          "claim_builder": "alpha2.1-claim-consequence",
+          "verifier": "alpha2.1-exact-passage-high-consequence",
+          "influence_controller": "medical-ai-influence-v0.2-typesafe",
+          "renderer": "alpha2.1"
+        },
+        "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+        "authorization_decision_ids": [
+          "1a086d8f-5f62-4b99-9de7-d411b055d528",
+          "d4900ba1-c6bd-457b-becb-eeb9fcd71785"
+        ]
+      },
+      "fidelity": {
+        "result": "PASS",
+        "scope": "Complete original abstract text and citation identity; not clinical correctness or retrieval completeness",
+        "xml_sha256": "ac3ac75db291e6c7794990f523e5641e9fc172c06d784364a91cb6e5b193e1a2",
+        "checked_abstracts": [
+          {
+            "pmid": "37249199",
+            "citation": "https://pubmed.ncbi.nlm.nih.gov/37249199/",
+            "characters": 1831,
+            "abstract_sha256": "06241ca41a86e1b8febf7463bb3bf421c512d898ebebd609959083eba827b62b"
+          },
+          {
+            "pmid": "36767238",
+            "citation": "https://pubmed.ncbi.nlm.nih.gov/36767238/",
+            "characters": 1814,
+            "abstract_sha256": "2e5c4060548126c1c10f667da6f810b9147e0699e5fcb7f09303ddad7736015b"
+          }
+        ]
+      },
+      "original_fields": [
+        {
+          "pmid": "37249199",
+          "headings": [
+            "ABSTRACT"
+          ],
+          "title_match": true
+        },
+        {
+          "pmid": "36767238",
+          "headings": [
+            "BACKGROUND",
+            "PURPOSE",
+            "METHODS",
+            "RESULTS",
+            "CONCLUSION"
+          ],
+          "title_match": true
+        }
+      ],
+      "tampered_claim_negative_control": "REJECTED",
+      "candidate_diagnostics": [
+        {
+          "claim_id": "clm_2d9fdc53b6d8bbce",
+          "sources": [
+            "pubmed:37249199"
+          ],
+          "categories": [],
+          "consequence": "MODERATE",
+          "verification": "PASS",
+          "entailment": "SUPPORTED_EXACT_PASSAGE"
+        },
+        {
+          "claim_id": "clm_51f6b36f448af7ad",
+          "sources": [
+            "pubmed:36767238"
+          ],
+          "categories": [],
+          "consequence": "MODERATE",
+          "verification": "PASS",
+          "entailment": "SUPPORTED_EXACT_PASSAGE"
+        }
+      ]
+    },
+    {
+      "name": "headings",
+      "xml_sha256": "ae8cd3ef1662e9c49825c4f0a7d9b87439d966aa821ff70041abd216b2338c56",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=30345511%2C32432795%2C25099314&retmode=xml",
+      "retrieved_at": "2026-10-26T20:16:42.542974+00:00",
+      "trace": {
+        "trace_id": "9f094c51-ab3a-4d31-97cb-e517577b1922",
+        "timestamp": "2026-10-26T20:16:42.599446Z",
+        "query_plan": {
+          "intent": [
+            "EVIDENCE_SYNTHESIS"
+          ],
+          "user_mode": "clinician",
+          "patient_specific": false,
+          "known_user_facts": [],
+          "unknown_material_facts": [],
+          "jurisdiction": "AU",
+          "jurisdiction_material": false,
+          "temporal_sensitivity": "moderate",
+          "consequence_level": "MODERATE",
+          "required_source_classes": [
+            "biomedical_literature"
+          ],
+          "retrieval_questions": [
+            "Find literature about mindfulness and attention randomized trial"
+          ],
+          "required_second_pass": false,
+          "safety_flags": []
+        },
+        "retrieval_query_digests": [
+          "hmac-sha256:055d9038a42de20b678d7272015551e050a461b623d1b3a1fcda276cf5454961"
+        ],
+        "connectors_used": [
+          "pubmed-eutils"
+        ],
+        "source_ids": [
+          "pubmed:30345511",
+          "pubmed:32432795",
+          "pubmed:25099314"
+        ],
+        "evidence_ids": [
+          "ev_268cb2491142dd8f",
+          "ev_4b31f88f49431815",
+          "ev_d0b0e733a13d6afa"
+        ],
+        "candidate_claim_ids": [
+          "clm_40a44e7f2dcbd4b6",
+          "clm_b4c8a5f0644b509f",
+          "clm_fb1df7d874bd2f27"
+        ],
+        "verification_results": {
+          "clm_40a44e7f2dcbd4b6": "FAIL",
+          "clm_b4c8a5f0644b509f": "FAIL",
+          "clm_fb1df7d874bd2f27": "FAIL"
+        },
+        "safety_flags": [],
+        "component_versions": {
+          "engine": "0.2.0-influence-control-core",
+          "connector": "alpha2.1-red-remediation",
+          "planner": "alpha2.1-interaction-context",
+          "extractor": "alpha2.1-extractive-safety-filtered",
+          "claim_builder": "alpha2.1-claim-consequence",
+          "verifier": "alpha2.1-exact-passage-high-consequence",
+          "influence_controller": "medical-ai-influence-v0.2-typesafe",
+          "renderer": "alpha2.1"
+        },
+        "final_status": "HIGH_CONSEQUENCE_VERIFICATION_FAILED",
+        "authorization_decision_ids": []
+      },
+      "candidate_diagnostics": [
+        {
+          "claim_id": "clm_40a44e7f2dcbd4b6",
+          "sources": [
+            "pubmed:32432795"
+          ],
+          "categories": [
+            "drug_interaction"
+          ],
+          "consequence": "HIGH",
+          "verification": "FAIL",
+          "entailment": "SUPPORTED_EXTRACTIVELY"
+        },
+        {
+          "claim_id": "clm_b4c8a5f0644b509f",
+          "sources": [
+            "pubmed:25099314"
+          ],
+          "categories": [
+            "diagnostic_exclusion"
+          ],
+          "consequence": "HIGH",
+          "verification": "FAIL",
+          "entailment": "SUPPORTED_EXTRACTIVELY"
+        },
+        {
+          "claim_id": "clm_fb1df7d874bd2f27",
+          "sources": [
+            "pubmed:30345511"
+          ],
+          "categories": [
+            "paediatrics"
+          ],
+          "consequence": "HIGH",
+          "verification": "FAIL",
+          "entailment": "SUPPORTED_EXTRACTIVELY"
+        }
+      ]
+    }
+  ],
+  "scope": "Literal fidelity and deterministic routing; not clinical correctness"
+}

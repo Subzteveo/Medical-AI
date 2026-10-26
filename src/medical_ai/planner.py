@@ -70,8 +70,81 @@ TRIAL_DISCOVERY_CUES = re.compile(
 )
 
 
+# This is a deliberately bounded linguistic exception, not medicine recognition.
+# Unknown operands (including unseen medicine names), references and verb forms
+# retain the original conservative classification. Never alter the source text.
+_NON_DRUG_VARIABLE = (
+    r"(?:mindfulness|attention|stress|resilience|social support|self[- ]efficacy|"
+    r"psychological (?:well[- ]?being|wellbeing)(?:\s*\(pwb\))?|"
+    r"age|sex|gender|education|income)"
+)
+_VARIABLE_SEPARATOR = r"(?:\s*,\s*(?:and\s+)?|\s+and\s+|\s*[-×]\s*|\s+by\s+)"
+_VARIABLE_LIST = _NON_DRUG_VARIABLE + r"(?:" + _VARIABLE_SEPARATOR + _NON_DRUG_VARIABLE + r")+"
+# Require the whole operand list, not a benign prefix followed by an unknown
+# third operand. A following predicate or sentence end terminates the list.
+_OPERAND_END = r"(?=\s*(?:[.!?]|$)|\s+(?:was|were|is|are|has|have)\b)"
+_EXPLICIT_VARIABLE_INTERACTION = re.compile(
+    r"\binteractions?\s+(?:between|among|of)\s+" + _VARIABLE_LIST + _OPERAND_END
+    + r"|\b" + _NON_DRUG_VARIABLE + r"-by-" + _NON_DRUG_VARIABLE
+    + r"\s+interactions?" + _OPERAND_END,
+    re.I,
+)
+_PHARMACOLOGICAL_CONTEXT = re.compile(
+    r"\b(?:drugs?|medicin(?:e|es|al)|medications?|pharmac\w*|"
+    r"prescri\w*|tablets?|capsules?|compounds?|coadministr\w*)\b", re.I,
+)
+
+
+def _resolved_variable_reference(prefix: str) -> bool:
+    # Resolve only the immediately preceding sentence's complete subject list.
+    # Do not split the e.g. abbreviation inside a grouped variable enumeration.
+    sentences = re.split(r"[.!?]\s+", re.sub(r"\be\.g\.\s*", "", prefix, flags=re.I))
+    if len(sentences) < 2:
+        return False
+    if not re.fullmatch(r"(?:(?:however|also),?\s+)?(?:the\s+)?", sentences[-1], re.I):
+        return False
+    antecedent = sentences[-2].strip()
+    antecedent = re.sub(r"^find literature about\s+", "", antecedent, flags=re.I)
+    antecedent = re.sub(r"^(?:(?:nursing )?students|participants|respondents)[’']\s*", "", antecedent, flags=re.I)
+    # Flatten only fully recognised groups. Unknown group members leave the
+    # parentheses in place and make the full-subject match fail closed.
+    antecedent = re.sub(
+        r"\bprotective factors\s*\((" + _VARIABLE_LIST + r")\)",
+        r"\1", antecedent, flags=re.I,
+    )
+    return bool(re.fullmatch(
+        _VARIABLE_LIST + r"\s+(?:were|are|have been|had been)\s+"
+        r"(?:(?:well|previously)\s+)?(?:measured|assessed|reported|examined)"
+        r"(?:\s+in the literature)?", antecedent, re.I,
+    ))
+
+
+def _has_unresolved_interaction(text: str) -> bool:
+    mentions = list(re.finditer(HIGH_CONSEQUENCE_PATTERNS["drug_interaction"], text, re.I))
+    if not mentions:
+        return False
+    if _PHARMACOLOGICAL_CONTEXT.search(text):
+        return True
+    resolved = list(_EXPLICIT_VARIABLE_INTERACTION.finditer(text))
+    for mention in mentions:
+        if any(span.start() <= mention.start() and mention.end() <= span.end() for span in resolved):
+            continue
+        reference = re.match(
+            r"interactions?\s+of these variables" + _OPERAND_END,
+            text[mention.start():], re.I,
+        )
+        if reference and _resolved_variable_reference(text[:mention.start()]):
+            continue
+        return True
+    return False
+
+
 def classify_consequence(text: str) -> tuple[ConsequenceLevel, list[str]]:
-    matched = [name for name, pattern in HIGH_CONSEQUENCE_PATTERNS.items() if re.search(pattern, text, re.I)]
+    matched = [
+        name for name, pattern in HIGH_CONSEQUENCE_PATTERNS.items()
+        if (_has_unresolved_interaction(text) if name == "drug_interaction"
+            else re.search(pattern, text, re.I))
+    ]
     return (ConsequenceLevel.HIGH if matched else ConsequenceLevel.MODERATE, matched)
 
 
