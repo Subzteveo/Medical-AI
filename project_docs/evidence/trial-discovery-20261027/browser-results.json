@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "name": "supported",
+      "question": "Find clinical trials for mindfulness",
+      "status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+      "claims": 10,
+      "connectors": [
+        "clinicaltrials-gov-v2"
+      ],
+      "http_status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "name": "unsupported",
+      "question": "Is mindfulness approved by the TGA?",
+      "status": "NO_AUTHORITATIVE_SOURCE",
+      "claims": 0,
+      "connectors": [],
+      "http_status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "name": "unsafe",
+      "question": "What dose of warfarin should my patient take?",
+      "status": "OUTSIDE_VALIDATED_CAPABILITY",
+      "claims": 0,
+      "connectors": [],
+      "http_status": 200,
+      "cache_control": "no-store"
+    }
+  ],
+  "errors": []
+}

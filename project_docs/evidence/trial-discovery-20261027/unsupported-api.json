@@ -1,0 +1,61 @@
+{
+  "status": "NO_AUTHORITATIVE_SOURCE",
+  "answer_markdown": "### Evidence-bound answer\n\nThe available evidence did not pass the required verification and influence-authorization gates for a supported answer.",
+  "claims": [],
+  "sources": [],
+  "evidence_objects": [],
+  "citation_mappings": [],
+  "passages": [],
+  "trace": {
+    "trace_id": "ed4da5d5-20c4-422c-8cfc-52f89e196c32",
+    "timestamp": "2026-10-26T19:12:33.111201Z",
+    "query_plan": {
+      "intent": [
+        "EVIDENCE_SYNTHESIS",
+        "REGULATORY_QUERY"
+      ],
+      "user_mode": "clinician",
+      "patient_specific": false,
+      "known_user_facts": [],
+      "unknown_material_facts": [],
+      "jurisdiction": "AU",
+      "jurisdiction_material": true,
+      "temporal_sensitivity": "high",
+      "consequence_level": "MODERATE",
+      "required_source_classes": [
+        "regulator"
+      ],
+      "retrieval_questions": [
+        "Is mindfulness approved by the TGA?"
+      ],
+      "required_second_pass": false,
+      "safety_flags": [
+        "REGULATORY_SOURCE_REQUIRED"
+      ]
+    },
+    "retrieval_query_digests": [
+      "hmac-sha256:3fcedabff485e9a6494c547efdeb4491223bb9967bac4f8b106b1fb8d8209006"
+    ],
+    "connectors_used": [],
+    "source_ids": [],
+    "evidence_ids": [],
+    "candidate_claim_ids": [],
+    "verification_results": {},
+    "safety_flags": [
+      "REGULATORY_SOURCE_REQUIRED"
+    ],
+    "component_versions": {
+      "engine": "0.2.0-influence-control-core",
+      "connector": "none",
+      "planner": "alpha2.1-policy-bound",
+      "extractor": "alpha2.1-extractive-safety-filtered",
+      "claim_builder": "alpha2.1-claim-consequence",
+      "verifier": "alpha2.1-exact-passage-high-consequence",
+      "influence_controller": "medical-ai-influence-v0.2-typesafe",
+      "renderer": "alpha2.1"
+    },
+    "final_status": "NO_AUTHORITATIVE_SOURCE",
+    "authorization_decision_ids": []
+  },
+  "influence_decisions": []
+}

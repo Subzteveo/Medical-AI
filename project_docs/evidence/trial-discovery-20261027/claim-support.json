@@ -1,0 +1,78 @@
+{
+  "result": "PASS",
+  "scope": "Exact registry-field attribution and citation identity; not clinical validation",
+  "checked_claims": [
+    {
+      "claim": "ClinicalTrials.gov lists NCT05175807 with the title: A Telemedicine Brief Mindfulness Intervention in Post-COVID-19.",
+      "original_field": "protocolSection.identificationModule.briefTitle",
+      "original_value": "A Telemedicine Brief Mindfulness Intervention in Post-COVID-19",
+      "citation": "https://clinicaltrials.gov/study/NCT05175807"
+    },
+    {
+      "claim": "ClinicalTrials.gov lists NCT03207711 with the title: Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger.",
+      "original_field": "protocolSection.identificationModule.briefTitle",
+      "original_value": "Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger",
+      "citation": "https://clinicaltrials.gov/study/NCT03207711"
+    },
+    {
+      "claim": "ClinicalTrials.gov lists NCT07575165 with the title: Mindful Movement And GAME BASED Training In Developmental Delay.",
+      "original_field": "protocolSection.identificationModule.briefTitle",
+      "original_value": "Mindful Movement And GAME BASED Training In Developmental Delay",
+      "citation": "https://clinicaltrials.gov/study/NCT07575165"
+    },
+    {
+      "claim": "The registered conditions for NCT03207711 include Diabetes Mellitus, Type 2.",
+      "original_field": "protocolSection.conditionsModule.conditions",
+      "original_value": [
+        "Diabetes Mellitus, Type 2"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT03207711"
+    },
+    {
+      "claim": "The registered conditions for NCT05175807 include Post COVID-19.",
+      "original_field": "protocolSection.conditionsModule.conditions",
+      "original_value": [
+        "Post COVID-19"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT05175807"
+    },
+    {
+      "claim": "The registered conditions for NCT07575165 include Developmental Delay (Disorder).",
+      "original_field": "protocolSection.conditionsModule.conditions",
+      "original_value": [
+        "Developmental Delay (Disorder)"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT07575165"
+    },
+    {
+      "claim": "The registered phase for NCT03207711 is NA.",
+      "original_field": "protocolSection.designModule.phases",
+      "original_value": [
+        "NA"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT03207711"
+    },
+    {
+      "claim": "The registered phase for NCT05175807 is NA.",
+      "original_field": "protocolSection.designModule.phases",
+      "original_value": [
+        "NA"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT05175807"
+    },
+    {
+      "claim": "The registered phase for NCT07575165 is NA.",
+      "original_field": "protocolSection.designModule.phases",
+      "original_value": [
+        "NA"
+      ],
+      "citation": "https://clinicaltrials.gov/study/NCT07575165"
+    },
+    {
+      "claim": "The registered study type for NCT03207711 is INTERVENTIONAL.",
+      "original_field": "protocolSection.designModule.studyType",
+      "original_value": "INTERVENTIONAL",
+      "citation": "https://clinicaltrials.gov/study/NCT03207711"
+    }
+  ]
+}

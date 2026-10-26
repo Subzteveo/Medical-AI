@@ -1,0 +1,252 @@
+{
+  "url": "https://clinicaltrials.gov/api/v2/studies?query.term=mindfulness&pageSize=3&format=json",
+  "status": 200,
+  "retrieved_at": "2026-10-26T19:12:32.448565+00:00",
+  "body": {
+    "studies": [
+      {
+        "protocolSection": {
+          "identificationModule": {
+            "nctId": "NCT07575165",
+            "orgStudyIdInfo": {
+              "id": "RCR & AHS/25/0709/Nimra Javed"
+            },
+            "organization": {
+              "fullName": "Riphah International University",
+              "class": "OTHER"
+            },
+            "briefTitle": "Mindful Movement And GAME BASED Training In Developmental Delay",
+            "officialTitle": "Comparative Effects Of Mindful Movement And Game Based Training On Motor Skills, Balance And Gait In Children With Developmental Delay",
+            "acronym": "MINDGAME"
+          },
+          "statusModule": {
+            "statusVerifiedDate": "2026-09",
+            "overallStatus": "COMPLETED",
+            "expandedAccessInfo": {
+              "hasExpandedAccess": false
+            },
+            "startDateStruct": {
+              "date": "2025-09-01",
+              "type": "ACTUAL"
+            },
+            "primaryCompletionDateStruct": {
+              "date": "2026-06-30",
+              "type": "ACTUAL"
+            },
+            "completionDateStruct": {
+              "date": "2026-08-30",
+              "type": "ACTUAL"
+            },
+            "studyFirstSubmitDate": "2025-12-14",
+            "studyFirstSubmitQcDate": "2026-05-04",
+            "studyFirstPostDateStruct": {
+              "date": "2026-05-08",
+              "type": "ACTUAL"
+            },
+            "lastUpdateSubmitDate": "2026-09-23",
+            "lastUpdatePostDateStruct": {
+              "date": "2026-09-28",
+              "type": "ACTUAL"
+            }
+          },
+          "conditionsModule": {
+            "conditions": [
+              "Developmental Delay (Disorder)"
+            ],
+            "keywords": [
+              "Developmental Delay Mindful Movement Game-Based Training"
+            ]
+          },
+          "designModule": {
+            "studyType": "INTERVENTIONAL",
+            "phases": [
+              "NA"
+            ],
+            "designInfo": {
+              "allocation": "RANDOMIZED",
+              "interventionModel": "PARALLEL",
+              "primaryPurpose": "TREATMENT",
+              "maskingInfo": {
+                "masking": "SINGLE",
+                "whoMasked": [
+                  "OUTCOMES_ASSESSOR"
+                ]
+              }
+            },
+            "enrollmentInfo": {
+              "count": 32,
+              "type": "ACTUAL"
+            }
+          }
+        }
+      },
+      {
+        "protocolSection": {
+          "identificationModule": {
+            "nctId": "NCT05175807",
+            "orgStudyIdInfo": {
+              "id": "FDG_MNF-COVID19"
+            },
+            "organization": {
+              "fullName": "Fondazione Don Carlo Gnocchi ETS",
+              "class": "OTHER"
+            },
+            "briefTitle": "A Telemedicine Brief Mindfulness Intervention in Post-COVID-19",
+            "officialTitle": "Application of a Telemedicine Brief Mindfulness Intervention in Post-COVID-19: a Pilot Randomized and Controlled Trial"
+          },
+          "statusModule": {
+            "statusVerifiedDate": "2021-12",
+            "overallStatus": "UNKNOWN",
+            "lastKnownStatus": "RECRUITING",
+            "expandedAccessInfo": {
+              "hasExpandedAccess": false
+            },
+            "startDateStruct": {
+              "date": "2020-06-19",
+              "type": "ACTUAL"
+            },
+            "primaryCompletionDateStruct": {
+              "date": "2021-07-30",
+              "type": "ACTUAL"
+            },
+            "completionDateStruct": {
+              "date": "2022-12-31",
+              "type": "ESTIMATED"
+            },
+            "studyFirstSubmitDate": "2021-04-22",
+            "studyFirstSubmitQcDate": "2021-12-28",
+            "studyFirstPostDateStruct": {
+              "date": "2022-01-04",
+              "type": "ACTUAL"
+            },
+            "lastUpdateSubmitDate": "2021-12-28",
+            "lastUpdatePostDateStruct": {
+              "date": "2022-01-04",
+              "type": "ACTUAL"
+            }
+          },
+          "conditionsModule": {
+            "conditions": [
+              "Post COVID-19"
+            ],
+            "keywords": [
+              "Post COVID-19",
+              "Mindfulness",
+              "Randomized Controlled Trial",
+              "Post Traumatic Stress Disorder"
+            ]
+          },
+          "designModule": {
+            "studyType": "INTERVENTIONAL",
+            "phases": [
+              "NA"
+            ],
+            "designInfo": {
+              "allocation": "RANDOMIZED",
+              "interventionModel": "PARALLEL",
+              "primaryPurpose": "OTHER",
+              "maskingInfo": {
+                "masking": "NONE"
+              }
+            },
+            "enrollmentInfo": {
+              "count": 40,
+              "type": "ESTIMATED"
+            }
+          }
+        }
+      },
+      {
+        "protocolSection": {
+          "identificationModule": {
+            "nctId": "NCT03207711",
+            "orgStudyIdInfo": {
+              "id": "R61AT009333",
+              "type": "NIH",
+              "link": "https://reporter.nih.gov/quickSearch/R61AT009333"
+            },
+            "secondaryIdInfos": [
+              {
+                "id": "R61AT009333",
+                "type": "NIH",
+                "link": "https://reporter.nih.gov/quickSearch/R61AT009333"
+              }
+            ],
+            "organization": {
+              "fullName": "University of California, San Francisco",
+              "class": "OTHER"
+            },
+            "briefTitle": "Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger",
+            "officialTitle": "Optimizing Lifestyle Interventions With Mindfulness-based Strategies in Type 2 Diabetes",
+            "acronym": "Delish"
+          },
+          "statusModule": {
+            "statusVerifiedDate": "2025-12",
+            "overallStatus": "COMPLETED",
+            "expandedAccessInfo": {
+              "hasExpandedAccess": false
+            },
+            "startDateStruct": {
+              "date": "2017-02-17",
+              "type": "ACTUAL"
+            },
+            "primaryCompletionDateStruct": {
+              "date": "2018-04-30",
+              "type": "ACTUAL"
+            },
+            "completionDateStruct": {
+              "date": "2018-09-01",
+              "type": "ACTUAL"
+            },
+            "studyFirstSubmitDate": "2017-06-11",
+            "studyFirstSubmitQcDate": "2017-06-30",
+            "studyFirstPostDateStruct": {
+              "date": "2017-07-05",
+              "type": "ACTUAL"
+            },
+            "resultsFirstSubmitDate": "2025-09-18",
+            "resultsFirstSubmitQcDate": "2025-12-04",
+            "resultsFirstPostDateStruct": {
+              "date": "2025-12-08",
+              "type": "ACTUAL"
+            },
+            "lastUpdateSubmitDate": "2025-12-04",
+            "lastUpdatePostDateStruct": {
+              "date": "2025-12-08",
+              "type": "ACTUAL"
+            }
+          },
+          "conditionsModule": {
+            "conditions": [
+              "Diabetes Mellitus, Type 2"
+            ]
+          },
+          "designModule": {
+            "studyType": "INTERVENTIONAL",
+            "phases": [
+              "NA"
+            ],
+            "designInfo": {
+              "allocation": "RANDOMIZED",
+              "interventionModel": "PARALLEL",
+              "primaryPurpose": "TREATMENT",
+              "maskingInfo": {
+                "masking": "SINGLE",
+                "maskingDescription": "Blood tests at LabCorp and 24-hour dietary recall interviews are done by research assistants blinded to treatment assignment.",
+                "whoMasked": [
+                  "OUTCOMES_ASSESSOR"
+                ]
+              }
+            },
+            "enrollmentInfo": {
+              "count": 60,
+              "type": "ACTUAL"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "capture_sha256": "37ef961f66fe36ef10888ec448e5deaaed4de5c04642475ae3b1f3c978dc33c8",
+  "retention": "Selected original API fields only; narrative, contacts, eligibility and other unused fields omitted. Values below are unchanged from the captured response."
+}
