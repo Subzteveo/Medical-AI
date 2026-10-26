@@ -319,3 +319,18 @@ def test_oversized_session_cookie_is_rejected(configured_access):
     client = TestClient(api.app)
     client.cookies.set('medical_ai_pilot_session', 'A' * 4097)
     assert client.get('/docs').status_code == 401
+
+@pytest.mark.parametrize('payload', [
+    {'question': {'synthetic_sensitive_field': 'SYNTHETIC_PRIVATE_MARKER'}},
+    {'question': 'SYNTHETIC_PRIVATE_MARKER' + ('x' * 4100)},
+    {'question': 'What does the evidence say?', 'patient_notes': 'SYNTHETIC_PRIVATE_MARKER'},
+])
+def test_invalid_evidence_query_never_echoes_rejected_input(configured_access, payload):
+    """Synthetic rejected input must not appear in API validation responses."""
+    response = TestClient(api.app).post(
+        '/v1/evidence/query', json=payload,
+        headers={'Authorization': f'Bearer {VALID_TOKEN}'},
+    )
+    assert response.status_code == 422
+    assert 'SYNTHETIC_PRIVATE_MARKER' not in response.text
+    assert response.headers.get('Cache-Control') == 'no-store'
