@@ -43,7 +43,10 @@ def extract_evidence(question: str, sources: list[SourceRecord], passages: list[
         # submissions and are not admissible efficacy/safety evidence in alpha2.x.
         if src.source_type == "clinical_trial_registry" and p.section != "REGISTRY_FACT":
             continue
-        for sentence in _split_sentences(p.text.strip()):
+        # Registry fields may contain sentence punctuation. Keep their attribution
+        # intact so title text cannot become a standalone efficacy claim.
+        sentences = [p.text.strip()] if src.source_type == "clinical_trial_registry" else _split_sentences(p.text.strip())
+        for sentence in sentences:
             sentence = sentence.strip()
             if len(sentence) < 20 or UNTRUSTED_INSTRUCTION.search(sentence):
                 continue

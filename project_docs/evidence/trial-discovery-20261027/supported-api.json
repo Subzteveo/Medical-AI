@@ -1,0 +1,1300 @@
+{
+  "status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+  "answer_markdown": "### Evidence-bound answer\n\n- ClinicalTrials.gov lists NCT05175807 with the title: A Telemedicine Brief Mindfulness Intervention in Post-COVID-19. [NCT05175807](https://clinicaltrials.gov/study/NCT05175807)\n- ClinicalTrials.gov lists NCT03207711 with the title: Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger. [NCT03207711](https://clinicaltrials.gov/study/NCT03207711)\n- ClinicalTrials.gov lists NCT07575165 with the title: Mindful Movement And GAME BASED Training In Developmental Delay. [NCT07575165](https://clinicaltrials.gov/study/NCT07575165)\n- The registered conditions for NCT03207711 include Diabetes Mellitus, Type 2. [NCT03207711](https://clinicaltrials.gov/study/NCT03207711)\n- The registered conditions for NCT05175807 include Post COVID-19. [NCT05175807](https://clinicaltrials.gov/study/NCT05175807)\n- The registered conditions for NCT07575165 include Developmental Delay \\(Disorder\\). [NCT07575165](https://clinicaltrials.gov/study/NCT07575165)\n- The registered phase for NCT03207711 is NA. [NCT03207711](https://clinicaltrials.gov/study/NCT03207711)\n- The registered phase for NCT05175807 is NA. [NCT05175807](https://clinicaltrials.gov/study/NCT05175807)\n- The registered phase for NCT07575165 is NA. [NCT07575165](https://clinicaltrials.gov/study/NCT07575165)\n- The registered study type for NCT03207711 is INTERVENTIONAL. [NCT03207711](https://clinicaltrials.gov/study/NCT03207711)\n\n### Sources\n- [Mindful Movement And GAME BASED Training In Developmental Delay](https://clinicaltrials.gov/study/NCT07575165) — NCT: NCT07575165\n- [A Telemedicine Brief Mindfulness Intervention in Post-COVID-19](https://clinicaltrials.gov/study/NCT05175807) — NCT: NCT05175807\n- [Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger](https://clinicaltrials.gov/study/NCT03207711) — NCT: NCT03207711\n\n*Alpha2 trial-discovery limitation: ClinicalTrials.gov records support discovery and registered-study facts. They are not treated as proof that an intervention is effective or safe.*",
+  "claims": [
+    {
+      "claim_id": "clm_e058fd4d369f38f4",
+      "claim_text": "ClinicalTrials.gov lists NCT05175807 with the title: A Telemedicine Brief Mindfulness Intervention in Post-COVID-19.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_37551c5e439cee59"
+      ],
+      "source_ids": [
+        "ctgov:NCT05175807"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_ef60196514cee71a",
+      "claim_text": "ClinicalTrials.gov lists NCT03207711 with the title: Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_01975b0da4cdc9ea"
+      ],
+      "source_ids": [
+        "ctgov:NCT03207711"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_6026d3a36422f9f1",
+      "claim_text": "ClinicalTrials.gov lists NCT07575165 with the title: Mindful Movement And GAME BASED Training In Developmental Delay.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_722c7492095ae5cc"
+      ],
+      "source_ids": [
+        "ctgov:NCT07575165"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_9c7cadd93455bf60",
+      "claim_text": "The registered conditions for NCT03207711 include Diabetes Mellitus, Type 2.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_0e25539306188ffb"
+      ],
+      "source_ids": [
+        "ctgov:NCT03207711"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_d0362c02f42fc47a",
+      "claim_text": "The registered conditions for NCT05175807 include Post COVID-19.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_78e6ff2e28cfcadb"
+      ],
+      "source_ids": [
+        "ctgov:NCT05175807"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_0141bbf9e58a899e",
+      "claim_text": "The registered conditions for NCT07575165 include Developmental Delay (Disorder).",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_6b6f680d17398bc9"
+      ],
+      "source_ids": [
+        "ctgov:NCT07575165"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_ffb3064f95626bda",
+      "claim_text": "The registered phase for NCT03207711 is NA.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_c5905d9d04ed57dd"
+      ],
+      "source_ids": [
+        "ctgov:NCT03207711"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_6dcb22846aa58fd2",
+      "claim_text": "The registered phase for NCT05175807 is NA.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_d979849713962e87"
+      ],
+      "source_ids": [
+        "ctgov:NCT05175807"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_dc47e7bca4be178e",
+      "claim_text": "The registered phase for NCT07575165 is NA.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_3e43e875ee6f6df7"
+      ],
+      "source_ids": [
+        "ctgov:NCT07575165"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    },
+    {
+      "claim_id": "clm_0bcbc686772dedb1",
+      "claim_text": "The registered study type for NCT03207711 is INTERVENTIONAL.",
+      "claim_type": "DIRECT",
+      "consequence_level": "MODERATE",
+      "evidence_ids": [
+        "ev_f6bd49c58a1e4614"
+      ],
+      "source_ids": [
+        "ctgov:NCT03207711"
+      ],
+      "jurisdiction": "INTERNATIONAL",
+      "population": null,
+      "applicability": "DIRECT",
+      "evidence_certainty": "NOT_ASSESSED",
+      "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+      "conflict_status": "NONE_DETECTED",
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verification_status": "PASS",
+      "model_id": "none-extractive-alpha2",
+      "prompt_version": "alpha2-extractive"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "ctgov:NCT07575165",
+      "authority": "ClinicalTrials.gov / U.S. National Library of Medicine",
+      "publisher": "Riphah International University",
+      "source_type": "clinical_trial_registry",
+      "title": "Mindful Movement And GAME BASED Training In Developmental Delay",
+      "jurisdiction": "INTERNATIONAL",
+      "record_id": "NCT07575165",
+      "stable_url": "https://clinicaltrials.gov/study/NCT07575165",
+      "identifiers": {
+        "NCT": "NCT07575165"
+      },
+      "version": null,
+      "publication_date": null,
+      "updated_date": "2026-09-23",
+      "effective_date": null,
+      "retrieved_at": "2026-10-26T19:12:32.452172Z",
+      "superseded": false,
+      "licence_class": "public_metadata",
+      "evidence_class": "trial_registry_record",
+      "population": null,
+      "phi_status": "non_phi",
+      "phi_classification": {
+        "classification_id": "public:ctgov:NCT07575165",
+        "object_id": "ctgov:NCT07575165",
+        "information_class": "PUBLIC",
+        "contains_phi": false,
+        "policy_version": "medical-ai-influence-v0.2"
+      },
+      "provenance_complete": true,
+      "raw_metadata": {
+        "overall_status": "COMPLETED",
+        "study_type": "INTERVENTIONAL",
+        "phases": [
+          "NA"
+        ],
+        "conditions": [
+          "Developmental Delay (Disorder)"
+        ]
+      }
+    },
+    {
+      "source_id": "ctgov:NCT05175807",
+      "authority": "ClinicalTrials.gov / U.S. National Library of Medicine",
+      "publisher": "Fondazione Don Carlo Gnocchi ETS",
+      "source_type": "clinical_trial_registry",
+      "title": "A Telemedicine Brief Mindfulness Intervention in Post-COVID-19",
+      "jurisdiction": "INTERNATIONAL",
+      "record_id": "NCT05175807",
+      "stable_url": "https://clinicaltrials.gov/study/NCT05175807",
+      "identifiers": {
+        "NCT": "NCT05175807"
+      },
+      "version": null,
+      "publication_date": null,
+      "updated_date": "2021-12-28",
+      "effective_date": null,
+      "retrieved_at": "2026-10-26T19:12:32.452251Z",
+      "superseded": false,
+      "licence_class": "public_metadata",
+      "evidence_class": "trial_registry_record",
+      "population": null,
+      "phi_status": "non_phi",
+      "phi_classification": {
+        "classification_id": "public:ctgov:NCT05175807",
+        "object_id": "ctgov:NCT05175807",
+        "information_class": "PUBLIC",
+        "contains_phi": false,
+        "policy_version": "medical-ai-influence-v0.2"
+      },
+      "provenance_complete": true,
+      "raw_metadata": {
+        "overall_status": "UNKNOWN",
+        "study_type": "INTERVENTIONAL",
+        "phases": [
+          "NA"
+        ],
+        "conditions": [
+          "Post COVID-19"
+        ]
+      }
+    },
+    {
+      "source_id": "ctgov:NCT03207711",
+      "authority": "ClinicalTrials.gov / U.S. National Library of Medicine",
+      "publisher": "University of California, San Francisco",
+      "source_type": "clinical_trial_registry",
+      "title": "Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger",
+      "jurisdiction": "INTERNATIONAL",
+      "record_id": "NCT03207711",
+      "stable_url": "https://clinicaltrials.gov/study/NCT03207711",
+      "identifiers": {
+        "NCT": "NCT03207711"
+      },
+      "version": null,
+      "publication_date": null,
+      "updated_date": "2025-12-04",
+      "effective_date": null,
+      "retrieved_at": "2026-10-26T19:12:32.452279Z",
+      "superseded": false,
+      "licence_class": "public_metadata",
+      "evidence_class": "trial_registry_record",
+      "population": null,
+      "phi_status": "non_phi",
+      "phi_classification": {
+        "classification_id": "public:ctgov:NCT03207711",
+        "object_id": "ctgov:NCT03207711",
+        "information_class": "PUBLIC",
+        "contains_phi": false,
+        "policy_version": "medical-ai-influence-v0.2"
+      },
+      "provenance_complete": true,
+      "raw_metadata": {
+        "overall_status": "COMPLETED",
+        "study_type": "INTERVENTIONAL",
+        "phases": [
+          "NA"
+        ],
+        "conditions": [
+          "Diabetes Mellitus, Type 2"
+        ]
+      }
+    }
+  ],
+  "evidence_objects": [
+    {
+      "evidence_id": "ev_37551c5e439cee59",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_d1f78faa88e69d3d"
+      ],
+      "proposition": "ClinicalTrials.gov lists NCT05175807 with the title: A Telemedicine Brief Mindfulness Intervention in Post-COVID-19.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_01975b0da4cdc9ea",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_682047df408ea6d3"
+      ],
+      "proposition": "ClinicalTrials.gov lists NCT03207711 with the title: Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_722c7492095ae5cc",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_d92e0b0e57bc8ac1"
+      ],
+      "proposition": "ClinicalTrials.gov lists NCT07575165 with the title: Mindful Movement And GAME BASED Training In Developmental Delay.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_0e25539306188ffb",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_29e3fd227402fd2f"
+      ],
+      "proposition": "The registered conditions for NCT03207711 include Diabetes Mellitus, Type 2.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_78e6ff2e28cfcadb",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_802f3d6eb96ae5d2"
+      ],
+      "proposition": "The registered conditions for NCT05175807 include Post COVID-19.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_6b6f680d17398bc9",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_36a2e8300d361e4d"
+      ],
+      "proposition": "The registered conditions for NCT07575165 include Developmental Delay (Disorder).",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_c5905d9d04ed57dd",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_0ad6650f47bc8181"
+      ],
+      "proposition": "The registered phase for NCT03207711 is NA.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_d979849713962e87",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_49a8e477475f9fcd"
+      ],
+      "proposition": "The registered phase for NCT05175807 is NA.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_3e43e875ee6f6df7",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_ac313216eb615037"
+      ],
+      "proposition": "The registered phase for NCT07575165 is NA.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    },
+    {
+      "evidence_id": "ev_f6bd49c58a1e4614",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_6e39b50837b7d0f1"
+      ],
+      "proposition": "The registered study type for NCT03207711 is INTERVENTIONAL.",
+      "evidence_type": "trial_registry_fact",
+      "population": null,
+      "intervention_or_exposure": null,
+      "comparator": null,
+      "outcome": null,
+      "effect": null,
+      "uncertainty": null,
+      "jurisdiction": "INTERNATIONAL",
+      "limitations": [
+        "ClinicalTrials.gov registry content supports trial discovery and registered-study facts; it is not treated as proof of treatment efficacy or safety."
+      ]
+    }
+  ],
+  "citation_mappings": [
+    {
+      "mapping_id": "clm_e058fd4d369f38f4:ev_37551c5e439cee59",
+      "claim_id": "clm_e058fd4d369f38f4",
+      "evidence_id": "ev_37551c5e439cee59",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_d1f78faa88e69d3d"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_ef60196514cee71a:ev_01975b0da4cdc9ea",
+      "claim_id": "clm_ef60196514cee71a",
+      "evidence_id": "ev_01975b0da4cdc9ea",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_682047df408ea6d3"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_6026d3a36422f9f1:ev_722c7492095ae5cc",
+      "claim_id": "clm_6026d3a36422f9f1",
+      "evidence_id": "ev_722c7492095ae5cc",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_d92e0b0e57bc8ac1"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_9c7cadd93455bf60:ev_0e25539306188ffb",
+      "claim_id": "clm_9c7cadd93455bf60",
+      "evidence_id": "ev_0e25539306188ffb",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_29e3fd227402fd2f"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_d0362c02f42fc47a:ev_78e6ff2e28cfcadb",
+      "claim_id": "clm_d0362c02f42fc47a",
+      "evidence_id": "ev_78e6ff2e28cfcadb",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_802f3d6eb96ae5d2"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_0141bbf9e58a899e:ev_6b6f680d17398bc9",
+      "claim_id": "clm_0141bbf9e58a899e",
+      "evidence_id": "ev_6b6f680d17398bc9",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_36a2e8300d361e4d"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_ffb3064f95626bda:ev_c5905d9d04ed57dd",
+      "claim_id": "clm_ffb3064f95626bda",
+      "evidence_id": "ev_c5905d9d04ed57dd",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_0ad6650f47bc8181"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_6dcb22846aa58fd2:ev_d979849713962e87",
+      "claim_id": "clm_6dcb22846aa58fd2",
+      "evidence_id": "ev_d979849713962e87",
+      "source_id": "ctgov:NCT05175807",
+      "passage_ids": [
+        "passage_49a8e477475f9fcd"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_dc47e7bca4be178e:ev_3e43e875ee6f6df7",
+      "claim_id": "clm_dc47e7bca4be178e",
+      "evidence_id": "ev_3e43e875ee6f6df7",
+      "source_id": "ctgov:NCT07575165",
+      "passage_ids": [
+        "passage_ac313216eb615037"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    },
+    {
+      "mapping_id": "clm_0bcbc686772dedb1:ev_f6bd49c58a1e4614",
+      "claim_id": "clm_0bcbc686772dedb1",
+      "evidence_id": "ev_f6bd49c58a1e4614",
+      "source_id": "ctgov:NCT03207711",
+      "passage_ids": [
+        "passage_6e39b50837b7d0f1"
+      ],
+      "entailment_status": "SUPPORTED_EXACT_PASSAGE",
+      "verified": true
+    }
+  ],
+  "passages": [
+    {
+      "passage_id": "passage_d92e0b0e57bc8ac1",
+      "source_id": "ctgov:NCT07575165",
+      "section": "REGISTRY_FACT",
+      "text": "ClinicalTrials.gov lists NCT07575165 with the title: Mindful Movement And GAME BASED Training In Developmental Delay.",
+      "locator": "protocolSection.identificationModule.briefTitle",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_ac313216eb615037",
+      "source_id": "ctgov:NCT07575165",
+      "section": "REGISTRY_FACT",
+      "text": "The registered phase for NCT07575165 is NA.",
+      "locator": "protocolSection.designModule.phases",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_36a2e8300d361e4d",
+      "source_id": "ctgov:NCT07575165",
+      "section": "REGISTRY_FACT",
+      "text": "The registered conditions for NCT07575165 include Developmental Delay (Disorder).",
+      "locator": "protocolSection.conditionsModule.conditions",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_d1f78faa88e69d3d",
+      "source_id": "ctgov:NCT05175807",
+      "section": "REGISTRY_FACT",
+      "text": "ClinicalTrials.gov lists NCT05175807 with the title: A Telemedicine Brief Mindfulness Intervention in Post-COVID-19.",
+      "locator": "protocolSection.identificationModule.briefTitle",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_49a8e477475f9fcd",
+      "source_id": "ctgov:NCT05175807",
+      "section": "REGISTRY_FACT",
+      "text": "The registered phase for NCT05175807 is NA.",
+      "locator": "protocolSection.designModule.phases",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_802f3d6eb96ae5d2",
+      "source_id": "ctgov:NCT05175807",
+      "section": "REGISTRY_FACT",
+      "text": "The registered conditions for NCT05175807 include Post COVID-19.",
+      "locator": "protocolSection.conditionsModule.conditions",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_682047df408ea6d3",
+      "source_id": "ctgov:NCT03207711",
+      "section": "REGISTRY_FACT",
+      "text": "ClinicalTrials.gov lists NCT03207711 with the title: Delish Study: Diabetes Education to Lower Insulin, Sugars, and Hunger.",
+      "locator": "protocolSection.identificationModule.briefTitle",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_6e39b50837b7d0f1",
+      "source_id": "ctgov:NCT03207711",
+      "section": "REGISTRY_FACT",
+      "text": "The registered study type for NCT03207711 is INTERVENTIONAL.",
+      "locator": "protocolSection.designModule.studyType",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_0ad6650f47bc8181",
+      "source_id": "ctgov:NCT03207711",
+      "section": "REGISTRY_FACT",
+      "text": "The registered phase for NCT03207711 is NA.",
+      "locator": "protocolSection.designModule.phases",
+      "start_offset": null,
+      "end_offset": null
+    },
+    {
+      "passage_id": "passage_29e3fd227402fd2f",
+      "source_id": "ctgov:NCT03207711",
+      "section": "REGISTRY_FACT",
+      "text": "The registered conditions for NCT03207711 include Diabetes Mellitus, Type 2.",
+      "locator": "protocolSection.conditionsModule.conditions",
+      "start_offset": null,
+      "end_offset": null
+    }
+  ],
+  "trace": {
+    "trace_id": "948b2fcd-7f4e-4b09-9095-93f3320c2904",
+    "timestamp": "2026-10-26T19:12:32.460629Z",
+    "query_plan": {
+      "intent": [
+        "EVIDENCE_SYNTHESIS",
+        "TRIAL_QUERY"
+      ],
+      "user_mode": "clinician",
+      "patient_specific": false,
+      "known_user_facts": [],
+      "unknown_material_facts": [],
+      "jurisdiction": "AU",
+      "jurisdiction_material": false,
+      "temporal_sensitivity": "high",
+      "consequence_level": "MODERATE",
+      "required_source_classes": [
+        "clinical_trial_registry"
+      ],
+      "retrieval_questions": [
+        "Find clinical trials for mindfulness"
+      ],
+      "required_second_pass": false,
+      "safety_flags": [
+        "TRIAL_REGISTRY_DISCOVERY_ONLY"
+      ]
+    },
+    "retrieval_query_digests": [
+      "hmac-sha256:29c90102a7f1973855738b47f81ced4d96e751a40b6c67659f7096ecf8793b82"
+    ],
+    "connectors_used": [
+      "clinicaltrials-gov-v2"
+    ],
+    "source_ids": [
+      "ctgov:NCT07575165",
+      "ctgov:NCT05175807",
+      "ctgov:NCT03207711"
+    ],
+    "evidence_ids": [
+      "ev_37551c5e439cee59",
+      "ev_01975b0da4cdc9ea",
+      "ev_722c7492095ae5cc",
+      "ev_0e25539306188ffb",
+      "ev_78e6ff2e28cfcadb",
+      "ev_6b6f680d17398bc9",
+      "ev_c5905d9d04ed57dd",
+      "ev_d979849713962e87",
+      "ev_3e43e875ee6f6df7",
+      "ev_f6bd49c58a1e4614"
+    ],
+    "candidate_claim_ids": [
+      "clm_e058fd4d369f38f4",
+      "clm_ef60196514cee71a",
+      "clm_6026d3a36422f9f1",
+      "clm_9c7cadd93455bf60",
+      "clm_d0362c02f42fc47a",
+      "clm_0141bbf9e58a899e",
+      "clm_ffb3064f95626bda",
+      "clm_6dcb22846aa58fd2",
+      "clm_dc47e7bca4be178e",
+      "clm_0bcbc686772dedb1"
+    ],
+    "verification_results": {
+      "clm_e058fd4d369f38f4": "PASS",
+      "clm_ef60196514cee71a": "PASS",
+      "clm_6026d3a36422f9f1": "PASS",
+      "clm_9c7cadd93455bf60": "PASS",
+      "clm_d0362c02f42fc47a": "PASS",
+      "clm_0141bbf9e58a899e": "PASS",
+      "clm_ffb3064f95626bda": "PASS",
+      "clm_6dcb22846aa58fd2": "PASS",
+      "clm_dc47e7bca4be178e": "PASS",
+      "clm_0bcbc686772dedb1": "PASS"
+    },
+    "safety_flags": [
+      "TRIAL_REGISTRY_DISCOVERY_ONLY"
+    ],
+    "component_versions": {
+      "engine": "0.2.0-influence-control-core",
+      "connector": "alpha2.1-red-remediation",
+      "planner": "alpha2.1-policy-bound",
+      "extractor": "alpha2.1-extractive-safety-filtered",
+      "claim_builder": "alpha2.1-claim-consequence",
+      "verifier": "alpha2.1-exact-passage-high-consequence",
+      "influence_controller": "medical-ai-influence-v0.2-typesafe",
+      "renderer": "alpha2.1"
+    },
+    "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
+    "authorization_decision_ids": [
+      "bdac3530-a002-4d14-af77-ca33e8d18147",
+      "3f5653cd-a338-43c2-80ac-1fd627b0248b",
+      "88bfe5a4-1628-4a95-a1bd-ab9c02d5f4c0",
+      "01262388-564e-4b62-aa3d-0674e46e7f45",
+      "a53f15bd-66a5-49eb-98b2-7cac42422bb1",
+      "3e9bed91-0431-4ded-9a76-bdc7a9184a2a",
+      "7c2ce01e-54d0-4637-99ca-6e1607089f4c",
+      "37b07130-e2be-4b58-9f32-2968d6a6332c",
+      "35a7150e-697d-4808-8e37-0f2bbb72c1cc",
+      "241c82af-f446-4e41-a0ae-4b8a8c8b5e6e"
+    ]
+  },
+  "influence_decisions": [
+    {
+      "decision_id": "bdac3530-a002-4d14-af77-ca33e8d18147",
+      "request_id": "1c634799-0c7c-4a11-929f-8859c4b6d10c",
+      "object_id": "clm_e058fd4d369f38f4",
+      "proposition_id": "user-output:clm_e058fd4d369f38f4",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "70080825-6590-4be0-a0ad-bb28eba8a756",
+        "decision_id": "bdac3530-a002-4d14-af77-ca33e8d18147",
+        "object_id": "clm_e058fd4d369f38f4",
+        "proposition_id": "user-output:clm_e058fd4d369f38f4",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.458953Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459043Z"
+    },
+    {
+      "decision_id": "3f5653cd-a338-43c2-80ac-1fd627b0248b",
+      "request_id": "ff86b2fa-224a-475b-9735-53600f4e4b7f",
+      "object_id": "clm_ef60196514cee71a",
+      "proposition_id": "user-output:clm_ef60196514cee71a",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "86024927-eb38-4f57-b3ca-9bfff06d9302",
+        "decision_id": "3f5653cd-a338-43c2-80ac-1fd627b0248b",
+        "object_id": "clm_ef60196514cee71a",
+        "proposition_id": "user-output:clm_ef60196514cee71a",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.459571Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459595Z"
+    },
+    {
+      "decision_id": "88bfe5a4-1628-4a95-a1bd-ab9c02d5f4c0",
+      "request_id": "184a652d-44df-4d2a-89a2-68e8e93f2bab",
+      "object_id": "clm_6026d3a36422f9f1",
+      "proposition_id": "user-output:clm_6026d3a36422f9f1",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "6a3680ea-7b2d-4d5f-8269-11ebfec0ac17",
+        "decision_id": "88bfe5a4-1628-4a95-a1bd-ab9c02d5f4c0",
+        "object_id": "clm_6026d3a36422f9f1",
+        "proposition_id": "user-output:clm_6026d3a36422f9f1",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.459698Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459715Z"
+    },
+    {
+      "decision_id": "01262388-564e-4b62-aa3d-0674e46e7f45",
+      "request_id": "a3d365b6-ac9a-47e3-beef-74bdaf041313",
+      "object_id": "clm_9c7cadd93455bf60",
+      "proposition_id": "user-output:clm_9c7cadd93455bf60",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "86f105df-db7d-47b0-a407-441bb94569d2",
+        "decision_id": "01262388-564e-4b62-aa3d-0674e46e7f45",
+        "object_id": "clm_9c7cadd93455bf60",
+        "proposition_id": "user-output:clm_9c7cadd93455bf60",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.459797Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459811Z"
+    },
+    {
+      "decision_id": "a53f15bd-66a5-49eb-98b2-7cac42422bb1",
+      "request_id": "efe2d21c-467a-4fba-93e1-f7b85b41beca",
+      "object_id": "clm_d0362c02f42fc47a",
+      "proposition_id": "user-output:clm_d0362c02f42fc47a",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "9c781a9a-82b2-423c-a743-38fd554d2469",
+        "decision_id": "a53f15bd-66a5-49eb-98b2-7cac42422bb1",
+        "object_id": "clm_d0362c02f42fc47a",
+        "proposition_id": "user-output:clm_d0362c02f42fc47a",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.459891Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459906Z"
+    },
+    {
+      "decision_id": "3e9bed91-0431-4ded-9a76-bdc7a9184a2a",
+      "request_id": "2b3da9c9-57fd-421f-8196-73c66368408d",
+      "object_id": "clm_0141bbf9e58a899e",
+      "proposition_id": "user-output:clm_0141bbf9e58a899e",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "45e3c302-98cb-4067-bb09-9fce5f550a96",
+        "decision_id": "3e9bed91-0431-4ded-9a76-bdc7a9184a2a",
+        "object_id": "clm_0141bbf9e58a899e",
+        "proposition_id": "user-output:clm_0141bbf9e58a899e",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.459981Z"
+      },
+      "created_at": "2026-10-26T19:12:32.459998Z"
+    },
+    {
+      "decision_id": "7c2ce01e-54d0-4637-99ca-6e1607089f4c",
+      "request_id": "146fb834-c243-4378-af4f-81fbb03bbe1f",
+      "object_id": "clm_ffb3064f95626bda",
+      "proposition_id": "user-output:clm_ffb3064f95626bda",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "50021d37-1cc5-49b3-88cf-30f3399268e5",
+        "decision_id": "7c2ce01e-54d0-4637-99ca-6e1607089f4c",
+        "object_id": "clm_ffb3064f95626bda",
+        "proposition_id": "user-output:clm_ffb3064f95626bda",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.460072Z"
+      },
+      "created_at": "2026-10-26T19:12:32.460113Z"
+    },
+    {
+      "decision_id": "37b07130-e2be-4b58-9f32-2968d6a6332c",
+      "request_id": "c7aba248-7833-460e-8a8d-74a3e4aab6ca",
+      "object_id": "clm_6dcb22846aa58fd2",
+      "proposition_id": "user-output:clm_6dcb22846aa58fd2",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "0aeb9403-5b0f-4dd6-ae91-c88a1533810d",
+        "decision_id": "37b07130-e2be-4b58-9f32-2968d6a6332c",
+        "object_id": "clm_6dcb22846aa58fd2",
+        "proposition_id": "user-output:clm_6dcb22846aa58fd2",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.460200Z"
+      },
+      "created_at": "2026-10-26T19:12:32.460213Z"
+    },
+    {
+      "decision_id": "35a7150e-697d-4808-8e37-0f2bbb72c1cc",
+      "request_id": "2a44c15a-b817-4c85-b2b5-d1d7783f8f6a",
+      "object_id": "clm_dc47e7bca4be178e",
+      "proposition_id": "user-output:clm_dc47e7bca4be178e",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "ad02ed4e-d330-47f5-b076-61db4565e0c5",
+        "decision_id": "35a7150e-697d-4808-8e37-0f2bbb72c1cc",
+        "object_id": "clm_dc47e7bca4be178e",
+        "proposition_id": "user-output:clm_dc47e7bca4be178e",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.460289Z"
+      },
+      "created_at": "2026-10-26T19:12:32.460301Z"
+    },
+    {
+      "decision_id": "241c82af-f446-4e41-a0ae-4b8a8c8b5e6e",
+      "request_id": "c6deef6e-2d18-4009-9f01-3aa691ac7697",
+      "object_id": "clm_0bcbc686772dedb1",
+      "proposition_id": "user-output:clm_0bcbc686772dedb1",
+      "status": "ALLOW",
+      "reasons": [],
+      "policy_version": "medical-ai-influence-v0.2-typesafe",
+      "evaluated_dimensions": {
+        "evidence_authority": "APPROVED",
+        "information_handling_authority": "APPROVED",
+        "data_plane": "EVIDENCE",
+        "information_class": "PUBLIC",
+        "provenance": "PASS",
+        "validation": "PASS",
+        "safety": "PASS",
+        "monitoring": "PASS"
+      },
+      "transition_authorization": {
+        "transition": {
+          "source_plane": "EVIDENCE",
+          "target_plane": "EVIDENCE",
+          "information_class": "PUBLIC"
+        },
+        "decision": "ALLOW",
+        "policy_version": "medical-ai-influence-v0.2-typesafe"
+      },
+      "authorization": {
+        "authorization_id": "68c08cf9-6015-4f33-bb28-334f7cb95352",
+        "decision_id": "241c82af-f446-4e41-a0ae-4b8a8c8b5e6e",
+        "object_id": "clm_0bcbc686772dedb1",
+        "proposition_id": "user-output:clm_0bcbc686772dedb1",
+        "state": "ACTIVE",
+        "required_dependency_dimensions": [
+          "EVIDENCE_AUTHORITY",
+          "INFORMATION_HANDLING_AUTHORITY",
+          "PROVENANCE",
+          "VALIDATION",
+          "SAFETY",
+          "MONITORING"
+        ],
+        "created_at": "2026-10-26T19:12:32.460375Z"
+      },
+      "created_at": "2026-10-26T19:12:32.460389Z"
+    }
+  ]
+}

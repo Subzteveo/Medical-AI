@@ -1,0 +1,68 @@
+{
+  "status": "OUTSIDE_VALIDATED_CAPABILITY",
+  "answer_markdown": "### Evidence-bound answer\n\nThe available evidence did not pass the required verification and influence-authorization gates for a supported answer.",
+  "claims": [],
+  "sources": [],
+  "evidence_objects": [],
+  "citation_mappings": [],
+  "passages": [],
+  "trace": {
+    "trace_id": "29ebed26-0ca9-4bce-ab5a-32aa2a391863",
+    "timestamp": "2026-10-26T19:12:33.691383Z",
+    "query_plan": {
+      "intent": [
+        "EVIDENCE_SYNTHESIS",
+        "PATIENT_SPECIFIC_REQUEST"
+      ],
+      "user_mode": "clinician",
+      "patient_specific": true,
+      "known_user_facts": [],
+      "unknown_material_facts": [],
+      "jurisdiction": "AU",
+      "jurisdiction_material": false,
+      "temporal_sensitivity": "moderate",
+      "consequence_level": "HIGH",
+      "required_source_classes": [
+        "biomedical_literature"
+      ],
+      "retrieval_questions": [
+        "What dose of warfarin should my patient take?"
+      ],
+      "required_second_pass": true,
+      "safety_flags": [
+        "HIGH_CONSEQUENCE:medication_dose",
+        "HIGH_CONSEQUENCE:anticoagulation",
+        "PATIENT_SPECIFIC",
+        "PATIENT_SPECIFIC_OR_IDENTIFYING"
+      ]
+    },
+    "retrieval_query_digests": [
+      "hmac-sha256:b4e467e19fd10d2f13e914b7dcd03e3a653356e770bd9271555056842c4d4707"
+    ],
+    "connectors_used": [],
+    "source_ids": [],
+    "evidence_ids": [],
+    "candidate_claim_ids": [],
+    "verification_results": {},
+    "safety_flags": [
+      "HIGH_CONSEQUENCE:medication_dose",
+      "HIGH_CONSEQUENCE:anticoagulation",
+      "PATIENT_SPECIFIC",
+      "PATIENT_SPECIFIC_OR_IDENTIFYING",
+      "PHI_ROUTE_BLOCKED"
+    ],
+    "component_versions": {
+      "engine": "0.2.0-influence-control-core",
+      "connector": "none",
+      "planner": "alpha2.1-policy-bound",
+      "extractor": "alpha2.1-extractive-safety-filtered",
+      "claim_builder": "alpha2.1-claim-consequence",
+      "verifier": "alpha2.1-exact-passage-high-consequence",
+      "influence_controller": "medical-ai-influence-v0.2-typesafe",
+      "renderer": "alpha2.1"
+    },
+    "final_status": "OUTSIDE_VALIDATED_CAPABILITY",
+    "authorization_decision_ids": []
+  },
+  "influence_decisions": []
+}

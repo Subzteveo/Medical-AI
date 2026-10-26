@@ -1,0 +1,73 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+___________ test_registry_title_sentences_keep_registry_attribution ____________
+
+    async def test_registry_title_sentences_keep_registry_attribution():
+        """A title is registered metadata, never a standalone efficacy assertion."""
+        from copy import deepcopy
+        from medical_ai.engine import EvidenceEngine
+        from medical_ai.schemas import AnswerStatus
+    
+        payload = deepcopy(PAYLOAD)
+        title = "Example trial. Treatment X cures insomnia."
+        payload["studies"][0]["protocolSection"]["identificationModule"]["briefTitle"] = title
+    
+        class FixtureConnector(ClinicalTrialsConnector):
+            async def search_and_fetch(self, query, limit=5):
+                return self._parse_payload(payload)
+    
+        answer = await EvidenceEngine(FixtureConnector()).answer("Find clinical trials for insomnia")
+        assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+        title_claims = [c.claim_text for c in answer.claims if "cures insomnia" in c.claim_text]
+>       assert title_claims == [f"ClinicalTrials.gov lists NCT12345678 with the title: {title}."]
+E       AssertionError: assert ['Treatment X...s insomnia..'] == ['ClinicalTri...s insomnia..']
+E         
+E         At index 0 diff: 'Treatment X cures insomnia..' != 'ClinicalTrials.gov lists NCT12345678 with the title: Example trial. Treatment X cures insomnia..'
+E         Use -v to get more diff
+
+/tmp/test_registry_regression_before.py:46: AssertionError
+__________ test_registry_fact_locators_resolve_to_original_api_fields __________
+
+    def test_registry_fact_locators_resolve_to_original_api_fields():
+        _, passages = ClinicalTrialsConnector._parse_payload(PAYLOAD)
+        expected = {
+            "protocolSection.identificationModule.briefTitle": "Example trial",
+            "protocolSection.statusModule.overallStatus": "RECRUITING",
+            "protocolSection.designModule.studyType": "INTERVENTIONAL",
+            "protocolSection.designModule.phases": ["PHASE2"],
+            "protocolSection.conditionsModule.conditions": ["Hypertension"],
+        }
+        facts = [p for p in passages if p.section == "REGISTRY_FACT"]
+>       assert {p.locator for p in facts} == set(expected)
+E       AssertionError: assert {'protocolSec...tion.fact[4]'} == {'protocolSec...verallStatus'}
+E         
+E         Extra items in the left set:
+E         'protocolSection.fact[2]'
+E         'protocolSection.fact[3]'
+E         'protocolSection.fact[1]'
+E         'protocolSection.fact[0]'
+E         'protocolSection.fact[4]'...
+E         
+E         ...Full output truncated (7 lines hidden), use '-vv' to show
+
+/tmp/test_registry_regression_before.py:60: AssertionError
+__________ test_registry_official_title_fallback_has_correct_locator ___________
+
+    def test_registry_official_title_fallback_has_correct_locator():
+        from copy import deepcopy
+        payload = deepcopy(PAYLOAD)
+        identification = payload["studies"][0]["protocolSection"]["identificationModule"]
+        identification["officialTitle"] = identification.pop("briefTitle")
+        _, passages = ClinicalTrialsConnector._parse_payload(payload)
+>       assert passages[0].locator == "protocolSection.identificationModule.officialTitle"
+E       AssertionError: assert 'protocolSection.fact[0]' == 'protocolSect...officialTitle'
+E         
+E         - protocolSection.identificationModule.officialTitle
+E         + protocolSection.fact[0]
+
+/tmp/test_registry_regression_before.py:74: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/test_registry_regression_before.py::test_registry_title_sentences_keep_registry_attribution
+FAILED ../../../../tmp/test_registry_regression_before.py::test_registry_fact_locators_resolve_to_original_api_fields
+FAILED ../../../../tmp/test_registry_regression_before.py::test_registry_official_title_fallback_has_correct_locator
+3 failed, 1 passed in 0.22s
