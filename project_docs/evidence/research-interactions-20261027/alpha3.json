@@ -219,11 +219,11 @@
   },
   "evaluation_scope": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
   "failures": [],
-  "generated_at": "2026-10-26T20:15:52.133704Z",
+  "generated_at": "2026-10-26T20:22:44.642650Z",
   "harness_failures": [],
   "metric_boundary": "Synthetic fixture source order after pipeline admission, as recorded in trace.source_ids; not live retrieval or ranking performance. Normalization is observed in the fixture connector.",
   "report_version": "alpha3-evidence-fidelity-report-v0.2",
-  "repository_commit_sha": "d9f190736cd42330b2e21b651e848ff7bf6f7499",
+  "repository_commit_sha": "8efd7b047804b85bf61015056b906f4e08c7073c",
   "runner_configuration": {
     "module": "medical_ai.evals.alpha3_evidence_fidelity",
     "python": "3.12.14"

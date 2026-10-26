@@ -85,7 +85,11 @@ _VARIABLE_LIST = _NON_DRUG_VARIABLE + r"(?:" + _VARIABLE_SEPARATOR + _NON_DRUG_V
 _OPERAND_END = r"(?=\s*(?:[.!?]|$)|\s+(?:was|were|is|are|has|have)\b)"
 _EXPLICIT_VARIABLE_INTERACTION = re.compile(
     r"\binteractions?\s+(?:between|among|of)\s+" + _VARIABLE_LIST + _OPERAND_END
-    + r"|\b" + _NON_DRUG_VARIABLE + r"-by-" + _NON_DRUG_VARIABLE
+    # A factor pair must begin its sentence (after a bounded neutral lead-in).
+    # A word boundary alone would accept age-by-sex inside an unknown longer
+    # expression such as tacrolimus-by-age-by-sex. Other forms remain unresolved.
+    + r"|(?:^|[.!?]\s+)(?:find literature about\s+)?(?:(?:the|a|no)\s+)?"
+    + _NON_DRUG_VARIABLE + r"-by-" + _NON_DRUG_VARIABLE
     + r"\s+interactions?" + _OPERAND_END,
     re.I,
 )

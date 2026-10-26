@@ -1,6 +1,6 @@
 # Research-variable interaction correction — 27 October 2026
 
-Baseline main: `a55b0eb0b2fa9d1b04c9737196c1468d2877569c` (PR #33 merged). No open PRs returned at intake. Application/test revision: `d9f190736cd42330b2e21b651e848ff7bf6f7499`. Later evidence/documentation commits do not change that application code. No deployment or intended-use change.
+Baseline main: `a55b0eb0b2fa9d1b04c9737196c1468d2877569c` (PR #33 merged). No open PRs returned at intake. Application/test revision: `8efd7b047804b85bf61015056b906f4e08c7073c`. Later evidence/documentation commits do not change that application code. No deployment or intended-use change.
 
 ## Reproduced failure and cause
 
@@ -17,13 +17,19 @@ This is an intentionally incomplete deterministic grammar with a small non-drug 
 ## Tests and execution
 
 - Before implementation: 14 failures and 41 passes in the initial 55-test set (`regression-before.txt`). The failing cases establish the research-variable false positive; risk controls already passed.
-- Final focused set: 64 passes, including 59 interaction tests and the five PR #33 context tests. Two further adversarial cases require withholding for an intervening subject and a semicolon-shared operand list.
-- Full regression: 282 passed, one dependency deprecation warning. Strict influence typing/static guard, source checksums, tracked-file hygiene, compile/import and installed-policy parity passed.
+- Final focused set: 74 passes, including 69 interaction tests and the five PR #33 context tests. Two further adversarial cases require withholding for an intervening subject and a semicolon-shared operand list.
+- Full regression: 292 passed, one dependency deprecation warning. Strict influence typing/static guard, source checksums, tracked-file hygiene, compile/import and installed-policy parity passed.
 - Alpha3: four required fixture cases passed. Existing conflict/population checks remain blocked and clinical entailment/live ranking unproven; see `alpha3.json`.
 - DOM: 43 invalid responses withheld, valid positive control and 15 unsafe-link controls passed. Real Chromium synthetic desktop/mobile/keyboard/provenance checks passed.
 - Browser tooling initially lacked a browser; the bundled newer browser download failed. Installing the repository CI's pinned Playwright 1.56.1 browser tooling resolved this. An initial separate-process server attempt was unreachable; co-locating the local server and browser in one execution established connectivity. These are environment failures, not passing application checks.
 
 `tests/test_interaction_context.py` is the case-by-case expectation register: every row states its reason and is exercised as a query and as a complete extracted abstract. Positive rows require exact preserved text/headings/attribution. Risk rows require withheld claims, sources and passages, with failed verification; a separate test proves a high-consequence query cannot be downgraded by a benign abstract.
+
+## Review-driven correction
+
+Automatic review of publication commit `47107f5` found a P1: the two-factor regex could match the benign suffix inside `tacrolimus-by-age-by-sex interaction`. This was a real regression, not a disputed finding. Five new cases cover known/unknown prefixes, whitespace and multiplication-symbol prefixes, and an unknown suffix, at both query and full-abstract boundaries. Eight tests failed before the correction (`review-regression-before.txt`; trailing whitespace only normalised). The statistical pair now requires a sentence boundary and a bounded neutral lead-in, so it cannot hide a preceding factor. All ten cases pass after the repair. Unknown expression forms remain conservative.
+
+The full regression and all five authenticated live-browser scenarios were repeated on corrected application revision `8efd7b0`; the current live-verification/browser-results/type-safety/Alpha3 records bind that revision. `original-replay.json` is an earlier exploratory working-copy replay; use the final revision-bound live records for acceptance. Historical initial failures remain preserved.
 
 ## Authenticated browser → live PubMed
 

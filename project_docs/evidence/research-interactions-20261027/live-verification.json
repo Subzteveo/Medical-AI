@@ -1,14 +1,14 @@
 {
-  "revision": "d9f190736cd42330b2e21b651e848ff7bf6f7499",
+  "revision": "8efd7b047804b85bf61015056b906f4e08c7073c",
   "cases": [
     {
       "name": "broad",
       "xml_sha256": "0cb3651c011715856a848f7e81e804abb752c3bb826f924f39a568155832d280",
       "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=33223537%2C26168376%2C37249199&retmode=xml",
-      "retrieved_at": "2026-10-26T20:16:27.920499+00:00",
+      "retrieved_at": "2026-10-26T20:22:40.779488+00:00",
       "trace": {
-        "trace_id": "6c32a2fb-fc25-4dd8-a459-fc7e4ce532e9",
-        "timestamp": "2026-10-26T20:16:28.060216Z",
+        "trace_id": "4ff3b943-e157-4cf9-b40c-78d3ec7a049d",
+        "timestamp": "2026-10-26T20:22:40.916434Z",
         "query_plan": {
           "intent": [
             "EVIDENCE_SYNTHESIS"
@@ -31,7 +31,7 @@
           "safety_flags": []
         },
         "retrieval_query_digests": [
-          "hmac-sha256:40d425e007963284fed7d35dcfeaff77468f2ccf5b096df290f747f156e9a2a3"
+          "hmac-sha256:e57bba20b7cc0b3ea25910dc7dd6313851b1c17997aab2446d31d701ca32ef75"
         ],
         "connectors_used": [
           "pubmed-eutils"
@@ -69,9 +69,9 @@
         },
         "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
         "authorization_decision_ids": [
-          "aec7fe51-192f-4e96-8f9a-78fbfabdfb31",
-          "bf082bd8-4e19-470c-9ee3-825bb29716fb",
-          "79189667-1b75-4d6b-961d-15952c4bef50"
+          "9d0054fd-24e5-4370-947c-d48cded5863d",
+          "64835c70-0b08-45f7-bad3-8d57e34ea923",
+          "ff788ff9-4e88-44f2-818b-08ea628cd281"
         ]
       },
       "fidelity": {
@@ -160,10 +160,10 @@
       "name": "target",
       "xml_sha256": "ac3ac75db291e6c7794990f523e5641e9fc172c06d784364a91cb6e5b193e1a2",
       "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=37249199%2C36767238&retmode=xml",
-      "retrieved_at": "2026-10-26T20:16:35.321247+00:00",
+      "retrieved_at": "2026-10-26T20:22:47.644609+00:00",
       "trace": {
-        "trace_id": "35ccfef0-8c0d-4475-b16b-817a92460a25",
-        "timestamp": "2026-10-26T20:16:35.396970Z",
+        "trace_id": "93f8b832-a49a-4247-9787-2b87d9268734",
+        "timestamp": "2026-10-26T20:22:47.712202Z",
         "query_plan": {
           "intent": [
             "EVIDENCE_SYNTHESIS"
@@ -186,7 +186,7 @@
           "safety_flags": []
         },
         "retrieval_query_digests": [
-          "hmac-sha256:b55da21f252f7c122208e27134ecc5519b86eae8061a6a6be8a672f14843f5b0"
+          "hmac-sha256:0272da8e70d59699a0f8223ca1cb1076b5dd003749329ea9ff7e9d8dfa7362fd"
         ],
         "connectors_used": [
           "pubmed-eutils"
@@ -220,8 +220,8 @@
         },
         "final_status": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
         "authorization_decision_ids": [
-          "1a086d8f-5f62-4b99-9de7-d411b055d528",
-          "d4900ba1-c6bd-457b-becb-eeb9fcd71785"
+          "e43085ca-fbbe-4ced-9c91-4df7694ab38b",
+          "af3235cc-493f-4670-81cf-c42b46c4417f"
         ]
       },
       "fidelity": {
@@ -291,10 +291,10 @@
       "name": "headings",
       "xml_sha256": "ae8cd3ef1662e9c49825c4f0a7d9b87439d966aa821ff70041abd216b2338c56",
       "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?tool=medical-ai-evidence-workbench&db=pubmed&id=30345511%2C32432795%2C25099314&retmode=xml",
-      "retrieved_at": "2026-10-26T20:16:42.542974+00:00",
+      "retrieved_at": "2026-10-26T20:22:53.889580+00:00",
       "trace": {
-        "trace_id": "9f094c51-ab3a-4d31-97cb-e517577b1922",
-        "timestamp": "2026-10-26T20:16:42.599446Z",
+        "trace_id": "e1805604-6095-48d3-b8c9-e430a063fe89",
+        "timestamp": "2026-10-26T20:22:53.948559Z",
         "query_plan": {
           "intent": [
             "EVIDENCE_SYNTHESIS"
@@ -317,7 +317,7 @@
           "safety_flags": []
         },
         "retrieval_query_digests": [
-          "hmac-sha256:055d9038a42de20b678d7272015551e050a461b623d1b3a1fcda276cf5454961"
+          "hmac-sha256:8056ddd27ec1145cf3215d05d2f6ff7ee1e7e2feff2b62b5dfd2d037b6716240"
         ],
         "connectors_used": [
           "pubmed-eutils"
