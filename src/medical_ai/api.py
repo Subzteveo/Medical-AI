@@ -205,8 +205,10 @@ def protected_docs(_participant=Depends(require_pilot_participant)):
 @app.post("/v1/evidence/query", response_model=EvidenceAnswer)
 async def query(
     req: QueryRequest,
+    response: Response,
     _participant=Depends(require_pilot_participant),
 ):
+    response.headers["Cache-Control"] = "no-store"
     engine = build_engine()
     answer = await engine.answer(req.question, user_mode=req.user_mode, jurisdiction=req.jurisdiction, limit=req.limit)
     return engine.revalidate_output(answer)
