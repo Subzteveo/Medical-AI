@@ -11,7 +11,6 @@ import re
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from .renderer import render_answer
 from .schemas import AnswerStatus, EvidenceAnswer
 
 if TYPE_CHECKING:
@@ -77,36 +76,10 @@ def build_research_outcome_handoff(
         "commercial_release": "NOT_AUTHORIZED",
     }
 
-    try:
-        checked = EvidenceAnswer.model_validate(answer.model_dump(mode="python"))
-        # The controller is the *issuing* authority. Reuse its current checks
-        # without calling engine.revalidate_output(), whose failure path writes
-        # an audit trace and therefore is not strictly read-only.
-        stored = {decision.decision_id: decision for decision in engine.influence_controller.decisions}
-        views = []
-        for claim in checked.claims:
-            decision = next(
-                d for d in checked.influence_decisions
-                if d.object_id == claim.claim_id and d.allowed
-            )
-            current = stored.get(decision.decision_id)
-            if current is None or current.model_dump() != decision.model_dump():
-                raise ValueError("Detached claim decision is not the issuing current decision")
-            views.append(engine.influence_controller.build_authorized_claim_view(claim, decision))
-        if checked.status in _SUPPORTED:
-            # A detached/synthetic answer cannot turn unrendered text into a
-            # positive inspection record. The actual rendered output must match.
-            expected_markdown = render_answer(
-                views, checked.sources,
-                trial_discovery="TRIAL_QUERY" in checked.trace.query_plan.intent,
-                influence_controller=engine.influence_controller,
-                evidence_objects=checked.evidence_objects,
-                passages=checked.passages,
-                citation_mappings=checked.citation_mappings,
-            )
-            if expected_markdown != checked.answer_markdown:
-                raise ValueError("Original browser-facing representation changed")
-    except (ValueError, StopIteration, KeyError, TypeError):
+    # The existing engine alone validates snapshots, point-of-use authority and
+    # renderer parity. No alternate output constructor or renderer is added.
+    checked = engine.inspect_output_for_handoff(answer)
+    if checked is None:
         handoff["runtime_answer_status"] = "INTEGRITY_OR_AUTHORIZATION_HOLD"
         return handoff
 
