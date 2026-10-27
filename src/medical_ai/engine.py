@@ -338,6 +338,40 @@ class EvidenceEngine:
         self._persist(trace)
         return answer
 
+    def inspect_output_for_handoff(self, answer: EvidenceAnswer) -> EvidenceAnswer | None:
+        """Read-only, point-of-use snapshot inspection for external evaluation.
+
+        Only the issuing influence controller may validate its live decisions.
+        Unlike revalidate_output's fail-closed API path, an invalid snapshot does
+        not create a replacement trace, persist audit records or render output.
+        """
+        try:
+            checked = EvidenceAnswer.model_validate(answer.model_dump(mode="python"))
+            stored = {decision.decision_id: decision for decision in self.influence_controller.decisions}
+            views: list[AuthorizedClaimView] = []
+            for claim in checked.claims:
+                decision = next(
+                    d for d in checked.influence_decisions
+                    if d.object_id == claim.claim_id and d.allowed
+                )
+                current = stored.get(decision.decision_id)
+                if current is None or current.model_dump() != decision.model_dump():
+                    return None
+                views.append(self.influence_controller.build_authorized_claim_view(claim, decision))
+            if checked.status in {AnswerStatus.ANSWER_SUPPORTED, AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS}:
+                rendered = render_answer(
+                    views, checked.sources,
+                    trial_discovery="TRIAL_QUERY" in checked.trace.query_plan.intent,
+                    influence_controller=self.influence_controller,
+                    evidence_objects=checked.evidence_objects, passages=checked.passages,
+                    citation_mappings=checked.citation_mappings,
+                )
+                if rendered != checked.answer_markdown:
+                    return None
+        except (ValueError, StopIteration, KeyError, TypeError):
+            return None
+        return checked
+
     def revalidate_output(self, answer: EvidenceAnswer) -> EvidenceAnswer:
         """Recheck a detached response snapshot and current capabilities at the API boundary.
 
