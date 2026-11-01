@@ -38,6 +38,7 @@ from .connectors.base import EvidenceConnector, require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
 from .influence import InfluenceController
 from .provenance import validate_retrieved_records
+from .assessment_holds import explicit_evidence_hold
 
 _TRACE_HMAC_KEY = (
     os.getenv("MEDICAL_AI_TRACE_HMAC_KEY", "").encode("utf-8")
@@ -190,6 +191,26 @@ class EvidenceEngine:
         admitted = [s for s in sources if qualify_source(s, plan).admitted]
         admitted_ids = {s.source_id for s in admitted}
         admitted_passages = [p for p in passages if p.source_id in admitted_ids]
+
+        # An explicit hazard may DENY output, never confer evidentiary authority.
+        # These bounded textual checks do not establish that other evidence is
+        # conflict-free or that a population is clinically applicable.
+        hazard = explicit_evidence_hold(question, admitted, admitted_passages)
+        if hazard is not None:
+            reason = (
+                "The retrieved literature contains directly conflicting outcome statements."
+                if hazard == AnswerStatus.EVIDENCE_CONFLICTING
+                else "The retrieved literature explicitly excludes the requested age population."
+            )
+            return self._terminal(
+                plan=plan, digest=digest, status=hazard,
+                message=(
+                    "### Evidence-bound answer\\n\\n" + reason +
+                    " No medical claim is displayed because applicability or conflict handling has not passed review."
+                ),
+                connectors_used=[connector.name],
+                safety_flags=[*plan.safety_flags, hazard.value],
+            )
 
         units = extract_evidence(question, admitted, admitted_passages)
         claims = build_claims(units, plan)
@@ -447,6 +468,7 @@ class EvidenceEngine:
             "extractor": "alpha2.1-extractive-safety-filtered",
             "claim_builder": "alpha2.1-claim-consequence",
             "verifier": "alpha2.1-exact-passage-high-consequence",
+            "assessment_holds": "alpha3-explicit-text-negative-gates-v0.1",
             "influence_controller": self.influence_controller.policy_version,
             "renderer": "alpha2.1",
         }
