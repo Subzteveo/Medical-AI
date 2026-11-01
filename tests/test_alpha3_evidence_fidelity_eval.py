@@ -168,3 +168,30 @@ def test_cli_baseline_reports_bounded_success(tmp_path):
     assert report['counts']['blocked_checks'] == 2
     assert 'not live retrieval' in report['metric_boundary']
     assert 'current_pipeline_live_retrieval_recall' in report['unproven_checks']
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("case_id", "expected_status"),
+    [
+        ("ALPHA3-FIX-005-CONFLICT-BLOCKED", "EVIDENCE_CONFLICTING"),
+        ("ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED", "POPULATION_MISMATCH"),
+    ],
+)
+async def test_explicit_synthetic_conflict_and_population_exclusion_withhold_all_claims(case_id, expected_status):
+    """Independent regression: blocked benchmark cases cannot authorize medical claims."""
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(default_case_set_path()), case_id)
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(
+        case.question, jurisdiction=case.jurisdiction
+    )
+    assert answer.status == AnswerStatus(expected_status)
+    assert answer.trace.final_status == answer.status
+    assert expected_status in answer.trace.safety_flags
+    assert answer.claims == []
+    assert answer.sources == []
+    assert answer.evidence_objects == []
+    assert answer.citation_mappings == []
+    assert answer.influence_decisions == []
