@@ -168,3 +168,95 @@ def test_cli_baseline_reports_bounded_success(tmp_path):
     assert report['counts']['blocked_checks'] == 2
     assert 'not live retrieval' in report['metric_boundary']
     assert 'current_pipeline_live_retrieval_recall' in report['unproven_checks']
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("case_id", "expected_status"),
+    [
+        ("ALPHA3-FIX-005-CONFLICT-BLOCKED", "EVIDENCE_CONFLICTING"),
+        ("ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED", "POPULATION_MISMATCH"),
+    ],
+)
+async def test_explicit_synthetic_conflict_and_population_exclusion_withhold_all_claims(case_id, expected_status):
+    """Independent regression: blocked benchmark cases cannot authorize medical claims."""
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(default_case_set_path()), case_id)
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(
+        case.question, jurisdiction=case.jurisdiction
+    )
+    assert answer.status == AnswerStatus(expected_status)
+    assert answer.trace.final_status == answer.status
+    assert expected_status in answer.trace.safety_flags
+    assert answer.claims == []
+    assert answer.sources == []
+    assert answer.evidence_objects == []
+    assert answer.citation_mappings == []
+    assert answer.influence_decisions == []
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "non_conflicting_text",
+    [
+        "Treatment Y did not reduce symptom scores compared with placebo in adults.",
+        "Treatment X did not improve sleep quality compared with placebo in adults.",
+    ],
+)
+async def test_explicit_conflict_guard_does_not_equate_unrelated_interventions_or_outcomes(non_conflicting_text):
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(), "ALPHA3-FIX-005-CONFLICT-BLOCKED")
+    case.scenario.passages[1].text = non_conflicting_text
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert answer.claims
+    assert "EVIDENCE_CONFLICTING" not in answer.trace.safety_flags
+
+
+@pytest.mark.asyncio
+async def test_explicit_conflict_guard_requires_independent_source_records():
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(), "ALPHA3-FIX-005-CONFLICT-BLOCKED")
+    case.scenario.passages[1].source_id = case.scenario.sources[0].source_id
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert "EVIDENCE_CONFLICTING" not in answer.trace.safety_flags
+
+
+@pytest.mark.asyncio
+async def test_population_guard_withholds_when_explicit_exclusion_starts_below_requested_age():
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(), "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED")
+    case.scenario.passages[0].text = (
+        "Treatment X reduced symptom scores in adults aged 40 to 65; "
+        "adults older than 70 were not evaluated."
+    )
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    assert answer.status == AnswerStatus.POPULATION_MISMATCH
+    assert answer.claims == []
+
+
+@pytest.mark.asyncio
+async def test_population_guard_does_not_convert_explicit_inclusion_into_exclusion():
+    from medical_ai.engine import EvidenceEngine
+    from medical_ai.evals.alpha3_evidence_fidelity import FixtureConnector
+    from medical_ai.schemas import AnswerStatus
+
+    case = _case(load_case_set(), "ALPHA3-FIX-006-POPULATION-MISMATCH-BLOCKED")
+    case.scenario.passages[0].text = (
+        "Treatment X reduced symptom scores in adults older than 80 years old."
+    )
+    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
+    assert answer.claims
+    assert "POPULATION_MISMATCH" not in answer.trace.safety_flags
