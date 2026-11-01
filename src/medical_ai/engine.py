@@ -205,7 +205,7 @@ class EvidenceEngine:
             return self._terminal(
                 plan=plan, digest=digest, status=hazard,
                 message=(
-                    "### Evidence-bound answer\\n\\n" + reason +
+                    "### Evidence-bound answer\n\n" + reason +
                     " No medical claim is displayed because applicability or conflict handling has not passed review."
                 ),
                 connectors_used=[connector.name],
