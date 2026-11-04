@@ -61,3 +61,7 @@ Do not duplicate the same durable fact across multiple files. Update the existin
 ## Evidence rule
 
 Repository text describes intent unless backed by execution evidence. Preserve the distinction between proposed, generated, inspected, executed, passed, verified, blocked, and unproven.
+
+## Dated, non-canonical coordination handoffs
+
+- [Pre-Claude engineering handoff — 4 November 2026](PRE_CLAUDE_HANDOFF_2026-11-04.md) — revision-bound review snapshot, blockers, staged plan and next-agent prompt. It is not a substitute for `STATUS.md`, approved requirements, GitHub enforcement or release authority.
