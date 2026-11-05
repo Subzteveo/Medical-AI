@@ -16,7 +16,6 @@ from conftest import make_engine, synthetic_version_record
 from medical_ai.authority_resolver import AuthorityResolver
 from medical_ai.connectors.clinical_trials import ClinicalTrialsConnector
 from medical_ai.connectors.pubmed import PubMedConnector
-from medical_ai.engine import EvidenceEngine
 from medical_ai.schemas import (
     USE_NOTICE,
     AnswerStatus,
@@ -26,8 +25,6 @@ from medical_ai.schemas import (
     FreshnessAssessment,
     FreshnessState,
     InfluenceReasonCode,
-    Passage,
-    PHIClassification,
     SourceRecord,
     SourceVersionRecord,
     VerificationStatus,
