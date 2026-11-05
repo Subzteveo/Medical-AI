@@ -43,6 +43,7 @@ include = [
   "src/medical_ai/connectors/base.py",
   "src/medical_ai/authority.py",
   "src/medical_ai/authority_policy.py",
+  "src/medical_ai/authority_resolver.py",
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"

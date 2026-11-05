@@ -1,6 +1,20 @@
 from __future__ import annotations
 import pytest
 from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
+from medical_ai.engine import EvidenceEngine
+from medical_ai.authority_resolver import AuthorityResolver
+
+
+def make_engine(connectors, **kwargs):
+    """Construct an engine with the trusted A2 authority resolver wired in.
+
+    Supported-path tests use this so claims can be independently authorised. Tests
+    that assert the fail-closed default (no authority) construct EvidenceEngine
+    directly without a resolver.
+    """
+    if "authority_resolver" not in kwargs:
+        kwargs["authority_resolver"] = AuthorityResolver()
+    return EvidenceEngine(connectors, **kwargs)
 
 
 class FakePubMedConnector:

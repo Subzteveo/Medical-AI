@@ -2,12 +2,14 @@
 import asyncio
 import json
 
-from conftest import FakePubMedConnector
+from conftest import FakePubMedConnector, make_engine
 from medical_ai.engine import EvidenceEngine
 
 
 async def main():
-    engine = EvidenceEngine(FakePubMedConnector())
+    # A2: the engine resolves authority independently, so the supported-path fixture
+    # must wire in the trusted resolver (via make_engine) to produce an authorised answer.
+    engine = make_engine(FakePubMedConnector())
     answer = await engine.answer("What evidence exists about treatment X?")
     insufficient = await EvidenceEngine(FakePubMedConnector(sources=[], passages=[])).answer("What evidence exists about treatment X?")
     high = await engine.answer("What dose of treatment X should adults take?")

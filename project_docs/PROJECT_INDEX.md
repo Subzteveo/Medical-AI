@@ -34,7 +34,8 @@ Key document owners:
 - `project_docs/EVIDENCE_ATLAS_UI.md` — output provenance boundary, Evidence Passport, deterministic limitations panel and UI verification scope;
 - `docs/MEDICAL_EVIDENCE_INFLUENCE_POLICY_v0.1.md` — evidence influence rules;
 - `docs/INFLUENCE_CONTROL_CORE_v0.2.md` — machine-enforced influence-control implementation contract;
-- `src/medical_ai/authority.py` and `src/medical_ai/authority_policy.py` — Alpha3 A1 candidate closed authority schemas and the deny-by-default policy compiler; not yet imported by the runtime engine (A2 integration is separately gated);
+- `src/medical_ai/authority.py` and `src/medical_ai/authority_policy.py` — Alpha3 A1 candidate closed authority schemas and the deny-by-default policy compiler;
+- `src/medical_ai/authority_resolver.py` — Alpha3 A2 trusted resolver that resolves each verified claim's authority from the A1 policies and drives the engine's influence subject; the engine fails closed without it;
 - `policies/` — source, consequence, PHI routing and evidence influence policies, plus the Alpha3 A1 authority/handling/data-plane/status/aggregation policies (`*-v0.2.yaml`, `status-claims-v0.1.yaml`); `src/medical_ai/policies/` is the identical packaged copy;
 - `docs/VALIDATION_PLAN.md` and `project_docs/VALIDATION_AND_EVIDENCE.md` — validation;
 - `docs/RELEASE_READINESS.md` — release boundary, Issue #5 assessment/decision record, unresolved conditions and final disposition;
@@ -66,6 +67,7 @@ Repository text describes intent unless backed by execution evidence. Preserve t
 ## Alpha3 tranche evidence records
 
 - [Alpha3 A1 authority-contract implementation candidate — 5 November 2026](evidence/alpha3-a1-20261105/README.md) — revision-bound engineering evidence for the additive A1 schemas, policy compiler, policies and tests (Issue #24). IMPLEMENTED/TESTED/PASSED locally only; not validated, approved, merged or released.
+- [Alpha3 A2 independent authority-origin resolution — 5 November 2026](evidence/alpha3-a2-20261105/README.md) — revision-bound engineering evidence for wiring the trusted authority resolver into the engine so claims fail closed without independently resolved authority (Issue #25). IMPLEMENTED/TESTED/PASSED locally only; not validated, approved, merged or released.
 
 ## Preserved authority records
 

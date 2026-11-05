@@ -24,6 +24,7 @@ from .connectors.pubmed import PubMedConnector
 from .connectors.clinical_trials import ClinicalTrialsConnector
 from .engine import EvidenceEngine
 from .influence import InfluenceController
+from .authority_resolver import AuthorityResolver
 from .trace_store import SQLiteTraceStore
 from .schemas import EvidenceAnswer
 
@@ -133,6 +134,7 @@ def build_engine() -> EvidenceEngine:
         connectors,
         trace_store=SQLiteTraceStore(TRACE_DB),
         influence_controller=_shared_influence_controller(),
+        authority_resolver=AuthorityResolver(),
     )
 
 

@@ -16,14 +16,12 @@ from .schemas import (
     DataPlane,
     DataPlaneTransition,
     EvidenceAnswer,
-    EvidenceAuthorityState,
     ExecutionTrace,
     InfluenceDecision,
     InfluenceObjectType,
     InfluenceRequest,
     InfluenceSubject,
     InformationClass,
-    InformationHandlingAuthorityState,
     PHIClassification,
     QueryPlan,
     VerificationStatus,
@@ -37,6 +35,7 @@ from .renderer import render_answer
 from .connectors.base import EvidenceConnector, require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
 from .influence import InfluenceController
+from .authority_resolver import AuthorityResolver, UNRESOLVED
 from .provenance import validate_retrieved_records
 from .assessment_holds import explicit_evidence_hold
 
@@ -63,6 +62,7 @@ class EvidenceEngine:
         connectors: Mapping[str, EvidenceConnector] | EvidenceConnector,
         trace_store: TraceStore | None = None,
         influence_controller: InfluenceController | None = None,
+        authority_resolver: AuthorityResolver | None = None,
     ) -> None:
         # Load and enforce packaged runtime policies rather than treating YAML as documentation only.
         phi_policy = phi_routing_policy()
@@ -85,6 +85,10 @@ class EvidenceEngine:
         self.influence_controller: InfluenceController = (
             influence_controller or InfluenceController()
         )
+        # Trusted, independent authority resolver. When absent the engine resolves
+        # no authority and every claim fails closed at the influence gate: a verifier
+        # PASS and connector admission are never, by themselves, medical influence.
+        self.authority_resolver: AuthorityResolver | None = authority_resolver
 
     async def answer(self, question: str, *, user_mode: str = "clinician", jurisdiction: str = "AU", limit: int = 5) -> EvidenceAnswer:
         plan = plan_query(question, user_mode=user_mode, jurisdiction=jurisdiction)
@@ -229,20 +233,32 @@ class EvidenceEngine:
                 and source.phi_classification.contains_phi is False
                 for source in claim_sources
             )
+            # A2: authority is resolved independently by the trusted resolver over the
+            # versioned, digest-verified A1 policies, from the claim's actual scope. The
+            # engine no longer self-declares APPROVED/validation_passed. Without a
+            # resolver, nothing is authorised and the gate fails closed.
+            any_source_superseded = any(source.superseded for source in claim_sources)
+            resolution = (
+                self.authority_resolver.resolve_claim_authority(
+                    claim,
+                    source_class=source_class,
+                    public_non_phi=public_non_phi,
+                    any_source_superseded=any_source_superseded,
+                    trace_ref=digest,
+                )
+                if self.authority_resolver is not None
+                else UNRESOLVED
+            )
             subject = InfluenceSubject(
                 object_id=claim.claim_id,
                 object_type=InfluenceObjectType.CLAIM_RECORD,
                 data_plane=DataPlane.EVIDENCE,
-                evidence_authority=EvidenceAuthorityState.APPROVED,
-                information_handling_authority=(
-                    InformationHandlingAuthorityState.APPROVED
-                    if public_non_phi
-                    else InformationHandlingAuthorityState.UNKNOWN
-                ),
+                evidence_authority=resolution.evidence_authority,
+                information_handling_authority=resolution.information_handling_authority,
                 provenance_complete=bool(claim_sources) and all(
                     source.provenance_complete for source in claim_sources
                 ),
-                validation_passed=True,
+                validation_passed=resolution.validation_passed,
                 safety_passed=claim.consequence_level != ConsequenceLevel.HIGH,
                 # Every answer creates an ExecutionTrace with component versions and gate outcomes.
                 monitoring_enabled=True,
@@ -254,9 +270,7 @@ class EvidenceEngine:
                 transition=DataPlaneTransition(
                     source_plane=DataPlane.EVIDENCE,
                     target_plane=DataPlane.EVIDENCE,
-                    information_class=(
-                        InformationClass.PUBLIC if public_non_phi else InformationClass.UNKNOWN
-                    ),
+                    information_class=resolution.information_class,
                 ),
             ), claim=claim)
             influence_decisions.append(decision)
