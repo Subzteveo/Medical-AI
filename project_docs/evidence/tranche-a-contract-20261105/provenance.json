@@ -1,0 +1,58 @@
+{
+  "record": "Medical AI #26 — Tranche A contract recovery provenance",
+  "captured_at": "2026-11-05T04:09:59.536Z",
+  "captured_by": "Claude (read-only, owner-approved 5 Nov 2026), via signed-in ChatGPT session in Claude browser",
+  "status": "RECOVERED — NOT YET OWNER-SIGNED-OFF; private; not in GitHub",
+  "source": {
+    "service": "ChatGPT",
+    "project_gizmo": "g-p-6ab4b451429081919d619588b06b10e5",
+    "conversation_id": "6aca6223-1fcc-83ec-8543-cbf52a9ebafe",
+    "conversation_title": "Draft Alpha3 Contract",
+    "url": "https://chatgpt.com/g/g-p-6ab4b451429081919d619588b06b10e5/c/6aca6223-1fcc-83ec-8543-cbf52a9ebafe",
+    "conversation_created": "2026-10-10T16:04:52.041Z",
+    "conversation_updated": "2026-10-11T01:13:37.235Z"
+  },
+  "contract_file": {
+    "filename": "Medical_AI_Alpha3_Tranche_A_Implementation_Contract_2026-10-11.md",
+    "origin": "heredoc body of container.exec message 9d5d0e85-4f57-43ed-839a-4a18597d6538 (cat > /mnt/data/...<<'EOF'), plus heredoc's terminating newline",
+    "written_at_utc": "2026-10-10T16:12:04.439Z",
+    "chatgpt_wc_output": "332 37883 /mnt/data/Medical_AI_Alpha3_Tranche_A_Implementation_Contract_2026-10-11.md",
+    "lines": 332,
+    "bytes": 37883,
+    "sha256": "bfa250de6be76084d84c26f827928c59c740e12a8280b2a4182bdb4c2a10786c",
+    "sha256_without_final_newline": "55a8819eeb161e0088c9a3bbc18737101372bd06c7c768d40fe456403577cc93"
+  },
+  "approved_summary_reply": {
+    "message_id": "ef19c0aa-7e06-47b8-9137-6bc4e132131b",
+    "role": "assistant",
+    "bytes": 8330,
+    "sha256": "5719af5d2f74e4174b51d15c79c254d3aded9ee29d62fb2d73e129a0a8f48244",
+    "links_to": "sandbox:/mnt/data/Medical_AI_Alpha3_Tranche_A_Implementation_Contract_2026-10-11.md",
+    "note": "Last visible message before owner approval; self-describes as 'prepared for review'."
+  },
+  "owner_approval": {
+    "message_id": "bbb21608-8997-4f32-a76d-433866ab08d4",
+    "author_role": "user",
+    "text": "Approved",
+    "created_utc": "2026-10-10T19:11:54.278Z",
+    "created_darwin": "2026-10-11 04:41:54 ACST",
+    "parent_is_summary_reply": true
+  },
+  "assistant_acknowledgement": {
+    "message_id": "cf477d70-de1f-47f3-b061-557450d7e33c",
+    "text": "I’ll treat this as approval of the Alpha3 Tranche A implementation contract, not approval for clinical release. I’ll verify the current repository state and governance controls, then proceed with the first bounded implementation PR where the existing controls permit it."
+  },
+  "cross_checks": {
+    "post_approval_readback_lines_240_332": "exact match (message 069c8666-7973-461d-a27b-d9e82635ba78)",
+    "post_approval_readback_lines_1_240": "head 8,028 chars and tail 8,146 chars match; ~10,532 middle chars elided by ChatGPT display truncation (message 6d093299-9c6b-42e9-aad0-94bce54c9c38)",
+    "structure": "31 headings, sections 0–15, tests A3A-001..A3A-024 (24)",
+    "g0_checkpoint": "consistent: title, 11 Oct date, commit 13fadd41e628ff60de2cdfff933b3e2be19f1327, CI runs 38063860401/38063858617, G0/A1–A4 sequence, 24 tests",
+    "a1_review": "project_docs/ALPHA3_A1_SCHEMA_POLICY_REVIEW.md (PR #23) is derivative; references but does not reproduce the contract"
+  },
+  "limits": [
+    "Original sandbox file is expired; text recovered from ChatGPT's recorded write command, not from the file itself.",
+    "SHA-256 proves integrity of captured text only, not historical authenticity; that rests on the conversation record above.",
+    "Owner approval followed the summary reply, which links to the full file; whether 'Approved' covers the full file is for owner sign-off.",
+    "No branches or later edits found in the conversation (single path, no sibling regenerations)."
+  ]
+}
