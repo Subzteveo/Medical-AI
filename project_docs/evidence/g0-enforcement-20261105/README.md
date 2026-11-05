@@ -3,7 +3,7 @@
 **Issue:** [#2 Repository hardening](https://github.com/Subzteveo/Medical-AI/issues/2)
 **Observed `main`:** `9cb52ab549f81d01fb4a8accb8c92eb92f7e0220`
 **Recorded:** 5 November 2026, Australia/Darwin
-**Status:** partial G0 evidence. G0 remains **BLOCKED** until the unverified items below and Issue #26 are resolved.
+**Status:** Issue #2 enforcement evidence complete (negative and positive controls). G0 as a whole remains **BLOCKED** on Issue #26.
 
 This record is engineering-governance evidence only. It says nothing about medical safety, clinical validation, privacy compliance or release readiness.
 
@@ -44,12 +44,26 @@ Screenshot taken by the owner, signed in as `9TEVE-O`, on 5 November 2026 at abo
 
 PR #40 was not merged, updated or changed. Do not press **Update branch** on PR #40; that would add a merge commit and change its recorded head.
 
+## 2b. Positive control: a green PR merges through the normal path
+
+Subject: [PR #41](https://github.com/Subzteveo/Medical-AI/pull/41), a 6-line documentation change to `project_docs/DEVELOPMENT_WORKFLOW.md`, opened from the owner's account by a separate session.
+
+| Observation | Value | Evidence state |
+| --- | --- | --- |
+| PR head | `87cf3c55b00d3762b55fe940767956d51057d8b7`, base `9cb52ab` (up to date with `main` at merge) | inspected |
+| `Deterministic checks / source-and-tests` at that exact head | succeeded in 22 s (`pull_request` and `push` runs listed on the commit's checks page) | passed |
+| Merge | Normal merge by `9TEVE-O`; merge commit `ceecc7bbf8fa9f79c876883644ed7095e3f69713`, 5 November 2026 12:53:54 +0930, parents `9cb52ab` and `87cf3c5` | passed |
+| Bypass | Bypass list empty (§1); no bypass was needed | inspected |
+| Post-merge `source-and-tests` on `main` at `ceecc7b` | Running when read at about 12:55 Darwin time | unproven at time of writing |
+
+Also observed: this evidence branch's own head `99f6999de973b07e71795b176bc2b4d8fce4cb67` passed `source-and-tests` (push run, 31 s) before `main` moved.
+
 ## 3. Not yet demonstrated
 
 1. Bypass list: API readback reported empty (§1); the signed-in edit-view check is optional corroboration.
 2. Signed-in visual check of the two settings in §1 that are API-verified only (optional corroboration).
 3. A direct push to `main` being rejected. This is deliberately not attempted: if protection failed, the test itself would change `main`. The PR requirement and the readback above are used instead, unless the owner decides otherwise.
-4. A green PR merging successfully under the same rules (positive control). The first ordinary docs PR will provide this.
+4. Positive control: done, see §2b.
 
 ## 4. Owner decisions recorded or pending
 
@@ -62,4 +76,6 @@ Acceptance criteria met by this record: protect `main` from direct merge without
 
 Bypass policy: no bypass actors (§1, GitHub API readback via a ChatGPT conversation).
 
-Still open: the positive control (§3 item 4). The pull request that adds this file is intended to be that control: it must pass `source-and-tests` at its exact head and merge through the normal path. Close #2 only after that merge is recorded.
+Positive control: PR #41, merged as `ceecc7b` (§2b).
+
+All Issue #2 acceptance criteria now have evidence. Closing #2 is the owner's decision; the open items in §3 are optional corroboration and do not block it. G0 still requires Issue #26.
