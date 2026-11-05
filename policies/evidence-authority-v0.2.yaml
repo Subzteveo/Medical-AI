@@ -1,0 +1,76 @@
+schema_version: medical-ai-authority-policy/1
+policy_id: evidence-authority-v0.2
+dimension: EVIDENCE_AUTHORITY
+revision: 1
+effective_at: "2026-11-05T00:00:00+00:00"
+default_decision: DENY
+policy_digest: 8269457ad5c9081d7605a1b7d262245da1c79383a56efdcc47f8601173412aa5
+rules:
+  - rule_id: ea-pubmed-literature-retrieve
+    decision: ALLOW
+    match:
+      claim_type: BIOMEDICAL_LITERATURE
+      source_class: PUBMED_INDEXED_LITERATURE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      freshness: CURRENT
+    evidence_requirements: [PROVENANCE, SOURCE_VERSION, EXACT_PASSAGE_VERIFICATION]
+  - rule_id: ea-pubmed-literature-extract
+    decision: ALLOW
+    match:
+      claim_type: BIOMEDICAL_LITERATURE
+      source_class: PUBMED_INDEXED_LITERATURE
+      operation: EXTRACT_PASSAGE
+      freshness: CURRENT
+    evidence_requirements: [PROVENANCE, SOURCE_VERSION, EXACT_PASSAGE_VERIFICATION]
+  - rule_id: ea-ctgov-registration-retrieve
+    decision: ALLOW
+    match:
+      claim_type: TRIAL_REGISTRATION_FACT
+      source_class: CLINICALTRIALS_GOV_REGISTRY
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      freshness: CURRENT
+    evidence_requirements: [PROVENANCE, SOURCE_VERSION, REGISTRY_FIELD_PRESENT]
+  - rule_id: ea-ctgov-narrative-not-efficacy
+    decision: DENY
+    match:
+      claim_type: TREATMENT_EFFICACY
+      source_class: CLINICALTRIALS_GOV_REGISTRY
+    reason_code: REGISTRY_NARRATIVE_NOT_EFFICACY
+  - rule_id: ea-pubmed-not-efficacy
+    decision: DENY
+    match:
+      claim_type: TREATMENT_EFFICACY
+      source_class: PUBMED_INDEXED_LITERATURE
+    reason_code: HIGH_CONSEQUENCE_SYNTHESIS_DISABLED
+  - rule_id: ea-pubmed-not-regulatory
+    decision: DENY
+    match:
+      claim_type: AU_REGULATORY_APPROVAL
+      source_class: PUBMED_INDEXED_LITERATURE
+    reason_code: WRONG_REGULATOR_FOR_CLAIM
+  - rule_id: ea-ctgov-not-regulatory
+    decision: DENY
+    match:
+      claim_type: AU_REGULATORY_APPROVAL
+      source_class: CLINICALTRIALS_GOV_REGISTRY
+    reason_code: WRONG_REGULATOR_FOR_CLAIM
+  - rule_id: ea-retracted-source
+    decision: DENY
+    match:
+      freshness: RETRACTED
+    reason_code: RETRACTED_SOURCE_NOT_CURRENT
+  - rule_id: ea-superseded-source
+    decision: DENY
+    match:
+      freshness: SUPERSEDED
+    reason_code: SUPERSEDED_SOURCE_NOT_CURRENT
+  - rule_id: ea-unknown-freshness
+    decision: DENY
+    match:
+      freshness: UNKNOWN
+    reason_code: UNKNOWN_FRESHNESS_BLOCKS_CURRENT_EFFECT
+  - rule_id: ea-high-consequence-block
+    decision: DENY
+    match:
+      consequence: HIGH
+    reason_code: HIGH_CONSEQUENCE_SYNTHESIS_DISABLED

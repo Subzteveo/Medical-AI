@@ -41,6 +41,8 @@ include = [
   "src/medical_ai/engine.py",
   "src/medical_ai/renderer.py",
   "src/medical_ai/connectors/base.py",
+  "src/medical_ai/authority.py",
+  "src/medical_ai/authority_policy.py",
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"

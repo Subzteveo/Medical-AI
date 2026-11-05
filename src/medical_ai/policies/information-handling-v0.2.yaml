@@ -1,0 +1,46 @@
+schema_version: medical-ai-authority-policy/1
+policy_id: information-handling-v0.2
+dimension: INFORMATION_HANDLING
+revision: 1
+effective_at: "2026-11-05T00:00:00+00:00"
+default_decision: DENY
+policy_digest: e2b9b0f88a055ad5df56e48f4c4479b8e6e57cd91da79a7ee04fd96664438753
+rules:
+  - rule_id: ih-pubmed-public-literature
+    decision: ALLOW
+    match:
+      component: pubmed_public_connector
+      information_class: PUBLIC_EVIDENCE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      purpose: LITERATURE_DISCOVERY
+      environment: production_public_readonly
+    evidence_requirements: [CONNECTOR_APPROVAL, NO_PATIENT_SPECIFIC_CONTENT]
+  - rule_id: ih-ctgov-public-registration
+    decision: ALLOW
+    match:
+      component: clinicaltrials_public_connector
+      information_class: PUBLIC_EVIDENCE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      purpose: TRIAL_REGISTRATION_DISCOVERY
+      environment: production_public_readonly
+    evidence_requirements: [CONNECTOR_APPROVAL, NO_PATIENT_SPECIFIC_CONTENT]
+  - rule_id: ih-identifiable-deny
+    decision: DENY
+    match:
+      information_class: IDENTIFIABLE_HEALTH_INFORMATION
+    reason_code: IDENTIFIABLE_HEALTH_INFORMATION_NOT_PERMITTED_HERE
+  - rule_id: ih-deidentified-unverified-deny
+    decision: DENY
+    match:
+      information_class: DEIDENTIFIED_HEALTH_INFORMATION
+    reason_code: DEIDENTIFICATION_REQUIRES_SEPARATE_AUTHORISATION
+  - rule_id: ih-restricted-research-deny
+    decision: DENY
+    match:
+      information_class: RESTRICTED_RESEARCH_DATA
+    reason_code: RESTRICTED_RESEARCH_DATA_REQUIRES_EXPLICIT_COMPONENT_DECISION
+  - rule_id: ih-unknown-class-deny
+    decision: DENY
+    match:
+      information_class: UNKNOWN
+    reason_code: UNKNOWN_INFORMATION_CLASS_FAILS_CLOSED
