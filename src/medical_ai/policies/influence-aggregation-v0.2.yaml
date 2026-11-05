@@ -1,0 +1,11 @@
+schema_version: medical-ai-influence-aggregation/1
+policy_id: influence-aggregation-v0.2
+revision: 1
+effective_at: "2026-11-05T00:00:00+00:00"
+required_dimensions:
+  - EVIDENCE_AUTHORITY
+  - INFORMATION_HANDLING
+  - DATA_PLANE_TRANSITION
+optional_dimensions:
+  - STATUS_AUTHORITY
+policy_digest: 6044832ed5748de3adb0428f0152ce229fb1214d3a3aab35391ab42ba9f1b1da

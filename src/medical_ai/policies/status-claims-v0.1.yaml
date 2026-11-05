@@ -1,0 +1,78 @@
+schema_version: medical-ai-authority-policy/1
+policy_id: status-claims-v0.1
+dimension: STATUS_AUTHORITY
+revision: 1
+effective_at: "2026-11-05T00:00:00+00:00"
+default_decision: DENY
+policy_digest: 2b3cb06f30a3ff940a1a79ac3bcb661c42a8a90443e107696bb14deb08b7afc2
+rules:
+  - rule_id: st-documented
+    decision: ALLOW
+    match:
+      subject_status: DOCUMENTED
+    evidence_requirements: [IDENTIFIED_DOCUMENT_AT_REVISION]
+  - rule_id: st-implemented
+    decision: ALLOW
+    match:
+      subject_status: IMPLEMENTED
+    evidence_requirements: [INSPECTED_ARTEFACT_AT_REVISION]
+  - rule_id: st-tested
+    decision: ALLOW
+    match:
+      subject_status: TESTED
+    evidence_requirements: [TEST_EXECUTION_EVENT_AT_REVISION]
+  - rule_id: st-passed
+    decision: ALLOW
+    match:
+      subject_status: PASSED
+    evidence_requirements: [CHECK_RUN_FOR_EXACT_COMMIT]
+  - rule_id: st-validated
+    decision: ALLOW
+    match:
+      subject_status: VALIDATED
+    evidence_requirements: [VALIDATION_PROTOCOL, VALIDATION_RESULT]
+  - rule_id: st-verified
+    decision: ALLOW
+    match:
+      subject_status: VERIFIED
+    evidence_requirements: [INDEPENDENT_VERIFICATION_EVENT]
+  - rule_id: st-approved
+    decision: ALLOW
+    match:
+      subject_status: APPROVED
+    evidence_requirements: [DESIGNATED_AUTHORITY_EVENT_WITH_SCOPE]
+  - rule_id: st-merged
+    decision: ALLOW
+    match:
+      subject_status: MERGED
+    evidence_requirements: [MERGE_COMMIT_REF]
+  - rule_id: st-release-blocked
+    decision: ALLOW
+    match:
+      subject_status: RELEASE_BLOCKED
+    evidence_requirements: [VERIFIED_UNRESOLVED_RELEASE_GATE]
+  - rule_id: st-release-ready
+    decision: ALLOW
+    match:
+      subject_status: RELEASE_READY
+    evidence_requirements: [ALL_MANDATORY_RELEASE_GATES, DESIGNATED_RELEASE_AUTHORITY]
+  - rule_id: st-deferred
+    decision: ALLOW
+    match:
+      subject_status: DEFERRED
+    evidence_requirements: [RECORDED_SCOPE_DECISION]
+  - rule_id: st-superseded
+    decision: ALLOW
+    match:
+      subject_status: SUPERSEDED
+    evidence_requirements: [IDENTIFIED_SUCCESSOR_OR_SUPERSESSION_EVENT]
+  - rule_id: st-deprecated
+    decision: ALLOW
+    match:
+      subject_status: DEPRECATED
+    evidence_requirements: [AUTHORISED_DEPRECATION_SCOPE]
+  - rule_id: st-proposed
+    decision: ALLOW
+    match:
+      subject_status: PROPOSED
+    evidence_requirements: [RECORDED_PROPOSAL]
