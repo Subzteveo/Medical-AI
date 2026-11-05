@@ -13,7 +13,6 @@ import pytest
 
 from conftest import FakePubMedConnector, make_engine
 from medical_ai.engine import EvidenceEngine
-from medical_ai.authority_resolver import AuthorityResolver
 from medical_ai.schemas import AnswerStatus, VerificationStatus
 
 
