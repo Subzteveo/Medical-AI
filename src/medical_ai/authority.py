@@ -27,7 +27,7 @@ from enum import StrEnum
 from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field
 from typing import Annotated
 
-from .schemas import ConsequenceLevel as ConsequenceLevel, DataPlane as DataPlane, InformationClass
+from .schemas import DataPlane as DataPlane, InformationClass
 
 
 # ---------------------------------------------------------------------------

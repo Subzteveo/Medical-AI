@@ -17,13 +17,13 @@ from medical_ai.authority import (
     AuthorityOperation,
     AuthorityPurpose,
     ClaimType,
-    ConsequenceLevel,
     DataPlane,
     DecisionResult,
     FreshnessState,
     InformationClassification,
     SourceClass,
 )
+from medical_ai.schemas import ConsequenceLevel
 from medical_ai.authority_policy import (
     AGGREGATION_POLICY_SCHEMA,
     AUTHORITY_POLICY_SCHEMA,

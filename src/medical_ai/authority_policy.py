@@ -38,7 +38,6 @@ from .authority import (
     AuthorityOperation,
     AuthorityPurpose,
     ClaimType,
-    ConsequenceLevel,
     DataPlane,
     DecisionResult,
     FreshnessState,
@@ -47,6 +46,7 @@ from .authority import (
     SourceClass,
     StatusValue,
 )
+from .schemas import ConsequenceLevel
 
 AUTHORITY_POLICY_SCHEMA = "medical-ai-authority-policy/1"
 AGGREGATION_POLICY_SCHEMA = "medical-ai-influence-aggregation/1"

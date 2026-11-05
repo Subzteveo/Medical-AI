@@ -24,7 +24,6 @@ from medical_ai.authority import (
     InformationClassification,
     InformationHandlingDecision,
     RetractionState,
-    SourceClass,
     SourceVersion,
     StatusClaimRecord,
     StatusResult,
