@@ -27,7 +27,7 @@ from enum import StrEnum
 from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field
 from typing import Annotated
 
-from .schemas import DataPlane as DataPlane, InformationClass
+from .schemas import DataPlane as DataPlane, FreshnessState as FreshnessState, InformationClass
 
 
 # ---------------------------------------------------------------------------
@@ -113,13 +113,6 @@ class SourceClass(StrEnum):
     CLINICALTRIALS_GOV_REGISTRY = "CLINICALTRIALS_GOV_REGISTRY"
     TGA = "TGA"
     PBS = "PBS"
-    UNKNOWN = "UNKNOWN"
-
-
-class FreshnessState(StrEnum):
-    CURRENT = "CURRENT"
-    SUPERSEDED = "SUPERSEDED"
-    RETRACTED = "RETRACTED"
     UNKNOWN = "UNKNOWN"
 
 

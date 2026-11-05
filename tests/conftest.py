@@ -1,8 +1,42 @@
 from __future__ import annotations
+from datetime import datetime, timezone
+
 import pytest
-from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
+from medical_ai.schemas import (
+    FreshnessAssessment,
+    FreshnessState,
+    InformationClass,
+    Passage,
+    PHIClassification,
+    SourceRecord,
+    SourceVersionRecord,
+    source_version_content_sha256,
+)
 from medical_ai.engine import EvidenceEngine
 from medical_ai.authority_resolver import AuthorityResolver
+
+
+def synthetic_version_record(
+    *, source_id: str, record_id: str, upstream_version: str, connector_name: str, connector_version: str
+) -> SourceVersionRecord:
+    """A clearly-synthetic, digest-valid source-version record for supported-path fixtures."""
+    return SourceVersionRecord(
+        source_id=source_id,
+        upstream_record_id=record_id,
+        upstream_version=upstream_version,
+        retrieved_at=datetime.now(timezone.utc),
+        connector_name=connector_name,
+        connector_version=connector_version,
+        content_sha256=source_version_content_sha256(
+            source_id=source_id, upstream_record_id=record_id, upstream_version=upstream_version
+        ),
+    )
+
+
+def synthetic_current_freshness() -> FreshnessAssessment:
+    return FreshnessAssessment(
+        state=FreshnessState.CURRENT, basis="synthetic-fixture", assessed_at=datetime.now(timezone.utc)
+    )
 
 
 def make_engine(connectors, **kwargs):
@@ -36,6 +70,11 @@ class FakePubMedConnector:
             stable_url="https://pubmed.ncbi.nlm.nih.gov/123/",
             identifiers={"PMID":"123"},
             publication_date="2026",
+            version_record=synthetic_version_record(
+                source_id="pubmed:123", record_id="123", upstream_version="123.1",
+                connector_name="fake-pubmed", connector_version="fixture-2",
+            ),
+            freshness=synthetic_current_freshness(),
             phi_classification=PHIClassification(
                 classification_id="public:pubmed:123",
                 object_id="pubmed:123",
@@ -73,6 +112,12 @@ class FakeTrialConnector:
             stable_url="https://clinicaltrials.gov/study/NCT00000001",
             identifiers={"NCT":"NCT00000001"},
             evidence_class="trial_registry_record",
+            version_record=synthetic_version_record(
+                source_id="ctgov:NCT00000001", record_id="NCT00000001",
+                upstream_version="NCT00000001@2026-01-01", connector_name="fake-clinicaltrials",
+                connector_version="fixture-2",
+            ),
+            freshness=synthetic_current_freshness(),
             phi_classification=PHIClassification(
                 classification_id="public:ctgov:NCT00000001",
                 object_id="ctgov:NCT00000001",

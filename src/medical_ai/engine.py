@@ -237,18 +237,20 @@ class EvidenceEngine:
             # versioned, digest-verified A1 policies, from the claim's actual scope. The
             # engine no longer self-declares APPROVED/validation_passed. Without a
             # resolver, nothing is authorised and the gate fails closed.
-            any_source_superseded = any(source.superseded for source in claim_sources)
             resolution = (
                 self.authority_resolver.resolve_claim_authority(
                     claim,
                     source_class=source_class,
                     public_non_phi=public_non_phi,
-                    any_source_superseded=any_source_superseded,
+                    source_records=claim_sources,
                     trace_ref=digest,
                 )
                 if self.authority_resolver is not None
                 else UNRESOLVED
             )
+            # Record the resolver's computed freshness on the claim (from the sources'
+            # explicit assessments); CURRENT only when every source was assessed CURRENT.
+            claim.freshness_status = resolution.freshness_status
             subject = InfluenceSubject(
                 object_id=claim.claim_id,
                 object_type=InfluenceObjectType.CLAIM_RECORD,

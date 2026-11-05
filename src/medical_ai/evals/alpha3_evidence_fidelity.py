@@ -16,7 +16,15 @@ from medical_ai.engine import EvidenceEngine
 from medical_ai.authority_resolver import AuthorityResolver
 from medical_ai.evals.retrieval import first_authoritative_rank, recall_at_k
 from medical_ai.retrieval_query import normalize_search_query
-from medical_ai.schemas import AnswerStatus, Passage, SourceRecord
+from medical_ai.schemas import (
+    AnswerStatus,
+    FreshnessAssessment,
+    FreshnessState,
+    Passage,
+    SourceRecord,
+    SourceVersionRecord,
+    source_version_content_sha256,
+)
 
 
 RUNNER_VERSION = "alpha3-evidence-fidelity-harness-v0.2"
@@ -207,13 +215,44 @@ class FixtureConnector:
         self.raw_queries: list[str] = []
         self.normalized_queries: list[str] = []
 
+    @staticmethod
+    def _with_synthetic_version(source: SourceRecord) -> SourceRecord:
+        """Attach an explicit, clearly synthetic version record + CURRENT freshness to a
+        fixture source that lacks one, so admitted fixtures satisfy the A2 trust root.
+
+        Clearly marked synthetic (basis ``alpha3-synthetic-fixture``). Sources that
+        already carry a version record (e.g. the case-001 JSON fixture) are left as-is.
+        """
+        if source.version_record is not None:
+            return source
+        now = datetime.now(timezone.utc)
+        upstream_version = f"{source.record_id}@alpha3-synthetic-fixture"
+        record = SourceVersionRecord(
+            source_id=source.source_id,
+            upstream_record_id=source.record_id,
+            upstream_version=upstream_version,
+            retrieved_at=now,
+            connector_name="alpha3-fixture-connector",
+            connector_version=FixtureConnector.version,
+            content_sha256=source_version_content_sha256(
+                source_id=source.source_id,
+                upstream_record_id=source.record_id,
+                upstream_version=upstream_version,
+            ),
+        )
+        freshness = source.freshness or FreshnessAssessment(
+            state=FreshnessState.CURRENT, basis="alpha3-synthetic-fixture", assessed_at=now,
+        )
+        return source.model_copy(update={"version_record": record, "freshness": freshness})
+
     async def search_and_fetch(self, query: str, limit: int = 5) -> tuple[list[SourceRecord], list[Passage]]:
         self.raw_queries.append(query)
         self.normalized_queries.append(normalize_search_query(query))
         if self._scenario.behavior == "raise_error":
             exc_type = self._EXC_TYPES.get(self._scenario.error_type or "", RuntimeError)
             raise exc_type(self._scenario.error_message or "synthetic source failure")
-        return list(self._scenario.sources), list(self._scenario.passages)
+        sources = [self._with_synthetic_version(source) for source in self._scenario.sources]
+        return sources, list(self._scenario.passages)
 
 
 def default_case_set_path() -> Path:

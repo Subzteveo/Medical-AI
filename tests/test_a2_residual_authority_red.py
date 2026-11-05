@@ -1,53 +1,42 @@
-"""A2 residual-authority RED regressions (gate before A3).
+"""A2 residual-authority repair regressions (Defects A and B, now fixed).
 
 Two residual gaps inside A2's own resolver code (``authority_resolver.py``),
-reproduced at the observable engine boundary. These are NOT the pre-A2 gap that
-``tests/test_authority_origin_regression.py`` already covers (that regression is
-green at ``df50749``); they are defects that survive *inside* the merged A2
-resolver.
+reproduced at the observable engine boundary, and now closed by the A2 authority
+repair. These are NOT the pre-A2 gap that ``tests/test_authority_origin_regression.py``
+covers; they are defects that survived *inside* the merged A2 resolver.
 
-Defect A — unresolvable source-version authority
-    The resolver builds reference strings such as
-    ``source-version:<class>:<claim_id>`` and ``claim-evidence:<claim_id>`` but
-    nothing establishes that they resolve to independently verified
-    source-version records. A policy ALLOW plus a well-formed reference string is
-    treated as authority. The reference string never reaches the engine output
-    (``engine.py`` copies only the four authority states into the influence
-    subject), so the defect is proven through the observable result: a supported
-    medical claim appears even though no source-version record exists.
+Defect A — unresolvable source-version authority (REPAIRED)
+    The resolver built reference strings such as ``source-version:<class>:<claim_id>``
+    but nothing established that they resolved to independently verified
+    source-version records. The repair makes the resolver verify a real
+    ``SourceVersionRecord`` per source; without one, evidence authority is UNKNOWN
+    and surfaces as ``EVIDENCE_AUTHORITY_UNKNOWN``. A well-formed reference string is
+    no longer authority.
 
-Defect B — missing freshness defaults to CURRENT
-    ``authority_resolver.resolve_claim_authority`` receives a plain ``bool``
-    (``any_source_superseded``) and computes
-    ``SUPERSEDED if any_source_superseded else CURRENT`` (about line 195). The
-    boolean cannot express "unknown", so the *absence* of a supersession flag is
-    silently treated as current authority.
+Defect B — missing freshness defaults to CURRENT (REPAIRED)
+    ``resolve_claim_authority`` used to receive a plain ``bool`` and compute
+    ``SUPERSEDED if any_source_superseded else CURRENT``, so the *absence* of a
+    freshness state was silently treated as current. The repair passes the claim's
+    source records; a source with no ``FreshnessAssessment`` resolves to UNKNOWN
+    freshness, which the merged ``ea-unknown-freshness`` DENY rule denies, surfacing
+    as ``EVIDENCE_AUTHORITY_DENIED``.
 
-Observable RED contract (shared by both tests, per the v6 prompt):
-    "traceable" at the boundary means the claim's ``InfluenceDecision`` is not
-    allowed and its ``reasons`` list is not empty. No reason *name* is asserted,
-    and none is added: the closed ``InfluenceReasonCode`` enum has no
-    source-version or freshness member today, and choosing one belongs to the A2
-    repair tranche, not here.
-
-Independence limit:
-    No runtime field can yet express "source-version record present" or
-    "explicitly current", so both tests necessarily use the same kind of fixture
-    and fail for the same observable reason. A later repair of either defect may
-    turn both green. Neither test isolates its defect from the other.
-
-Fixtures use synthetic, non-PHI data only. Against ``df50749`` both tests are
-expected to FAIL (RED): the current engine returns a supported, allowed claim.
+Each test now isolates its defect: Defect A has an explicit CURRENT freshness and no
+version record (so only the record gate fails); Defect B has a valid version record
+and no freshness (so only the freshness gate fails). Fixtures use synthetic, non-PHI
+data only.
 """
 
 from __future__ import annotations
+
+from collections.abc import Sequence
 
 import pytest
 
 from conftest import FakePubMedConnector
 from medical_ai.authority_resolver import AuthorityResolver, ClaimAuthorityResolution
 from medical_ai.engine import EvidenceEngine
-from medical_ai.schemas import AnswerStatus, VerificationStatus
+from medical_ai.schemas import AnswerStatus, InfluenceReasonCode, SourceRecord, VerificationStatus
 
 _QUESTION = "What evidence shows treatment X reduces symptom scores?"
 
@@ -74,14 +63,14 @@ class _RecordingResolver(AuthorityResolver):
         *,
         source_class: str,
         public_non_phi: bool,
-        any_source_superseded: bool,
+        source_records: Sequence[SourceRecord],
         trace_ref: str,
     ) -> ClaimAuthorityResolution:
         resolution = super().resolve_claim_authority(
             claim,
             source_class=source_class,
             public_non_phi=public_non_phi,
-            any_source_superseded=any_source_superseded,
+            source_records=source_records,
             trace_ref=trace_ref,
         )
         self.calls.append(
@@ -89,7 +78,10 @@ class _RecordingResolver(AuthorityResolver):
                 "claim_id": claim.claim_id,
                 "source_class": source_class,
                 "public_non_phi": public_non_phi,
-                "any_source_superseded": any_source_superseded,
+                "has_version_record": all(s.version_record is not None for s in source_records),
+                "freshness_states": [
+                    (s.freshness.state.value if s.freshness is not None else None) for s in source_records
+                ],
             }
         )
         self.resolutions.append(resolution)
@@ -101,14 +93,17 @@ async def test_defect_a_reference_string_is_not_a_resolved_source_version_record
     """Defect A: a well-formed source-version reference string, backed by no
     independently verified record, must not yield a supported medical claim.
 
-    RED against df50749: the engine returns an ALLOW decision and a supported
-    claim because the resolver treats the policy ALLOW plus the reference string
-    as authority.
+    Repaired: the engine denies the claim with ``EVIDENCE_AUTHORITY_UNKNOWN`` because
+    no verified source-version record exists, even though freshness is CURRENT.
     """
     resolver = _RecordingResolver()
-    # The shared fixture carries publication_date="2026" (a *date* field, not a
-    # freshness state) and no source-version record of any kind.
-    connector = FakePubMedConnector()
+    # Explicit CURRENT freshness but NO source-version record: isolates the record
+    # (trust-root) gate from the freshness gate.
+    base = FakePubMedConnector()
+    no_record = base.sources[0].model_copy(update={"version_record": None})
+    assert no_record.version_record is None
+    assert no_record.freshness is not None and no_record.freshness.state.value == "CURRENT"
+    connector = FakePubMedConnector([no_record], base.passages)
     engine = EvidenceEngine(connector, authority_resolver=resolver)
 
     answer = await engine.answer(_QUESTION)
@@ -123,21 +118,18 @@ async def test_defect_a_reference_string_is_not_a_resolved_source_version_record
     )
     assert answer.influence_decisions, "claim must reach the influence gate"
 
-    # 2. Diagnostic (NOT the RED assertion): the resolver authorised this claim on
-    #    a policy ALLOW plus a well-formed source-version reference *string*, with
-    #    no backing source-version record. The string never reaches the engine
-    #    output, so the defect can only be proven through the observable result.
+    # 2. Diagnostic (NOT the RED assertion): the resolver still emits the reference
+    #    string, but it no longer confers authority without a verified record.
     resolution = resolver.resolutions[0]
     resolved_claim_id = resolver.calls[0]["claim_id"]
     source_version_refs = [
         getattr(decision, "source_version_ref", None) for decision in resolution.decisions
     ]
     assert f"source-version:biomedical_literature:{resolved_claim_id}" in source_version_refs, (
-        "resolver emits only a reference string, not a resolved source-version record"
+        "resolver still emits a reference string for traceability"
     )
-    assert resolution.authorized, (
-        "diagnostic baseline: current resolver treats the reference string as "
-        "sufficient authority (this is the behaviour under test)"
+    assert not resolution.authorized, (
+        "a reference string without a verified source-version record is not authority"
     )
 
     # 3. REQUIRED behaviour (RED against df50749): without an independently
@@ -156,44 +148,46 @@ async def test_defect_a_reference_string_is_not_a_resolved_source_version_record
         AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS,
     }
 
+    # Per-defect reason code (3.4): a missing verified record is EVIDENCE_AUTHORITY_UNKNOWN.
+    assert any(
+        InfluenceReasonCode.EVIDENCE_AUTHORITY_UNKNOWN in decision.reasons
+        for decision in answer.influence_decisions
+    ), "Defect A must surface as EVIDENCE_AUTHORITY_UNKNOWN"
+    assert not any(
+        InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED in decision.reasons
+        for decision in answer.influence_decisions
+    ), "Defect A is an absent record (UNKNOWN), not a policy DENY"
+
 
 @pytest.mark.asyncio
 async def test_defect_b_missing_freshness_must_not_default_to_current_allow():
-    """Defect B: admitted evidence carrying no freshness-state or retraction
-    metadata must not be treated as current authority.
+    """Defect B: admitted evidence carrying no freshness assessment must not be
+    treated as current authority.
 
-    RED against df50749: the engine returns an ALLOW decision and a supported
-    claim because ``any_source_superseded`` is False (the absence of a
-    supersession flag is indistinguishable from "not superseded").
+    Repaired: the source carries a valid version record but no freshness assessment,
+    so freshness resolves to UNKNOWN and ``ea-unknown-freshness`` denies it with
+    ``EVIDENCE_AUTHORITY_DENIED``.
     """
     base = FakePubMedConnector()
-    # Strip the only non-default date the fixture carries so freshness is
-    # genuinely ABSENT, not set to a convenient value. ``superseded`` stays at its
-    # default (False) — the only freshness-state field on the runtime source model
-    # (schemas.py line 155) — and version/updated_date/effective_date are already
-    # None. No freshness state and no retraction state are set anywhere.
-    freshnessless = base.sources[0].model_copy(update={"publication_date": None})
+    # Valid version record, but freshness genuinely ABSENT (not a convenient value).
+    freshnessless = base.sources[0].model_copy(update={"freshness": None})
     resolver = _RecordingResolver()
     connector = FakePubMedConnector([freshnessless], base.passages)
     engine = EvidenceEngine(connector, authority_resolver=resolver)
 
     answer = await engine.answer(_QUESTION)
 
-    # Freshness is genuinely absent from the input (reported, not asserted away):
+    # Freshness is genuinely absent from the input, but the version record is valid.
     src = connector.sources[0]
-    assert src.superseded is False, "supersession flag left unset (defaults to False)"
-    assert src.version is None
-    assert src.publication_date is None
-    assert src.updated_date is None
-    assert src.effective_date is None
+    assert src.freshness is None, "freshness assessment left unset"
+    assert src.version_record is not None, "a valid source-version record is present"
 
-    # 1. The evidence reaches the resolver, and the engine can only pass a plain
-    #    bool, so "unknown freshness" is indistinguishable from "not superseded".
+    # 1. The evidence reaches the resolver; a missing freshness assessment is UNKNOWN,
+    #    never silently 'not superseded'.
     assert connector.called, "fixture must exercise the evidence engine"
     assert resolver.calls, "evidence must reach the authority resolver"
-    assert resolver.calls[0]["any_source_superseded"] is False, (
-        "the engine passes only a bool; absence of a supersession flag is "
-        "indistinguishable from 'not superseded'"
+    assert resolver.calls[0]["freshness_states"] == [None], (
+        "the source carries no freshness assessment; the resolver treats it as UNKNOWN"
     )
     assert answer.influence_decisions, "claim must reach the influence gate"
 
@@ -211,3 +205,40 @@ async def test_defect_b_missing_freshness_must_not_default_to_current_allow():
         AnswerStatus.ANSWER_SUPPORTED,
         AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS,
     }
+
+    # Per-defect reason code (3.4): unknown freshness is the explicit DENY rule.
+    assert any(
+        InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED in decision.reasons
+        for decision in answer.influence_decisions
+    ), "Defect B must surface as EVIDENCE_AUTHORITY_DENIED"
+
+
+@pytest.mark.asyncio
+async def test_dated_source_with_record_but_no_freshness_is_denied():
+    """A dated source (publication_date set) with a valid version record but no
+    freshness assessment must still be denied with EVIDENCE_AUTHORITY_DENIED: a
+    publication date is not a freshness assessment.
+    """
+    base = FakePubMedConnector()
+    dated = base.sources[0].model_copy(update={"freshness": None})
+    assert dated.publication_date is not None, "the source carries a publication date"
+    assert dated.version_record is not None, "the source carries a valid version record"
+    assert dated.freshness is None, "but no explicit freshness assessment"
+    resolver = _RecordingResolver()
+    connector = FakePubMedConnector([dated], base.passages)
+    engine = EvidenceEngine(connector, authority_resolver=resolver)
+
+    answer = await engine.answer(_QUESTION)
+
+    assert resolver.calls, "claim must reach the authority resolver"
+    assert answer.influence_decisions, "claim must reach the influence gate"
+    assert not any(decision.allowed for decision in answer.influence_decisions)
+    assert answer.claims == [], "a publication date must not stand in for freshness"
+    assert answer.status not in {
+        AnswerStatus.ANSWER_SUPPORTED,
+        AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS,
+    }
+    assert any(
+        InfluenceReasonCode.EVIDENCE_AUTHORITY_DENIED in decision.reasons
+        for decision in answer.influence_decisions
+    ), "an unknown freshness must surface as EVIDENCE_AUTHORITY_DENIED"
