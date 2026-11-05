@@ -35,7 +35,7 @@ Every substantive medical `ClaimRecord` must be able to represent:
 - `source_passages` — recoverable passages/sections supporting the claim where available;
 - `source_versions` / effective dates — sufficient to assess currency and supersession;
 - `retrieval_timestamp` — when the evidence was obtained;
-- `freshness_status` — current, potentially outdated, superseded, unknown or equivalent explicit state;
+- `freshness_status` — one of `CURRENT`, `SUPERSEDED`, `RETRACTED`, `UNKNOWN` or `NOT_ASSESSED`; `CURRENT` only when every source was assessed current, never a merged "current or not assessed" default;
 - `conflict_status` — concordant, mixed, conflicting, unknown or not applicable;
 - `verification_status` — whether claim-to-evidence support has passed the required verification path;
 - `safety_gate_status` — including independent high-consequence verification where required;

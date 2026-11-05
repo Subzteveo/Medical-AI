@@ -2,11 +2,21 @@ from __future__ import annotations
 
 import hashlib
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 
 import httpx
 
 from medical_ai.retrieval_query import normalize_search_query
-from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
+from medical_ai.schemas import (
+    FreshnessAssessment,
+    FreshnessState,
+    InformationClass,
+    Passage,
+    PHIClassification,
+    SourceRecord,
+    SourceVersionRecord,
+    source_version_content_sha256,
+)
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
@@ -75,7 +85,9 @@ class PubMedConnector:
             citation = article.find("MedlineCitation")
             if citation is None:
                 continue
-            pmid = _text(citation.find("PMID"))
+            pmid_el = citation.find("PMID")
+            pmid = _text(pmid_el)
+            pmid_version = pmid_el.attrib.get("Version") if pmid_el is not None else None
             art = citation.find("Article")
             if art is None or not pmid:
                 continue
@@ -109,6 +121,40 @@ class PubMedConnector:
                     identifiers[kind] = val
 
             source_id = f"pubmed:{pmid}"
+            retrieved_at = datetime.now(timezone.utc)
+            # Source-version record (trust root). Requires a PMID Version attribute;
+            # without it no record is emitted and the resolver denies as unverified.
+            if pmid_version:
+                upstream_version = f"{pmid}.{pmid_version}"
+                version_record: SourceVersionRecord | None = SourceVersionRecord(
+                    source_id=source_id,
+                    upstream_record_id=pmid,
+                    upstream_version=upstream_version,
+                    retrieved_at=retrieved_at,
+                    connector_name=PubMedConnector.name,
+                    connector_version=PubMedConnector.version,
+                    content_sha256=source_version_content_sha256(
+                        source_id=source_id,
+                        upstream_record_id=pmid,
+                        upstream_version=upstream_version,
+                    ),
+                )
+            else:
+                version_record = None
+            # Freshness from data the connector already parses. A retraction signal is
+            # RETRACTED; an UpdateIn correction is SUPERSEDED; an ExpressionOfConcernIn
+            # is UNKNOWN; otherwise CURRENT. superseded=retracted is unchanged.
+            if retracted:
+                freshness_state = FreshnessState.RETRACTED
+            elif any(ref_type.lower() == "updatein" for ref_type in correction_types):
+                freshness_state = FreshnessState.SUPERSEDED
+            elif any(ref_type.lower() == "expressionofconcernin" for ref_type in correction_types):
+                freshness_state = FreshnessState.UNKNOWN
+            else:
+                freshness_state = FreshnessState.CURRENT
+            freshness = FreshnessAssessment(
+                state=freshness_state, basis="pubmed-index-check", assessed_at=retrieved_at,
+            )
             source = SourceRecord(
                 source_id=source_id,
                 authority="NLM/NCBI PubMed",
@@ -121,6 +167,8 @@ class PubMedConnector:
                 identifiers=identifiers,
                 publication_date=publication_date,
                 superseded=retracted,
+                version_record=version_record,
+                freshness=freshness,
                 phi_classification=PHIClassification(
                     classification_id=f"public:{source_id}",
                     object_id=source_id,

@@ -12,7 +12,7 @@ def xml_abstract(*sections):
     for label, text in sections:
         attribute = f' Label="{label}"' if label else ''
         body += f'<AbstractText{attribute}>{escape(text)}</AbstractText>' 
-    return f'<PubmedArticleSet><PubmedArticle><MedlineCitation><PMID>999</PMID><Article><ArticleTitle>Context test</ArticleTitle><Abstract>{body}</Abstract></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>'
+    return f'<PubmedArticleSet><PubmedArticle><MedlineCitation><PMID Version="1">999</PMID><Article><ArticleTitle>Context test</ArticleTitle><Abstract>{body}</Abstract></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>'
 
 
 class FixtureConnector(PubMedConnector):

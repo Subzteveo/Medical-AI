@@ -1,12 +1,22 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
 
 from medical_ai.retrieval_query import normalize_search_query
-from medical_ai.schemas import InformationClass, Passage, PHIClassification, SourceRecord
+from medical_ai.schemas import (
+    FreshnessAssessment,
+    FreshnessState,
+    InformationClass,
+    Passage,
+    PHIClassification,
+    SourceRecord,
+    SourceVersionRecord,
+    source_version_content_sha256,
+)
 
 API_BASE = "https://clinicaltrials.gov/api/v2/studies"
 
@@ -74,8 +84,35 @@ class ClinicalTrialsConnector:
             last_update = _nested(status, "lastUpdateSubmitDate") or _nested(status, "studyFirstSubmitDate")
             conditions = _nested(protocol, "conditionsModule", "conditions", default=[]) or []
 
+            source_id = f"ctgov:{nct_id}"
+            retrieved_at = datetime.now(timezone.utc)
+            # Source-version record keyed to the registry's last update date. Without an
+            # update date no record is emitted and freshness is UNKNOWN (fail-closed).
+            if last_update:
+                upstream_version = f"{nct_id}@{last_update}"
+                version_record: SourceVersionRecord | None = SourceVersionRecord(
+                    source_id=source_id,
+                    upstream_record_id=nct_id,
+                    upstream_version=upstream_version,
+                    retrieved_at=retrieved_at,
+                    connector_name=ClinicalTrialsConnector.name,
+                    connector_version=ClinicalTrialsConnector.version,
+                    content_sha256=source_version_content_sha256(
+                        source_id=source_id,
+                        upstream_record_id=nct_id,
+                        upstream_version=upstream_version,
+                    ),
+                )
+                freshness_state = FreshnessState.CURRENT
+            else:
+                version_record = None
+                freshness_state = FreshnessState.UNKNOWN
+            freshness = FreshnessAssessment(
+                state=freshness_state, basis="ctgov-registry-record", assessed_at=retrieved_at,
+            )
+
             src = SourceRecord(
-                source_id=f"ctgov:{nct_id}",
+                source_id=source_id,
                 authority="ClinicalTrials.gov / U.S. National Library of Medicine",
                 publisher=str(org),
                 source_type="clinical_trial_registry",
@@ -85,6 +122,8 @@ class ClinicalTrialsConnector:
                 stable_url=f"https://clinicaltrials.gov/study/{nct_id}",
                 identifiers={"NCT": nct_id},
                 updated_date=last_update,
+                version_record=version_record,
+                freshness=freshness,
                 evidence_class="trial_registry_record",
                 phi_classification=PHIClassification(
                     classification_id=f"public:ctgov:{nct_id}",
