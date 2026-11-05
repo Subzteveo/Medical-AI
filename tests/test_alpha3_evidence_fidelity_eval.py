@@ -7,6 +7,7 @@ from medical_ai.evals.alpha3_evidence_fidelity import (
     evaluate_case_set,
     load_case_set,
 )
+from conftest import make_engine
 
 
 def _case(case_set, case_id: str):
@@ -184,7 +185,7 @@ async def test_explicit_synthetic_conflict_and_population_exclusion_withhold_all
     from medical_ai.schemas import AnswerStatus
 
     case = _case(load_case_set(default_case_set_path()), case_id)
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(
         case.question, jurisdiction=case.jurisdiction
     )
     assert answer.status == AnswerStatus(expected_status)
@@ -211,7 +212,7 @@ async def test_explicit_conflict_guard_does_not_equate_unrelated_interventions_o
 
     case = _case(load_case_set(), "ALPHA3-FIX-005-CONFLICT-BLOCKED")
     case.scenario.passages[1].text = non_conflicting_text
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(case.question)
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert answer.claims
     assert "EVIDENCE_CONFLICTING" not in answer.trace.safety_flags
@@ -225,7 +226,7 @@ async def test_explicit_conflict_guard_requires_independent_source_records():
 
     case = _case(load_case_set(), "ALPHA3-FIX-005-CONFLICT-BLOCKED")
     case.scenario.passages[1].source_id = case.scenario.sources[0].source_id
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(case.question)
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert "EVIDENCE_CONFLICTING" not in answer.trace.safety_flags
 
@@ -241,7 +242,7 @@ async def test_population_guard_withholds_when_explicit_exclusion_starts_below_r
         "Treatment X reduced symptom scores in adults aged 40 to 65; "
         "adults older than 70 were not evaluated."
     )
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(case.question)
     assert answer.status == AnswerStatus.POPULATION_MISMATCH
     assert answer.claims == []
 
@@ -256,7 +257,7 @@ async def test_population_guard_does_not_convert_explicit_inclusion_into_exclusi
     case.scenario.passages[0].text = (
         "Treatment X reduced symptom scores in adults older than 80 years old."
     )
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(case.question)
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(case.question)
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert answer.claims
     assert "POPULATION_MISMATCH" not in answer.trace.safety_flags

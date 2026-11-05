@@ -4,7 +4,7 @@ dimension: DATA_PLANE_TRANSITION
 revision: 1
 effective_at: "2026-11-05T00:00:00+00:00"
 default_decision: DENY
-policy_digest: ac7a0ec81f11d25e7236f139200d1810a3a684a54a76b538d28d8e6071a75532
+policy_digest: b5951deb2c9b31450fbe8de44d5b309595df556e794b392325273da12eae615d
 rules:
   - rule_id: dp-evidence-retrieve-public
     decision: ALLOW
@@ -14,6 +14,15 @@ rules:
       information_class: PUBLIC_EVIDENCE
       operation: RETRIEVE_PUBLIC_EVIDENCE
       purpose: LITERATURE_DISCOVERY
+    evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
+  - rule_id: dp-evidence-retrieve-registry
+    decision: ALLOW
+    match:
+      from_plane: EVIDENCE
+      to_plane: EVIDENCE
+      information_class: PUBLIC_EVIDENCE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      purpose: TRIAL_REGISTRATION_DISCOVERY
     evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
   - rule_id: dp-evidence-extract-public
     decision: ALLOW

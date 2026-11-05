@@ -13,6 +13,7 @@ AUTHORITATIVE_FILES = (
     ROOT / "src/medical_ai/connectors/base.py",
     ROOT / "src/medical_ai/authority.py",
     ROOT / "src/medical_ai/authority_policy.py",
+    ROOT / "src/medical_ai/authority_resolver.py",
 )
 RUNTIME_ROOT = ROOT / "src/medical_ai"
 CAPABILITY_CONSTRUCTORS = {

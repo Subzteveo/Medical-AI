@@ -13,6 +13,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 from medical_ai.engine import EvidenceEngine
+from medical_ai.authority_resolver import AuthorityResolver
 from medical_ai.evals.retrieval import first_authoritative_rank, recall_at_k
 from medical_ai.retrieval_query import normalize_search_query
 from medical_ai.schemas import AnswerStatus, Passage, SourceRecord
@@ -268,7 +269,7 @@ def _citation_linkage_complete(claim_ids: set[str], evidence_ids: set[str], sour
 
 async def _run_case(case: Alpha3Case) -> Alpha3CaseResult:
     connector = FixtureConnector(case.scenario)
-    answer = await EvidenceEngine(connector).answer(
+    answer = await EvidenceEngine(connector, authority_resolver=AuthorityResolver()).answer(
         case.question,
         jurisdiction=case.jurisdiction,
     )

@@ -1,4 +1,5 @@
 from medical_ai.connectors.clinical_trials import ClinicalTrialsConnector
+from conftest import make_engine
 
 PAYLOAD = {
     "studies": [{
@@ -40,7 +41,7 @@ async def test_registry_title_sentences_keep_registry_attribution():
         async def search_and_fetch(self, query, limit=5):
             return self._parse_payload(payload)
 
-    answer = await EvidenceEngine(FixtureConnector()).answer("Find clinical trials for insomnia")
+    answer = await make_engine(FixtureConnector()).answer("Find clinical trials for insomnia")
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     title_claims = [c.claim_text for c in answer.claims if "cures insomnia" in c.claim_text]
     assert title_claims == [f"ClinicalTrials.gov lists NCT12345678 with the title: {title}."]
