@@ -53,6 +53,12 @@ Live PubMed/ClinicalTrials checks should be a separate explicit job or controlle
 
 Do not merge when required checks are failed, skipped, stale, absent, or bound to a different head SHA.
 
+A repository-protection positive control uses an ordinary pull request with required
+checks passing at its exact head SHA, followed by a normal merge without bypass.
+Record the PR, tested head SHA, checks and merge outcome. A passing CI run alone
+proves test execution, not merge-rule enforcement. Verify denied operations and
+missing-check/review restrictions separately as negative controls.
+
 ## Main protection recovery
 
 Routine administrator bypass of `main` protection is not permitted. Emergency bypass or temporary ruleset modification is allowed only for deliberate repository recovery when the normal pull-request path cannot safely restore service or repository integrity.
