@@ -25,6 +25,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -56,6 +57,8 @@ from .schemas import (
     EvidenceAuthorityState,
     InformationClass,
     InformationHandlingAuthorityState,
+    SourceRecord,
+    source_version_content_sha256,
 )
 
 _EVIDENCE_POLICY = "evidence-authority-v0.2.yaml"
@@ -82,6 +85,23 @@ _PURPOSE: dict[str, AuthorityPurpose] = {
 }
 _ENVIRONMENT = "production_public_readonly"
 
+# Worst-across-sources ranking: a higher rank dominates. RETRACTED beats SUPERSEDED,
+# which beats UNKNOWN (and missing), which beats CURRENT.
+_FRESHNESS_RANK: dict[FreshnessState, int] = {
+    FreshnessState.CURRENT: 0,
+    FreshnessState.UNKNOWN: 1,
+    FreshnessState.SUPERSEDED: 2,
+    FreshnessState.RETRACTED: 3,
+}
+# The user-facing claim freshness_status. CURRENT appears only when every source was
+# assessed CURRENT; any missing or unknown assessment yields UNKNOWN.
+_FRESHNESS_STATUS: dict[FreshnessState, str] = {
+    FreshnessState.CURRENT: "CURRENT",
+    FreshnessState.SUPERSEDED: "SUPERSEDED",
+    FreshnessState.RETRACTED: "RETRACTED",
+    FreshnessState.UNKNOWN: "UNKNOWN",
+}
+
 
 @dataclass(frozen=True)
 class ClaimAuthorityResolution:
@@ -93,6 +113,7 @@ class ClaimAuthorityResolution:
     validation_passed: bool
     reason_codes: tuple[str, ...] = ()
     decisions: tuple[AuthorityDecisionEnvelope, ...] = field(default_factory=tuple)
+    freshness_status: str = "NOT_ASSESSED"
 
     @property
     def authorized(self) -> bool:
@@ -184,7 +205,7 @@ class AuthorityResolver:
         *,
         source_class: str,
         public_non_phi: bool,
-        any_source_superseded: bool,
+        source_records: Sequence[SourceRecord],
         trace_ref: str,
     ) -> ClaimAuthorityResolution:
         reasons: list[str] = []
@@ -192,7 +213,14 @@ class AuthorityResolver:
         claim_type = _CLAIM_TYPE.get(source_class, ClaimType.UNKNOWN)
         component = _COMPONENT.get(source_class)
         purpose = _PURPOSE.get(source_class)
-        freshness = FreshnessState.SUPERSEDED if any_source_superseded else FreshnessState.CURRENT
+        # Freshness is derived from each source's explicit assessment, worst across the
+        # claim's sources. A missing assessment is UNKNOWN, never silently CURRENT.
+        freshness = self._claim_freshness(source_records)
+        freshness_status = _FRESHNESS_STATUS[freshness]
+        # Trust root: every source must carry a verifiable source-version record. A
+        # well-formed reference string is not authority. A failure here makes evidence
+        # authority UNKNOWN (absent), distinct from a policy DENY on freshness.
+        record_failure = self._verify_source_version_records(source_records)
         info_class = (
             InformationClassification.PUBLIC_EVIDENCE if public_non_phi else InformationClassification.UNKNOWN
         )
@@ -210,6 +238,17 @@ class AuthorityResolver:
             consequence=claim.consequence_level,
         )
         evidence = evaluate_scope(self._evidence, evidence_scope)
+        if record_failure is not None:
+            # No independently verified source-version record. Resolve to UNKNOWN by
+            # replacing the policy decision with a NO_MATCHING_RULE denial (which maps
+            # to UNKNOWN, not DENIED), so it surfaces as EVIDENCE_AUTHORITY_UNKNOWN.
+            evidence = ScopedDecision(
+                result=DecisionResult.DENY,
+                reason=ScopedDecisionReason.NO_MATCHING_RULE,
+                policy_id=self._evidence.policy_id,
+                policy_digest=self._evidence.policy_digest,
+                matched_rule_ids=(record_failure,),
+            )
         evidence_state = _evidence_state(evidence)
         evidence_envelope = _envelope_fields(
             dimension_label="evidence-authority", claim=claim, scope=evidence_scope, scoped=evidence,
@@ -292,4 +331,53 @@ class AuthorityResolver:
             validation_passed=all_allowed,
             reason_codes=tuple(reasons),
             decisions=tuple(decisions),
+            freshness_status=freshness_status,
         )
+
+    @staticmethod
+    def _claim_freshness(source_records: Sequence[SourceRecord]) -> FreshnessState:
+        """Worst freshness across a claim's sources; missing/empty is UNKNOWN."""
+        if not source_records:
+            return FreshnessState.UNKNOWN
+        worst = FreshnessState.CURRENT
+        for source in source_records:
+            assessment = source.freshness
+            state = assessment.state if assessment is not None else FreshnessState.UNKNOWN
+            if _FRESHNESS_RANK[state] > _FRESHNESS_RANK[worst]:
+                worst = state
+        return worst
+
+    @staticmethod
+    def _verify_source_version_records(source_records: Sequence[SourceRecord]) -> str | None:
+        """Verify each source's version record; return a reason string on first failure.
+
+        Checks that the record exists, its ``source_id`` matches the source, every
+        required field is present and non-blank, and ``content_sha256`` recomputes
+        exactly. Returns ``None`` only when every source passes.
+        """
+        if not source_records:
+            return "SOURCE_VERSION_RECORD_MISSING"
+        for source in source_records:
+            record = source.version_record
+            if record is None:
+                return "SOURCE_VERSION_RECORD_MISSING"
+            if record.source_id != source.source_id:
+                return "SOURCE_VERSION_RECORD_SOURCE_MISMATCH"
+            required = (
+                record.source_id,
+                record.upstream_record_id,
+                record.upstream_version,
+                record.connector_name,
+                record.connector_version,
+                record.content_sha256,
+            )
+            if any((not value) or value != value.strip() for value in required):
+                return "SOURCE_VERSION_RECORD_FIELD_BLANK"
+            expected = source_version_content_sha256(
+                source_id=record.source_id,
+                upstream_record_id=record.upstream_record_id,
+                upstream_version=record.upstream_version,
+            )
+            if record.content_sha256 != expected:
+                return "SOURCE_VERSION_RECORD_DIGEST_MISMATCH"
+        return None

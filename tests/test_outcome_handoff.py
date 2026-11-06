@@ -65,7 +65,7 @@ async def test_existing_registry_attribution_survives_without_rewriting_claims()
     title = "Example trial. Treatment X cures insomnia."
     payload = {"studies": [{"protocolSection": {
         "identificationModule": {"nctId": "NCT12345678", "briefTitle": title, "organization": {"fullName": "University"}},
-        "statusModule": {"overallStatus": "RECRUITING"},
+        "statusModule": {"overallStatus": "RECRUITING", "lastUpdateSubmitDate": "2026-09-20"},
         "designModule": {"studyType": "INTERVENTIONAL"},
         "conditionsModule": {"conditions": ["Insomnia"]},
     }}]}

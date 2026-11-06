@@ -1,9 +1,33 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import uuid
 from datetime import datetime, timezone
 from enum import StrEnum
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from typing import Annotated
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, JsonValue, model_validator
+
+
+def _nonblank_text(value: str) -> str:
+    if not value or value != value.strip():
+        raise ValueError("value must be non-blank and unpadded")
+    return value
+
+
+NonBlankText = Annotated[str, AfterValidator(_nonblank_text)]
+
+
+# Steven's verbatim use notice. Defined once; reused by the renderer, the API response
+# (via the EvidenceAnswer.use_notice field) and the browser view. Do not edit the text.
+USE_NOTICE = (
+    "**Use notice.** Medical AI is an engineering-alpha evidence tool for medical "
+    "education, literature and trial discovery, and research support. It does not "
+    "diagnose, recommend, select or dose treatment for any patient, and it does not "
+    "replace the clinical judgement of a qualified health professional. Check every "
+    "claim against its cited source before relying on it. This build is not clinically "
+    "validated, and no TGA classification or exemption determination has been made."
+)
 
 
 class AnswerStatus(StrEnum):
@@ -129,6 +153,61 @@ class InvalidationReasonCode(StrEnum):
     AUTHORITY_REVOKED = "AUTHORITY_REVOKED"
 
 
+class FreshnessState(StrEnum):
+    """Canonical freshness states. Re-exported from ``authority`` for the A1 kernel."""
+
+    CURRENT = "CURRENT"
+    SUPERSEDED = "SUPERSEDED"
+    RETRACTED = "RETRACTED"
+    UNKNOWN = "UNKNOWN"
+
+
+def source_version_content_sha256(
+    *, source_id: str, upstream_record_id: str, upstream_version: str
+) -> str:
+    """Canonical SHA-256 over a source version's identifying and versioned fields.
+
+    The serialisation covers exactly three fields: the source identity (``source_id``),
+    the upstream record identity (``upstream_record_id``, e.g. the PMID or NCT ID) and
+    the upstream version (``upstream_version``). It is a minimal integrity binding so a
+    tampered digest or a mismatched version fails verification; it is not the A3
+    provenance graph and establishes no revocation or dependency state.
+    """
+
+    material = {
+        "source_id": source_id,
+        "upstream_record_id": upstream_record_id,
+        "upstream_version": upstream_version,
+    }
+    canonical = json.dumps(material, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+class FreshnessAssessment(BaseModel):
+    """An explicit freshness assessment attached to a retrieved source by a connector."""
+
+    state: FreshnessState
+    basis: NonBlankText
+    assessed_at: AwareDatetime
+
+
+class SourceVersionRecord(BaseModel):
+    """A checkable source-version record produced by a connector at retrieval time.
+
+    The resolver treats this as the trust root for evidence authority: a reference
+    string is never sufficient. Records are produced only by connectors, never by the
+    extractor, verifier, claim builder, renderer, API or any model output.
+    """
+
+    source_id: str
+    upstream_record_id: str
+    upstream_version: str
+    retrieved_at: AwareDatetime
+    connector_name: str
+    connector_version: str
+    content_sha256: str
+
+
 class PHIClassification(BaseModel):
     classification_id: str
     object_id: str
@@ -153,6 +232,8 @@ class SourceRecord(BaseModel):
     effective_date: str | None = None
     retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     superseded: bool = False
+    version_record: SourceVersionRecord | None = None
+    freshness: FreshnessAssessment | None = None
     licence_class: str = "public_metadata"
     evidence_class: str = "primary_or_indexed_literature"
     population: str | None = None
@@ -199,7 +280,7 @@ class ClaimRecord(BaseModel):
     population: str | None = None
     applicability: Applicability = Applicability.DIRECT
     evidence_certainty: str = "NOT_ASSESSED"
-    freshness_status: str = "CURRENT_OR_NOT_ASSESSED"
+    freshness_status: str = "NOT_ASSESSED"
     conflict_status: str = "NONE_DETECTED"
     entailment_status: str = "UNVERIFIED"
     verification_status: VerificationStatus = VerificationStatus.FAIL
@@ -440,6 +521,7 @@ class EvidenceAnswer(BaseModel):
     passages: list[Passage] = Field(default_factory=list[Passage])
     trace: ExecutionTrace
     influence_decisions: list[InfluenceDecision] = Field(default_factory=list[InfluenceDecision])
+    use_notice: str = USE_NOTICE
 
     @model_validator(mode="after")
     def validate_output_consistency(self) -> "EvidenceAnswer":
@@ -490,4 +572,14 @@ class EvidenceAnswer(BaseModel):
                         dimensions.provenance, dimensions.validation, dimensions.safety, dimensions.monitoring,
                     ))):
                 raise ValueError("Recorded decision does not support the delivered claim")
+        return self
+
+    @model_validator(mode="after")
+    def ensure_use_notice(self) -> "EvidenceAnswer":
+        # Every answer, supported or not, carries the use notice at the end of the
+        # rendered Markdown. The notice is additive and never makes an unauthorised
+        # claim renderable; the evidence gates above remain the only authority.
+        if not self.answer_markdown.rstrip().endswith(USE_NOTICE):
+            separator = "\n\n" if self.answer_markdown.strip() else ""
+            self.answer_markdown = f"{self.answer_markdown}{separator}{USE_NOTICE}"
         return self
