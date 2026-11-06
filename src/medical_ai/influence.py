@@ -34,6 +34,10 @@ from .schemas import (
 )
 
 
+class InfluenceCapacityExceeded(RuntimeError):
+    """Fail-closed capacity hold; never discard an existing authorization or revocation."""
+
+
 class InfluenceController:
     """Machine-enforced gate for whether an object may influence medical output.
 
@@ -48,7 +52,11 @@ class InfluenceController:
     def __init__(
         self,
         allowed_transitions: Iterable[tuple[DataPlane, DataPlane]] | None = None,
+        max_decisions: int = 2048,
     ) -> None:
+        if type(max_decisions) is not int or not 1 <= max_decisions <= 100000:
+            raise ValueError("Influence decision budget must be between 1 and 100000")
+        self.max_decisions = max_decisions
         defaults: set[tuple[DataPlane, DataPlane]] = {
             (DataPlane.EVIDENCE, DataPlane.EVIDENCE),
             (DataPlane.TERMINOLOGY, DataPlane.TERMINOLOGY),
@@ -74,6 +82,11 @@ class InfluenceController:
     def authorize(
         self, request: InfluenceRequest, *, claim: ClaimRecord | None = None
     ) -> InfluenceDecision:
+        # A hard limit bounds retained decisions, capabilities and dependency
+        # records without evicting security revocations or earlier claims.
+        # Refuse *before* touching any subject/dependency state.
+        if len(self._decisions) >= self.max_decisions:
+            raise InfluenceCapacityExceeded("Influence controller capacity exceeded")
         if claim is not None and (
             request.subject.object_type != InfluenceObjectType.CLAIM_RECORD
             or claim.claim_id != request.subject.object_id
