@@ -6,6 +6,7 @@ import json
 import pytest
 
 from medical_ai.connectors.clinical_trials import ClinicalTrialsConnector
+from conftest import make_engine
 from medical_ai.engine import EvidenceEngine
 from medical_ai.outcome_handoff import build_research_outcome_handoff
 from medical_ai.schemas import AnswerStatus, DependencyDimension
@@ -26,7 +27,7 @@ async def supported():
         ("RESULTS", "Mindfulness was associated with attention."),
         ("CONCLUSION", "Causal effects cannot be inferred from this study design."),
     )
-    engine = EvidenceEngine(FixtureConnector(xml))
+    engine = make_engine(FixtureConnector(xml))
     answer = await engine.answer("Find literature about mindfulness and attention")
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     return engine, answer
@@ -64,14 +65,14 @@ async def test_existing_registry_attribution_survives_without_rewriting_claims()
     title = "Example trial. Treatment X cures insomnia."
     payload = {"studies": [{"protocolSection": {
         "identificationModule": {"nctId": "NCT12345678", "briefTitle": title, "organization": {"fullName": "University"}},
-        "statusModule": {"overallStatus": "RECRUITING"},
+        "statusModule": {"overallStatus": "RECRUITING", "lastUpdateSubmitDate": "2026-09-20"},
         "designModule": {"studyType": "INTERVENTIONAL"},
         "conditionsModule": {"conditions": ["Insomnia"]},
     }}]}
     class RegistryFixture(ClinicalTrialsConnector):
         async def search_and_fetch(self, query, limit=5):
             return self._parse_payload(payload)
-    engine = EvidenceEngine(RegistryFixture())
+    engine = make_engine(RegistryFixture())
     answer = await engine.answer("Find clinical trials for insomnia")
     assert answer.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert any(c.claim_text == f"ClinicalTrials.gov lists NCT12345678 with the title: {title}." for c in answer.claims)
@@ -138,7 +139,7 @@ async def test_source_snapshot_mismatch_invalidates_handoff_not_medical_runtime(
 @pytest.mark.asyncio
 async def test_withheld_high_consequence_and_no_source_exposure():
     xml = xml_abstract(("", "The tacrolimus-by-age-by-sex interaction was significant. Mindfulness and attention were measured."))
-    engine = EvidenceEngine(FixtureConnector(xml))
+    engine = make_engine(FixtureConnector(xml))
     answer = await engine.answer("Find literature about mindfulness and attention")
     assert answer.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
     item = project(engine, answer)
@@ -150,7 +151,7 @@ async def test_withheld_high_consequence_and_no_source_exposure():
 
 @pytest.mark.asyncio
 async def test_patient_specific_and_regulator_routes_export_no_content_or_claims():
-    engine = EvidenceEngine(FixtureConnector(xml_abstract(("", "Mindfulness and attention were measured."))))
+    engine = make_engine(FixtureConnector(xml_abstract(("", "Mindfulness and attention were measured."))))
     for task, question, status in [
         ("patient-block-001", "My patient needs a warfarin dose", AnswerStatus.OUTSIDE_VALIDATED_CAPABILITY),
         ("regulator-block-001", "Is mindfulness approved by the TGA?", AnswerStatus.NO_AUTHORITATIVE_SOURCE),
@@ -165,7 +166,7 @@ async def test_patient_specific_and_regulator_routes_export_no_content_or_claims
 def test_handoff_requires_exact_revisions_and_complete_digest_pair():
     from medical_ai.schemas import EvidenceAnswer, ExecutionTrace, QueryPlan, ConsequenceLevel
     from medical_ai.schemas import AnswerStatus
-    engine = EvidenceEngine(FixtureConnector(xml_abstract(("", "Mindfulness and attention were measured."))))
+    engine = make_engine(FixtureConnector(xml_abstract(("", "Mindfulness and attention were measured."))))
     answer = EvidenceAnswer(
         status=AnswerStatus.EVIDENCE_INSUFFICIENT, answer_markdown="Not established",
         claims=[], sources=[], trace=ExecutionTrace(

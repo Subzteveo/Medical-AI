@@ -1,0 +1,66 @@
+schema_version: medical-ai-authority-policy/1
+policy_id: data-plane-transitions-v0.2
+dimension: DATA_PLANE_TRANSITION
+revision: 1
+effective_at: "2026-11-05T00:00:00+00:00"
+default_decision: DENY
+policy_digest: b5951deb2c9b31450fbe8de44d5b309595df556e794b392325273da12eae615d
+rules:
+  - rule_id: dp-evidence-retrieve-public
+    decision: ALLOW
+    match:
+      from_plane: EVIDENCE
+      to_plane: EVIDENCE
+      information_class: PUBLIC_EVIDENCE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      purpose: LITERATURE_DISCOVERY
+    evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
+  - rule_id: dp-evidence-retrieve-registry
+    decision: ALLOW
+    match:
+      from_plane: EVIDENCE
+      to_plane: EVIDENCE
+      information_class: PUBLIC_EVIDENCE
+      operation: RETRIEVE_PUBLIC_EVIDENCE
+      purpose: TRIAL_REGISTRATION_DISCOVERY
+    evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
+  - rule_id: dp-evidence-extract-public
+    decision: ALLOW
+    match:
+      from_plane: EVIDENCE
+      to_plane: EVIDENCE
+      information_class: PUBLIC_EVIDENCE
+      operation: EXTRACT_PASSAGE
+      purpose: EDUCATIONAL_EVIDENCE_RENDER
+    evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
+  - rule_id: dp-evidence-render-public
+    decision: ALLOW
+    match:
+      from_plane: EVIDENCE
+      to_plane: EVIDENCE
+      information_class: PUBLIC_EVIDENCE
+      operation: RENDER_EDUCATIONAL_CLAIM
+      purpose: EDUCATIONAL_EVIDENCE_RENDER
+    evidence_requirements: [PUBLIC_EVIDENCE_ONLY, APPROVED_OPERATION]
+  - rule_id: dp-clinical-to-evidence-deny
+    decision: DENY
+    match:
+      from_plane: CLINICAL
+      to_plane: EVIDENCE
+    reason_code: CLINICAL_TO_EVIDENCE_PROMOTION_DENIED
+  - rule_id: dp-research-to-evidence-deny
+    decision: DENY
+    match:
+      from_plane: RESEARCH
+      to_plane: EVIDENCE
+    reason_code: RESEARCH_TO_EVIDENCE_PROMOTION_DENIED
+  - rule_id: dp-promote-to-evidence-deny
+    decision: DENY
+    match:
+      operation: PROMOTE_TO_EVIDENCE
+    reason_code: PROMOTE_TO_EVIDENCE_NOT_AUTHORISED_IN_TRANCHE_A
+  - rule_id: dp-unknown-class-deny
+    decision: DENY
+    match:
+      information_class: UNKNOWN
+    reason_code: UNKNOWN_INFORMATION_CLASS_FAILS_CLOSED

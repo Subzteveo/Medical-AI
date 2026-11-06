@@ -22,7 +22,7 @@ Return one JSON object per source:
   "population": null,
   "version": null,
   "publication_date": "2026",
-  "freshness_status": "CURRENT_OR_NOT_ASSESSED",
+  "freshness_status": "CURRENT",
   "superseded": false,
   "provenance_complete": true,
   "licence_class": "public_metadata",

@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from medical_ai import api
+from conftest import make_engine
 from medical_ai.engine import EvidenceEngine
 from medical_ai.renderer import render_answer
 from medical_ai.schemas import AnswerStatus, DependencyDimension, EvidenceAnswer
@@ -67,7 +68,7 @@ def corrupt(payload, case):
 
 @pytest.fixture
 async def supported(fake_connector):
-    engine = EvidenceEngine(fake_connector)
+    engine = make_engine(fake_connector)
     result = await engine.answer(QUESTION)
     assert result.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert result.claims
@@ -118,7 +119,7 @@ async def test_engine_fails_closed_on_ambiguous_connector_records(fake_connector
     elif case == "duplicate_passage": fake_connector.passages *= 2
     elif case == "wrong_passage_source": fake_connector.passages[0].source_id = "absent"
     else: fake_connector.sources[0].stable_url = "javascript:alert(1)"
-    result = await EvidenceEngine(fake_connector).answer(QUESTION)
+    result = await make_engine(fake_connector).answer(QUESTION)
     assert result.status == AnswerStatus.PROVENANCE_INCOMPLETE
     assert not result.claims and not result.sources and not result.passages
     assert "Treatment X reduced" not in result.answer_markdown
@@ -162,7 +163,7 @@ async def test_multiline_source_claim_is_one_markdown_list_item(fake_connector, 
         + "additional recorded context compared with placebo in the studied adult population."
     )
     fake_connector.passages[0].text = text
-    engine = EvidenceEngine(fake_connector)
+    engine = make_engine(fake_connector)
     response = await engine.answer(QUESTION)
 
     assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
@@ -187,7 +188,7 @@ async def test_multiline_source_title_and_identifier_remain_one_markdown_item(fa
     original_title = "Evidence about treatment X\n- apparent additional citation"
     fake_connector.sources[0].title = original_title
     fake_connector.sources[0].identifiers["PMID"] = "123\n- apparent additional reference"
-    response = await EvidenceEngine(fake_connector).answer(QUESTION)
+    response = await make_engine(fake_connector).answer(QUESTION)
 
     assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert response.sources[0].title == original_title
@@ -207,7 +208,7 @@ async def test_source_strikethrough_delimiters_are_literal_in_markdown(fake_conn
     else:
         fake_connector.sources[0].identifiers["PMID"] = "123~~withdrawn~~"
 
-    response = await EvidenceEngine(fake_connector).answer(QUESTION)
+    response = await make_engine(fake_connector).answer(QUESTION)
     assert response.status == AnswerStatus.ANSWER_SUPPORTED_WITH_QUALIFICATIONS
     assert r"\~\~" in response.answer_markdown
     assert "~~" not in response.answer_markdown

@@ -11,7 +11,7 @@
       "expected_authority_or_source_class": "biomedical_literature",
       "jurisdiction": "AU",
       "population_or_applicability_expectation": "adult evidence is directly represented in supporting passage text",
-      "freshness_requirement": "CURRENT_OR_NOT_ASSESSED",
+      "freshness_requirement": "CURRENT",
       "expected_terminal_state": "ANSWER_SUPPORTED_WITH_QUALIFICATIONS",
       "expected_failure_code": null,
       "review_classification": "ENGINEERING FIXTURE \u2014 NOT CLINICALLY REVIEWED",
@@ -46,6 +46,20 @@
               "PMID": "900001"
             },
             "publication_date": "2026",
+            "version_record": {
+              "source_id": "pubmed:alpha3-supported-001",
+              "upstream_record_id": "900001",
+              "upstream_version": "900001.1",
+              "retrieved_at": "2026-01-01T00:00:00+00:00",
+              "connector_name": "alpha3-fixture-supported",
+              "connector_version": "alpha3-fixture-connector-v0.1",
+              "content_sha256": "sha256:e93f289dcb0ca839b79475383f1ba0204a775b002b4a9bee577d6be6762c8bcb"
+            },
+            "freshness": {
+              "state": "CURRENT",
+              "basis": "alpha3-synthetic-fixture",
+              "assessed_at": "2026-01-01T00:00:00+00:00"
+            },
             "phi_classification": {
               "classification_id": "public:pubmed:alpha3-supported-001",
               "object_id": "pubmed:alpha3-supported-001",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from urllib.parse import quote, urlsplit, urlunsplit
 
-from .schemas import AuthorizedClaimView, CitationMapping, EvidenceUnit, Passage, SourceRecord
+from .schemas import USE_NOTICE, AuthorizedClaimView, CitationMapping, EvidenceUnit, Passage, SourceRecord
 from .influence import InfluenceController
 from .provenance import safe_source_url, validate_output_provenance
 
@@ -72,6 +72,7 @@ def render_answer(
             "### Evidence-bound answer\n\n"
             "The available evidence did not pass the required verification "
             "and influence-authorization gates for a supported answer."
+            "\n\n" + USE_NOTICE
         )
 
     for view in checked_views:
@@ -130,4 +131,5 @@ def render_answer(
                 ),
             ]
         )
+    lines.extend(["", USE_NOTICE])
     return "\n".join(lines)

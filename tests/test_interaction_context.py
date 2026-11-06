@@ -1,6 +1,7 @@
 """Bounded linguistic engineering cases, not adjudicated clinical examples."""
 import pytest
 from medical_ai.planner import classify_consequence, plan_query
+from conftest import make_engine
 from medical_ai.schemas import AnswerStatus, ConsequenceLevel
 from medical_ai.engine import EvidenceEngine
 from test_pubmed_context import FixtureConnector, xml_abstract
@@ -58,7 +59,7 @@ def test_query_classification(case,text,interaction,other,reason):
 async def test_complete_abstract_classification(case,text,interaction,other,reason):
     # Low-consequence query means these gates must come from the full abstract.
     abstract = 'Mindfulness and attention were assessed. ' + text
-    out = await EvidenceEngine(FixtureConnector(xml_abstract(('RESULTS', abstract)))).answer('Find literature about mindfulness and attention')
+    out = await make_engine(FixtureConnector(xml_abstract(('RESULTS', abstract)))).answer('Find literature about mindfulness and attention')
     if interaction or other:
         assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED, reason
         assert not out.claims and not out.sources and not out.passages
@@ -71,6 +72,6 @@ async def test_complete_abstract_classification(case,text,interaction,other,reas
         assert 'PubMed abstract' in out.answer_markdown
 
 async def test_high_query_cannot_be_downgraded_by_benign_abstract():
-    out = await EvidenceEngine(FixtureConnector(xml_abstract(('', 'Mindfulness and attention interactions between age and sex were examined.')))).answer('Find literature about mindfulness and drug interactions')
+    out = await make_engine(FixtureConnector(xml_abstract(('', 'Mindfulness and attention interactions between age and sex were examined.')))).answer('Find literature about mindfulness and drug interactions')
     assert out.status == AnswerStatus.HIGH_CONSEQUENCE_VERIFICATION_FAILED
     assert not out.claims
