@@ -45,7 +45,7 @@ async def test_synthetic_identifiers_never_reach_provider_or_trace(tmp_path, que
     assert answer.status == AnswerStatus.OUTSIDE_VALIDATED_CAPABILITY
     assert "PHI_ROUTE_BLOCKED" in answer.trace.safety_flags
     assert connector.queries == []
-    assert question not in db_path.read_bytes().decode("utf-8")
+    assert question.encode("utf-8") not in db_path.read_bytes()
 
 
 @pytest.mark.asyncio
