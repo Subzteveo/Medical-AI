@@ -7,10 +7,13 @@ import hmac
 import json
 import os
 import re
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Request, status
+
+from .session_store import PilotSessionStore, SessionStoreUnavailable
 
 
 ACCESS_CONFIG_ENV = "MEDICAL_AI_PILOT_ACCESS_JSON"
@@ -209,8 +212,10 @@ def create_session_token(
         current + timedelta(seconds=config.session_ttl_seconds),
     )
     max_age = max(1, int((session_expiry - current).total_seconds()))
+    session_id = secrets.token_urlsafe(32)
     payload = {
-        "v": 1,
+        "v": 2,
+        "sid": session_id,
         "participant_id": participant.participant_id,
         "credential_id": participant.credential_id,
         "exp": int(session_expiry.timestamp()),
@@ -221,6 +226,11 @@ def create_session_token(
     signature = hmac.new(
         config.session_secret, encoded_payload.encode("ascii"), hashlib.sha256
     ).digest()
+    # Register before returning a cookie. No registry means no valid session.
+    PilotSessionStore.from_environment().issue(
+        session_id, participant.participant_id, participant.credential_id,
+        expires_at=int(session_expiry.timestamp()), now=int(current.timestamp()),
+    )
     return f"{encoded_payload}.{_b64url_encode(signature)}", max_age
 
 
@@ -244,7 +254,10 @@ def authenticate_session_token(
     except (ValueError, UnicodeError, binascii.Error):
         return None
 
-    if not isinstance(payload, dict) or payload.get("v") != 1:
+    if not isinstance(payload, dict) or payload.get("v") != 2:
+        return None
+    session_id = payload.get("sid")
+    if not isinstance(session_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{43}", session_id):
         return None
     participant_id = payload.get("participant_id")
     credential_id = payload.get("credential_id")
@@ -265,7 +278,24 @@ def authenticate_session_token(
         return None
     if not hmac.compare_digest(participant.credential_id, credential_id):
         return None
+    if not PilotSessionStore.from_environment().is_active(
+        session_id, participant_id, credential_id, expires_at=expiry,
+        now=int(current.timestamp()),
+    ):
+        return None
     return participant
+
+
+def revoke_session_token(session_token: str, config: PilotAccessConfig) -> bool:
+    """Invalidate just this browser session, not other sessions or bearer invites."""
+    if authenticate_session_token(session_token, config) is None:
+        return False
+    try:
+        encoded_payload = session_token.split(".", 1)[0]
+        session_id = json.loads(_b64url_decode(encoded_payload))["sid"]
+    except (KeyError, TypeError, ValueError, UnicodeError, binascii.Error):
+        return False
+    return PilotSessionStore.from_environment().revoke(session_id)
 
 
 def _configuration_or_503() -> PilotAccessConfig:
@@ -308,9 +338,15 @@ def require_pilot_participant(request: Request) -> PilotParticipant:
         return participant
 
     session_token = request.cookies.get(SESSION_COOKIE_NAME)
-    participant = (
-        authenticate_session_token(session_token, config) if session_token else None
-    )
+    try:
+        participant = (
+            authenticate_session_token(session_token, config) if session_token else None
+        )
+    except SessionStoreUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Pilot session state unavailable",
+        ) from exc
     if participant is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -333,9 +369,15 @@ def optional_pilot_participant(request: Request) -> PilotParticipant | None:
         return participant
 
     session_token = request.cookies.get(SESSION_COOKIE_NAME)
-    participant = (
-        authenticate_session_token(session_token, config) if session_token else None
-    )
+    try:
+        participant = (
+            authenticate_session_token(session_token, config) if session_token else None
+        )
+    except SessionStoreUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Pilot session state unavailable",
+        ) from exc
     if participant is not None:
         request.state.pilot_participant_id = participant.participant_id
     return participant
