@@ -37,17 +37,17 @@ def test_root_serves_accessible_workbench_shell_only_after_login(monkeypatch):
 
     anonymous = client.get("/")
     assert anonymous.status_code == 200
-    assert "Medical AI Pilot" in anonymous.text
+    assert "Welcome to Medical AI" in anonymous.text
     assert 'label for="question"' not in anonymous.text
 
     assert client.post("/access/session", json={"token": TOKEN}).status_code == 200
     response = client.get("/")
     assert response.status_code == 200
-    assert "Medical AI Evidence Workbench" in response.text
+    assert "Medical AI | Search medical research" in response.text
     assert 'label for="question"' in response.text
     assert 'aria-live="polite"' in response.text
     assert 'id="answer-heading" tabindex="-1"' in response.text
-    assert "do not enter identifying patient information" in response.text
+    assert "Do not enter personal patient details" in response.text
 
 
 def test_health_reports_alpha2():
