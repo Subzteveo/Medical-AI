@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
@@ -127,7 +128,7 @@ class QueryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=3, max_length=4000)
     user_mode: str = Field(default="clinician", pattern="^(student|clinician|researcher)$")
-    jurisdiction: str = Field(default="AU", max_length=40)
+    jurisdiction: Literal["AU", "US", "INTERNATIONAL"] = "AU"
     limit: int = Field(default=5, ge=1, le=20)
 
 

@@ -44,3 +44,11 @@ assessment, account lifecycle operations and any required tenancy/rate-limit con
 No Australian Privacy Act/APP, health-record, HIPAA, clinical-safety or regulatory
 compliance claim is made by this engineering candidate.
 
+
+## ToxSec DES-01 candidate — 7 November 2026
+
+ToxSec's source-based review at `fad2ca97207a30d3c5c9f07d341b9e853b118df2` found that permitted research text could carry identifiers through query normalization into third-party provider requests. The synthetic helper check did not exercise live egress.
+
+This branch adds conservative input rejection for common email, Australian mobile, address, numeric and name-shaped patterns before invoking a public provider. It also restricts HTTP jurisdiction metadata to values supported by the current UI (`AU`, `US`, `INTERNATIONAL`). The added regression tests inspect mocked connector calls and local trace storage for synthetic input. There is no claim that the detector reliably de-identifies arbitrary text: false negatives, indirect identifiers, uncommon formats and legitimate queries rejected as names remain possible.
+
+**Pilot boundary remains blocked.** No real patient data may be entered. An independently reviewed permitted-input contract, a provider egress inventory, synthetic end-to-end privacy tests, operational log checks and an Australian privacy assessment remain required before considering invited use. This patch does not authorize PHI handling, deployment or release.
