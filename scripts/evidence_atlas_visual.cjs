@@ -151,6 +151,8 @@ async function run() {
     mobile.on('pageerror', e => mobileErrors.push(e.message));
     await mobile.goto('http://127.0.0.1:' + port + '/', { waitUntil: 'networkidle' });
     assert.equal(await mobile.locator('#query-form').isVisible(), true);
+    const questionPosition = await mobile.locator('#question').boundingBox();
+    assert.ok(questionPosition && questionPosition.y < 844, 'Search field is not in the initial mobile view');
     const overflow = await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     assert.equal(overflow, false, 'Mobile horizontal overflow detected');
     await mobile.screenshot({ path: path.join(OUT, 'mobile-search.png'), fullPage: true });
