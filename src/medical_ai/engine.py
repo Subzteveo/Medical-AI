@@ -34,7 +34,7 @@ from .verifier import verify_claims
 from .renderer import render_answer
 from .connectors.base import EvidenceConnector, require_evidence_approved
 from .policy_loader import phi_routing_policy, evidence_influence_policy
-from .influence import InfluenceController
+from .influence import InfluenceCapacityExceeded, InfluenceController
 from .authority_resolver import AuthorityResolver, UNRESOLVED
 from .provenance import validate_retrieved_records
 from .assessment_holds import explicit_evidence_hold
@@ -266,15 +266,26 @@ class EvidenceEngine:
                 monitoring_enabled=True,
                 version=self.version,
             )
-            decision = self.influence_controller.authorize(InfluenceRequest(
-                subject=subject,
-                proposition_id=f"user-output:{claim.claim_id}",
-                transition=DataPlaneTransition(
-                    source_plane=DataPlane.EVIDENCE,
-                    target_plane=DataPlane.EVIDENCE,
-                    information_class=resolution.information_class,
-                ),
-            ), claim=claim)
+            try:
+                decision = self.influence_controller.authorize(InfluenceRequest(
+                    subject=subject,
+                    proposition_id=f"user-output:{claim.claim_id}",
+                    transition=DataPlaneTransition(
+                        source_plane=DataPlane.EVIDENCE,
+                        target_plane=DataPlane.EVIDENCE,
+                        information_class=resolution.information_class,
+                    ),
+                ), claim=claim)
+            except InfluenceCapacityExceeded:
+                return self._terminal(
+                    plan=plan, digest=digest, status=AnswerStatus.INFLUENCE_DENIED,
+                    message=(
+                        "### Evidence-bound answer\n\nThe evidence authorization "
+                        "service reached its bounded capacity. No new medical claim is shown."
+                    ),
+                    connectors_used=[connector.name],
+                    safety_flags=[*plan.safety_flags, "INFLUENCE_CAPACITY_EXCEEDED"],
+                )
             influence_decisions.append(decision)
             if decision.allowed:
                 authorized_views.append(
