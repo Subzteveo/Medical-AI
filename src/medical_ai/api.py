@@ -65,17 +65,27 @@ ACCESS_PAGE = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Medical AI Pilot Access</title>
+  <title>Medical AI | Invitation access</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1b302a;background:#f5f7f1}
+*{box-sizing:border-box}body{margin:0;padding:24px;min-height:100vh;display:grid;place-items:center}
+main{width:min(100%,470px);padding:clamp(24px,5vw,40px);background:#fffefa;border:1px solid #cbd9cf;border-radius:18px;box-shadow:0 15px 45px rgba(11,60,48,.06)}
+h1{font-size:clamp(28px,5vw,38px);line-height:1.2;color:#0b3c30;margin:0 0 12px}p{margin:0 0 16px}
+form{display:grid;gap:10px;margin-top:22px}label{font-weight:750}
+input{width:100%;font:inherit;padding:12px 14px;border:1px solid #9fbaac;border-radius:10px}
+button{font:inherit;font-weight:750;background:#0b3c30;color:white;border:0;border-radius:10px;min-height:48px;padding:12px 20px;cursor:pointer}
+:focus-visible{outline:3px solid #c2882d;outline-offset:3px}#access-status{min-height:1.6em;margin-top:16px}
+</style>
 </head>
 <body>
 <main>
-  <h1>Medical AI Pilot</h1>
-  <p>This engineering pilot is invitation-only. Enter the pilot credential supplied to you.</p>
-  <p>Do not enter patient-identifying information. Access does not expand the product's intended-use boundary.</p>
+  <h1>Welcome to Medical AI</h1>
+  <p>This research tool is still in development and available only to invited reviewers. Enter the invitation code you received.</p>
+  <p>Do not enter personal patient details. This tool is for research and learning, not patient care.</p>
   <form id="access-form">
-    <label for="pilot-token">Pilot credential</label>
+    <label for="pilot-token">Invitation code</label>
     <input id="pilot-token" name="pilot-token" type="password" required minlength="20" autocomplete="off">
-    <button type="submit">Enter pilot</button>
+    <button type="submit">Continue</button>
   </form>
   <p id="access-status" role="status" aria-live="polite"></p>
 </main>
@@ -93,7 +103,7 @@ form.addEventListener('submit', async (event) => {
       body: JSON.stringify({token})
     });
     if (!response.ok) {
-      statusEl.textContent = response.status === 401 ? 'Invitation not accepted.' : 'Pilot access is unavailable.';
+      statusEl.textContent = response.status === 401 ? 'Invitation not accepted.' : 'Access is unavailable right now.';
       return;
     }
     document.getElementById('pilot-token').value = '';
