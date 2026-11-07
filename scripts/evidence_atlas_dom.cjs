@@ -54,7 +54,7 @@ async function run() {
     payload = fixtures[name];
     document.getElementById('query-form').dispatchEvent(new window.Event('submit', { cancelable: true }));
     await new Promise(resolve => setImmediate(resolve));
-    assert.equal(document.getElementById('state-code').textContent, ({ EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[payload.status]);
+    assert.equal(document.getElementById('state-code').textContent, ({ ANSWER_SUPPORTED_WITH_QUALIFICATIONS: 'Research found, with important limits', EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[payload.status]);
     assert.equal(document.querySelectorAll('.passport').length, 0);
     assert.ok(document.getElementById('boundaries').textContent.includes('Study quality not assessed'), `${name}: missing study-quality limitation`);
     assert.ok(document.getElementById('boundaries').textContent.includes('Australian medicine rules not checked'), `${name}: missing source limitation`);
@@ -64,7 +64,7 @@ async function run() {
   delete payload.sources[0].version;
   document.getElementById('query-form').dispatchEvent(new window.Event('submit', { cancelable: true }));
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(document.getElementById('state-code').textContent, ({ EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[payload.status]);
+  assert.equal(document.getElementById('state-code').textContent, ({ ANSWER_SUPPORTED_WITH_QUALIFICATIONS: 'Research found, with important limits', EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[payload.status]);
   assert.ok(document.querySelector('.passport').textContent.includes('Read the supporting passage'));
   assert.equal(document.querySelector('.passport').textContent.includes('Evidence certainty:'), false);
   for (const url of unsafeUrls) assert.equal(window.safeSourceUrl(url), null, url);
