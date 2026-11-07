@@ -137,7 +137,7 @@ def test_browser_entry_requires_session_then_serves_workbench(configured_access)
     client = TestClient(api.app)
     anonymous = client.get("/")
     assert anonymous.status_code == 200
-    assert "Medical AI Pilot" in anonymous.text
+    assert "Welcome to Medical AI" in anonymous.text
     assert 'id="question"' not in anonymous.text
 
     login = client.post("/access/session", json={"token": VALID_TOKEN})
@@ -146,7 +146,7 @@ def test_browser_entry_requires_session_then_serves_workbench(configured_access)
 
     authenticated = client.get("/")
     assert authenticated.status_code == 200
-    assert "Medical AI Evidence Workbench" in authenticated.text
+    assert "Medical AI | Search medical research" in authenticated.text
     assert 'id="question"' in authenticated.text
 
 
