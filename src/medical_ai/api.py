@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
@@ -16,6 +17,7 @@ from .access import (
     AccessConfigurationError,
     authenticate_invite_token,
     create_session_token,
+    revoke_session_token,
     load_access_config,
     optional_pilot_participant,
     require_pilot_participant,
@@ -26,6 +28,7 @@ from .engine import EvidenceEngine
 from .influence import InfluenceController
 from .authority_resolver import AuthorityResolver
 from .trace_store import SQLiteTraceStore
+from .session_store import SessionStoreUnavailable
 from .schemas import EvidenceAnswer
 
 VERSION = "0.1.0-alpha2.1-remediation"
@@ -115,7 +118,7 @@ class QueryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=3, max_length=4000)
     user_mode: str = Field(default="clinician", pattern="^(student|clinician|researcher)$")
-    jurisdiction: str = Field(default="AU", max_length=40)
+    jurisdiction: Literal["AU", "US", "INTERNATIONAL"] = "AU"
     limit: int = Field(default=5, ge=1, le=20)
 
 
@@ -161,7 +164,13 @@ def create_access_session(req: AccessRequest, response: Response):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or inactive pilot credential",
         )
-    session_token, max_age = create_session_token(participant, config)
+    try:
+        session_token, max_age = create_session_token(participant, config)
+    except SessionStoreUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Pilot session state unavailable",
+        ) from exc
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=session_token,
@@ -180,7 +189,18 @@ def create_access_session(req: AccessRequest, response: Response):
 
 
 @app.post("/access/logout", include_in_schema=False)
-def logout(response: Response):
+def logout(request: Request, response: Response):
+    # Single-session logout. A browser deletion alone cannot revoke a copy.
+    session_token = request.cookies.get(SESSION_COOKIE_NAME)
+    if session_token:
+        try:
+            config = load_access_config()
+            revoke_session_token(session_token, config)
+        except (AccessConfigurationError, SessionStoreUnavailable) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Pilot session state unavailable",
+            ) from exc
     response.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
     response.headers["Cache-Control"] = "no-store"
     return {"status": "signed_out"}

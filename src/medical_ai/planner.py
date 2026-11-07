@@ -36,6 +36,11 @@ IDENTIFIER_PATTERNS = [
     r"\bMedicare\b\s*(?:no\.?|number)?\s*[:=]?\s*[0-9 ]{9,15}\b",
     r"\b(?:Mr|Mrs|Ms|Miss|Dr)\.?\s+[A-Z][a-z]+\b",
     r"\bbed\s*\d+\b",
+    # Conservative pre-provider checks: these are rejection cues, not de-identification.
+    r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
+    r"(?<!\w)(?:\+61[\s().-]*4|04)(?:[\s().-]*\d){8}(?!\w)",
+    r"\b\d{1,4}\s+(?:[A-Za-z'-]+\s+){0,3}(?:street|st|road|rd|avenue|ave|drive|dr|court|ct)\b",
+    r"\b\d{9,12}\b",
 ]
 PATIENT_CONTEXT_PATTERNS = [
     r"\bmy\s+(?:patient|child|mum|mom|mother|dad|father|husband|wife|partner|medication|medicine|symptoms?|diagnosis|results?|blood|scan|test)\b",
@@ -49,6 +54,11 @@ PATIENT_CONTEXT_PATTERNS = [
     r"\bT2DM\b",
 ]
 PATIENT_CUES = re.compile("|".join(f"(?:{p})" for p in IDENTIFIER_PATTERNS + PATIENT_CONTEXT_PATTERNS), re.I)
+# Case-sensitive on purpose: a pair of name-shaped, title-case tokens should
+# fail closed before public retrieval. This can reject legitimate titles.
+PROPER_NAME_CUE = re.compile(
+    r"(?<![A-Za-z])(?:[A-Z][a-z]{1,30}\s+){1,2}[A-Z][a-z]{1,30}(?![A-Za-z])"
+)
 
 # Regulatory routing requires actual regulatory intent, not isolated words such
 # as "registered nurse" or "approved outcome measure".
@@ -153,7 +163,7 @@ def classify_consequence(text: str) -> tuple[ConsequenceLevel, list[str]]:
 
 
 def is_patient_specific_or_identifying(text: str) -> bool:
-    return bool(PATIENT_CUES.search(text))
+    return bool(PATIENT_CUES.search(text) or PROPER_NAME_CUE.search(text))
 
 
 def plan_query(question: str, user_mode: str = "clinician", jurisdiction: str = "AU") -> QueryPlan:
