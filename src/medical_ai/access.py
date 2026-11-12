@@ -115,6 +115,18 @@ def _read_access_file(path: str) -> str:
         raise AccessConfigurationError(f"{ACCESS_FILE_ENV} must be UTF-8 JSON") from exc
 
 
+def read_access_file(path: str) -> str:
+    """Public, fail-closed allowlist file reader used by the admin tool."""
+
+    return _read_access_file(path)
+
+
+def parse_expiry(value: str) -> datetime:
+    """Parse a timezone-aware ISO-8601 expiry, normalised to UTC."""
+
+    return _parse_expiry(value)
+
+
 def _raw_access_document() -> tuple[str, str]:
     """Return (source variable name, raw JSON). Exactly one source must be set."""
 
