@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 from medical_ai.schemas import (
@@ -14,6 +15,31 @@ from medical_ai.schemas import (
 )
 from medical_ai.engine import EvidenceEngine
 from medical_ai.authority_resolver import AuthorityResolver
+
+
+def _home_state_snapshot() -> dict[str, int]:
+    root = Path.home() / ".medical_ai"
+    if not root.exists():
+        return {}
+    return {str(p): p.stat().st_mtime_ns for p in [root, *sorted(root.rglob("*"))]}
+
+
+@pytest.fixture(scope="session", autouse=True)
+def home_state_untouched():
+    """The suite must never create or modify the operator's real state directory."""
+    before = _home_state_snapshot()
+    yield
+    assert _home_state_snapshot() == before, "tests wrote to ~/.medical_ai"
+
+
+@pytest.fixture(autouse=True)
+def isolated_state_dirs(monkeypatch, tmp_path):
+    """Point the session and trace stores at a per-test temporary directory."""
+    import medical_ai.api as api
+
+    monkeypatch.setenv("MEDICAL_AI_PILOT_SESSION_DB", str(tmp_path / "pilot_sessions.sqlite3"))
+    monkeypatch.setenv("MEDICAL_AI_TRACE_DB", str(tmp_path / "medical_ai_traces.sqlite3"))
+    monkeypatch.setattr(api, "TRACE_DB", str(tmp_path / "medical_ai_traces.sqlite3"))
 
 
 def synthetic_version_record(
