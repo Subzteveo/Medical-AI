@@ -99,6 +99,11 @@ not authorize deployment, pilot invitations or release.
   `MEDICAL_AI_LOG_LEVEL` and `MEDICAL_AI_HTTP_TIMEOUT_SECONDS` are optional.
   `MEDICAL_AI_WORKERS` must be `1`.
 
+`medical-ai-admin` maintains that allowlist file: `invite`, `revoke`, `rotate`,
+`list` and `check`, each with an explicit `--allowlist PATH`. A new token is printed
+once on standard output and is never stored; only its digest is written. The tool is
+engineering tooling and does not authorize issuing invitations.
+
 Allowlist JSON has exactly one top-level field, `participants`. Every entry must
 contain exactly `participant_id`, `credential_id`, `token_sha256`, `expires_at` and
 an explicit boolean `revoked`. Missing, unexpected or duplicate fields fail closed.

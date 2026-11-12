@@ -134,10 +134,14 @@ def test_importing_api_needs_no_environment(tmp_path):
         "PYTHONPATH": os.pathsep.join(sys.path),
         "MEDICAL_AI_PORT": "not-a-port",
     }
+    snippet = "\n".join([
+        "import pathlib",
+        "import medical_ai.api as a",
+        "assert a.app is not None",
+        "assert pathlib.Path(a.TRACE_DB).is_absolute()",
+    ])
     result = subprocess.run(
-        [sys.executable, "-c",
-         "import medical_ai.api as a, pathlib; "
-         "assert a.app is not None; assert pathlib.Path(a.TRACE_DB).is_absolute()"],
+        [sys.executable, "-c", snippet],
         env=env, capture_output=True, text=True, timeout=60,
     )
     assert result.returncode == 0, result.stderr
