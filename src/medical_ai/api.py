@@ -30,11 +30,12 @@ from .authority_resolver import AuthorityResolver
 from .trace_store import SQLiteTraceStore
 from .session_store import SessionStoreUnavailable
 from .schemas import EvidenceAnswer
+from .settings import load_settings, trace_db_path
 
 VERSION = "0.1.0-alpha2.1-remediation"
 STATIC_DIR = Path(__file__).parent / "static"
-_default_trace_db = Path.home() / ".medical_ai" / "medical_ai_traces.sqlite3"
-TRACE_DB = str(Path(os.getenv("MEDICAL_AI_TRACE_DB", str(_default_trace_db))).expanduser().resolve())
+# Resolved once at import and never raises; tests and operators may override it.
+TRACE_DB = str(trace_db_path(os.environ))
 
 app = FastAPI(
     title="Medical AI Evidence Workbench",
@@ -129,9 +130,16 @@ def _shared_influence_controller() -> InfluenceController:
 
 
 def build_engine() -> EvidenceEngine:
+    connector_settings = load_settings().connectors
     connectors = {
-        "biomedical_literature": PubMedConnector(email=os.getenv("NCBI_EMAIL"), api_key=os.getenv("NCBI_API_KEY")),
-        "clinical_trial_registry": ClinicalTrialsConnector(),
+        "biomedical_literature": PubMedConnector(
+            email=connector_settings.ncbi_email,
+            api_key=connector_settings.ncbi_api_key,
+            timeout=connector_settings.http_timeout_seconds,
+        ),
+        "clinical_trial_registry": ClinicalTrialsConnector(
+            timeout=connector_settings.http_timeout_seconds,
+        ),
     }
     return EvidenceEngine(
         connectors,

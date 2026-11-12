@@ -63,6 +63,10 @@ SQLite is sufficient for the current single-user engineering alpha because only 
 
 No public trace lookup endpoint exists in alpha2; exposing stored traces requires an access-control decision first.
 
+### Runtime entry point and settings — 12 November 2026 candidate
+
+`medical-ai-serve` (`src/medical_ai/server.py`) is the supported start command. It runs fail-closed start-up checks and then one uvicorn worker with request access logs off and forwarded headers untrusted. Runtime settings are parsed per call by `src/medical_ai/settings.py`; nothing is cached at import. The pilot allowlist may come from `MEDICAL_AI_PILOT_ACCESS_JSON` or an owner-only file named by `MEDICAL_AI_PILOT_ACCESS_FILE`, never both. One worker is enforced because influence revocation state is in process memory. The API surface above is unchanged.
+
 ## Context → loop → harness → graph: evidence-bound integration candidate (28 October 2026)
 
 **Status: proposed architecture/acceptance mapping, not a runtime feature, release decision, or replacement authority.**
