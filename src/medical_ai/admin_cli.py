@@ -9,6 +9,7 @@ or into an error message; only its SHA-256 digest is stored.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import secrets
@@ -93,10 +94,10 @@ def _save(path: str, participants: Sequence[PilotParticipant]) -> None:
             os.close(fd)
         os.replace(temporary, path)
     except OSError as exc:
-        try:
+        # Best-effort cleanup: the write already failed and is reported below, and the
+        # temporary file may never have been created or may already be gone.
+        with contextlib.suppress(OSError):
             os.unlink(temporary)
-        except OSError:
-            pass
         raise AdminError("allowlist file could not be written") from exc
 
 
