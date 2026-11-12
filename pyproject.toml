@@ -16,6 +16,10 @@ dependencies = [
   "uvicorn==0.48.0",
 ]
 
+[project.scripts]
+medical-ai-serve = "medical_ai.server:main"
+medical-ai-admin = "medical_ai.admin_cli:main"
+
 [project.optional-dependencies]
 dev = ["pytest==9.0.2", "pytest-asyncio==1.3.0", "pyright==1.1.414"]
 
@@ -44,6 +48,9 @@ include = [
   "src/medical_ai/authority.py",
   "src/medical_ai/authority_policy.py",
   "src/medical_ai/authority_resolver.py",
+  "src/medical_ai/settings.py",
+  "src/medical_ai/server.py",
+  "src/medical_ai/admin_cli.py",
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"

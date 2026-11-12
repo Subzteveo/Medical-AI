@@ -8,15 +8,19 @@ import json
 import os
 import re
 import secrets
+import stat
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Request, status
 
 from .session_store import PilotSessionStore, SessionStoreUnavailable
+from .settings import SettingsError, parse_bool
 
 
 ACCESS_CONFIG_ENV = "MEDICAL_AI_PILOT_ACCESS_JSON"
+ACCESS_FILE_ENV = "MEDICAL_AI_PILOT_ACCESS_FILE"
+MAX_ACCESS_FILE_BYTES = 1024 * 1024
 SESSION_SECRET_ENV = "MEDICAL_AI_PILOT_SESSION_SECRET"
 COOKIE_SECURE_ENV = "MEDICAL_AI_PILOT_COOKIE_SECURE"
 SESSION_TTL_ENV = "MEDICAL_AI_PILOT_SESSION_TTL_SECONDS"
@@ -48,14 +52,10 @@ class PilotAccessConfig:
 
 
 def _parse_bool(value: str, *, default: bool) -> bool:
-    if value == "":
-        return default
-    normalized = value.strip().lower()
-    if normalized in {"1", "true", "yes", "on"}:
-        return True
-    if normalized in {"0", "false", "no", "off"}:
-        return False
-    raise AccessConfigurationError(f"{COOKIE_SECURE_ENV} must be true or false")
+    try:
+        return parse_bool(value, default=default, name=COOKIE_SECURE_ENV)
+    except SettingsError as exc:
+        raise AccessConfigurationError(str(exc)) from exc
 
 
 def _parse_expiry(value: object) -> datetime:
@@ -82,21 +82,83 @@ def _unique_json_object(pairs: list[tuple[str, object]]) -> dict:
     return result
 
 
-def load_access_config() -> PilotAccessConfig:
-    raw = os.getenv(ACCESS_CONFIG_ENV, "")
-    secret = os.getenv(SESSION_SECRET_ENV, "")
-    if not raw:
-        raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} is required")
-    if len(secret.encode("utf-8")) < 32:
-        raise AccessConfigurationError(f"{SESSION_SECRET_ENV} must contain at least 32 bytes")
+def _read_access_file(path: str) -> str:
+    """Read an out-of-repository allowlist file, failing closed on anything unusual.
 
+    The file is opened without following a final-component symlink, must be a regular
+    file readable only by its owner, and is bounded in size.
+    """
+
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    try:
+        fd = os.open(path, flags)
+    except OSError as exc:
+        raise AccessConfigurationError(f"{ACCESS_FILE_ENV} could not be opened") from exc
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise AccessConfigurationError(f"{ACCESS_FILE_ENV} must be a regular file")
+        if stat.S_IMODE(info.st_mode) & 0o077:
+            raise AccessConfigurationError(f"{ACCESS_FILE_ENV} permissions are too broad")
+        if info.st_size > MAX_ACCESS_FILE_BYTES:
+            raise AccessConfigurationError(f"{ACCESS_FILE_ENV} is too large")
+        data = os.read(fd, MAX_ACCESS_FILE_BYTES + 1)
+    except OSError as exc:
+        raise AccessConfigurationError(f"{ACCESS_FILE_ENV} could not be read") from exc
+    finally:
+        os.close(fd)
+    if len(data) > MAX_ACCESS_FILE_BYTES:
+        raise AccessConfigurationError(f"{ACCESS_FILE_ENV} is too large")
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise AccessConfigurationError(f"{ACCESS_FILE_ENV} must be UTF-8 JSON") from exc
+
+
+def read_access_file(path: str) -> str:
+    """Public, fail-closed allowlist file reader used by the admin tool."""
+
+    return _read_access_file(path)
+
+
+def parse_expiry(value: str) -> datetime:
+    """Parse a timezone-aware ISO-8601 expiry, normalised to UTC."""
+
+    return _parse_expiry(value)
+
+
+def _raw_access_document() -> tuple[str, str]:
+    """Return (source variable name, raw JSON). Exactly one source must be set."""
+
+    raw = os.getenv(ACCESS_CONFIG_ENV, "")
+    file_path = os.getenv(ACCESS_FILE_ENV, "")
+    if raw and file_path:
+        raise AccessConfigurationError(
+            f"Set only one of {ACCESS_CONFIG_ENV} and {ACCESS_FILE_ENV}"
+        )
+    if file_path:
+        return ACCESS_FILE_ENV, _read_access_file(file_path)
+    if not raw:
+        raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} or {ACCESS_FILE_ENV} is required")
+    return ACCESS_CONFIG_ENV, raw
+
+
+def parse_access_json(raw: str, *, source: str = "pilot allowlist") -> tuple[PilotParticipant, ...]:
     try:
         document = json.loads(raw, object_pairs_hook=_unique_json_object)
     except json.JSONDecodeError as exc:
-        raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} must be valid JSON") from exc
+        raise AccessConfigurationError(f"{source} must be valid JSON") from exc
+    return parse_access_document(document, source=source)
+
+
+def parse_access_document(
+    document: object, *, source: str = "pilot allowlist"
+) -> tuple[PilotParticipant, ...]:
+    """Validate an allowlist document without reading the environment."""
+
     if (not isinstance(document, dict) or set(document) != {"participants"}
             or not isinstance(document.get("participants"), list)):
-        raise AccessConfigurationError(f"{ACCESS_CONFIG_ENV} must contain a participants array")
+        raise AccessConfigurationError(f"{source} must contain a participants array")
     if not document["participants"]:
         raise AccessConfigurationError("pilot participant allowlist must not be empty")
 
@@ -140,6 +202,16 @@ def load_access_config() -> PilotAccessConfig:
             )
         )
 
+    return tuple(participants)
+
+
+def load_access_config() -> PilotAccessConfig:
+    source, raw = _raw_access_document()
+    secret = os.getenv(SESSION_SECRET_ENV, "")
+    if len(secret.encode("utf-8")) < 32:
+        raise AccessConfigurationError(f"{SESSION_SECRET_ENV} must contain at least 32 bytes")
+    participants = parse_access_json(raw, source=source)
+
     ttl_raw = os.getenv(SESSION_TTL_ENV, "28800")
     try:
         ttl = int(ttl_raw)
@@ -149,7 +221,7 @@ def load_access_config() -> PilotAccessConfig:
         raise AccessConfigurationError(f"{SESSION_TTL_ENV} must be between 300 and 43200 seconds")
 
     return PilotAccessConfig(
-        participants=tuple(participants),
+        participants=participants,
         session_secret=secret.encode("utf-8"),
         cookie_secure=_parse_bool(os.getenv(COOKIE_SECURE_ENV, ""), default=True),
         session_ttl_seconds=ttl,
