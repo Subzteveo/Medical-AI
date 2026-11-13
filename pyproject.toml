@@ -53,6 +53,7 @@ include = [
   "src/medical_ai/admin_cli.py",
   "src/medical_ai/evals/clinical_harm.py",
   "src/medical_ai/evals/answer_harm_adapter.py",
+  "src/medical_ai/evals/medai_eval_002.py",
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
