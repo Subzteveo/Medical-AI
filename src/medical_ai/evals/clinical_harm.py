@@ -150,7 +150,7 @@ def require_complete_case_set(
     extra = observed - expected
     duplicates = {case_id for case_id, count in counts.items() if count > 1}
     if missing or extra or duplicates:
-        pieces = []
+        pieces: list[str] = []
         if missing:
             pieces.append("missing=" + ",".join(sorted(missing)))
         if extra:
