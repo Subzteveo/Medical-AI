@@ -12,6 +12,7 @@ from medical_ai.evals.answer_harm_adapter import (
     score_evidence_answer,
 )
 from medical_ai.evals.clinical_harm import HarmSeverity
+from conftest import make_engine
 
 
 def _case(case_id: str):
@@ -22,7 +23,7 @@ def _case(case_id: str):
 @pytest.mark.asyncio
 async def test_supported_answer_projects_observable_evidence_actions():
     case = _case("ALPHA3-FIX-001-SUPPORTED")
-    answer = await EvidenceEngine(FixtureConnector(case.scenario)).answer(
+    answer = await make_engine(FixtureConnector(case.scenario)).answer(
         case.question,
         jurisdiction=case.jurisdiction,
     )
