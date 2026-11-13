@@ -7,7 +7,6 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -53,13 +52,31 @@ async def sensitive_validation_error(request: Request, exc: RequestValidationErr
         "/access/session": "Invalid pilot credential request",
         "/v1/evidence/query": "Invalid evidence query request",
     }
-    if request.url.path in sensitive_paths:
-        return JSONResponse(
-            status_code=422,
-            content={"detail": sensitive_paths[request.url.path]},
-            headers={"Cache-Control": "no-store"},
-        )
-    return await request_validation_exception_handler(request, exc)
+    # ASGI's routing path is not reconstructed from the client-supplied Host.
+    # Either independent routing signal may identify a sensitive endpoint;
+    # neither an absent route nor malformed metadata permits input reflection.
+    scope_path = request.scope.get("path")
+    matched_route = request.scope.get("route")
+    try:
+        matched_path = getattr(matched_route, "path", None)
+    except Exception:
+        # A bad route object must not turn a validation error into a 500 or
+        # allow a fallback that serialises rejected request values.
+        matched_path = None
+
+    detail = "Invalid request"
+    for path in (scope_path, matched_path):
+        if isinstance(path, str) and path in sensitive_paths:
+            detail = sensitive_paths[path]
+            break
+
+    # Fail closed for unknown paths: never delegate to FastAPI's default
+    # RequestValidationError formatter, which includes rejected input.
+    return JSONResponse(
+        status_code=422,
+        content={"detail": detail},
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 ACCESS_PAGE = """<!doctype html>
