@@ -1,0 +1,17 @@
+{
+  "experiment_id": "RET-EXP-001",
+  "version": "0.1",
+  "baseline_revision": "f292523c3fd94983b2df48812739dbeba6ac0d06",
+  "sha256": {
+    "evals/retrieval/ret-exp-001-v0.1/cases.json": "08dd3ff4a11b4cdd8e37e214b91bd6758648e9644e6d2c77e38263e071f811ca",
+    "project_docs/plans/RET-EXP-001-v0.1.md": "512bd92f0615b79c673cc81b05ff1efed2996df018407614c867d81d851e6c8b",
+    "src/medical_ai/__init__.py": "358f95da8c697bb56a759a20996cf3451d15821697c085ac6f01a32c161d9a74",
+    "src/medical_ai/extractor.py": "2119fefd1a315c1c1c93e0964cc1f9132720cfd79307c96c6b07bd4713478f63",
+    "src/medical_ai/policies/__init__.py": "68bfa174a544f63741a42cf9c97a23a31c7ed1f82f1ccfb3ffc06153613803c0",
+    "src/medical_ai/policies/source-policy-v0.1.yaml": "ab17d14748790f6a8678e02f53ba0e4e92b8612ca82cd1ea1ae614aa6abf7dcf",
+    "src/medical_ai/policy_loader.py": "cb7aa752de21df166d4941d4a402f2541d8a9815b4449d3b91182da0be5652a4",
+    "src/medical_ai/provenance.py": "e664764e72b3510d660059bf491273b1339c45c0488bf424df5a155084ec6d3a",
+    "src/medical_ai/schemas.py": "df404077f6dccb6cf41764365daad75c24d5cfeec00a0f28f8d81f735db2f366",
+    "src/medical_ai/source_policy.py": "40dcf3b781a4a741a502a6b4f9458508c941ffac0fb9fe51a45170727f77bf45"
+  }
+}
