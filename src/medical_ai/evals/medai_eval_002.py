@@ -24,6 +24,7 @@ from medical_ai.evals.clinical_harm import (
     HarmSeverity,
     decision_resilience,
     require_complete_case_set,
+    score_clinical_actions,
 )
 from medical_ai.schemas import AnswerStatus, EvidenceAnswer
 
@@ -118,8 +119,8 @@ class PerturbationResult(BaseModel):
     executed: bool
     resilience: float | None = None
     minimum_resilience: float
-    variants: list[PerturbationVariantResult] = Field(default_factory=list)
-    failures: list[str] = Field(default_factory=list)
+    variants: list[PerturbationVariantResult] = []
+    failures: list[str] = []
     passed: bool
 
 
@@ -173,15 +174,10 @@ def _current_commit_sha() -> str:
     return completed.stdout.strip() or "UNKNOWN"
 
 
-def _alpha3_cases() -> dict[str, Alpha3Case]:
-    case_set = load_case_set()
-    return {case.case_id: case for case in case_set.cases}
-
-
 async def _answer_for_case(
     spec: EvalCaseSpec,
     alpha3_cases: dict[str, Alpha3Case],
-) -> tuple[EvidenceAnswer, AnswerStatus]:
+) -> EvidenceAnswer:
     base = alpha3_cases[spec.base_case_id]
     scenario = base.scenario.model_copy(deep=True)
     if spec.scenario_transform == "empty_results":
@@ -196,37 +192,20 @@ async def _answer_for_case(
         FixtureConnector(scenario),
         authority_resolver=AuthorityResolver(),
     )
-    runtime_answer = await engine.answer(question, jurisdiction=base.jurisdiction)
-    runtime_status = runtime_answer.status
-
-    if spec.mode == "runtime":
-        return runtime_answer, runtime_status
-
-    contract_trace = runtime_answer.trace.model_copy(
-        update={"final_status": AnswerStatus.ANSWER_SUPPORTED},
-        deep=True,
-    )
-    contract_answer = runtime_answer.model_copy(
-        update={
-            "status": AnswerStatus.ANSWER_SUPPORTED,
-            "trace": contract_trace,
-        },
-        deep=True,
-    )
-    validated = EvidenceAnswer.model_validate(contract_answer.model_dump(mode="python"))
-    return validated, runtime_status
+    return await engine.answer(question, jurisdiction=base.jurisdiction)
 
 
 def _metadata_failures(
     spec: EvalCaseSpec,
-    answer: EvidenceAnswer,
+    observed_status: AnswerStatus,
     actions: set[str],
     runtime_source_status: AnswerStatus,
 ) -> list[str]:
     failures: list[str] = []
-    if answer.status != spec.expected_status:
+    if observed_status != spec.expected_status:
         failures.append(
-            f"status mismatch: expected {spec.expected_status.value}, observed {answer.status.value}"
+            f"status mismatch: expected {spec.expected_status.value}, "
+            f"observed {observed_status.value}"
         )
     if spec.runtime_source_expected_status is not None:
         if runtime_source_status != spec.runtime_source_expected_status:
@@ -272,14 +251,33 @@ async def _run_case(
     spec: EvalCaseSpec,
     alpha3_cases: dict[str, Alpha3Case],
 ) -> EvalCaseResult:
-    answer, runtime_source_status = await _answer_for_case(spec, alpha3_cases)
+    answer = await _answer_for_case(spec, alpha3_cases)
+    runtime_source_status = answer.status
     actions = answer_action_ids(answer)
-    score = score_evidence_answer(
-        answer,
-        required_actions=spec.required_actions,
-        harmful_actions=spec.harmful_actions,
+    observed_status = answer.status
+
+    if spec.mode == "contract_supported":
+        actions.discard(f"status/{runtime_source_status.value}")
+        actions.add("status/ANSWER_SUPPORTED")
+        observed_status = AnswerStatus.ANSWER_SUPPORTED
+        score = score_clinical_actions(
+            required_actions=spec.required_actions,
+            observed_actions=actions,
+            harmful_actions=spec.harmful_actions,
+        )
+    else:
+        score = score_evidence_answer(
+            answer,
+            required_actions=spec.required_actions,
+            harmful_actions=spec.harmful_actions,
+        )
+
+    failures = _metadata_failures(
+        spec,
+        observed_status,
+        actions,
+        runtime_source_status,
     )
-    failures = _metadata_failures(spec, answer, actions, runtime_source_status)
     failures.extend(
         f"{event.harm_type}:{event.action_id}:{event.severity.value}"
         for event in score.events
@@ -290,7 +288,7 @@ async def _run_case(
         mode=spec.mode,
         severity=spec.severity,
         expected_status=spec.expected_status,
-        observed_status=answer.status,
+        observed_status=observed_status,
         runtime_source_status=(
             runtime_source_status if spec.mode == "contract_supported" else None
         ),
