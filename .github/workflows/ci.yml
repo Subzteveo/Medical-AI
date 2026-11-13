@@ -50,6 +50,15 @@ jobs:
           name: alpha3-evidence-fidelity-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/alpha3-evidence-fidelity.json
           if-no-files-found: error
+      - name: Run MEDAI-EVAL-002 synthetic harm harness CLI
+        run: python -m medical_ai.evals.medai_eval_002 --json-out /tmp/medai-eval-002.json
+      - name: Preserve revision-bound MEDAI-EVAL-002 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: medai-eval-002-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/medai-eval-002.json
+          if-no-files-found: error
       - name: Compile, import and compare installed policies
         run: |
           python -m compileall -q src
