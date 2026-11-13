@@ -80,8 +80,8 @@ the comparison was corrected and the gate rerun successfully. No test or typing
 rule was weakened. The initial RED run is interface evidence, not reproduction
 of a pre-existing runtime safety defect.
 
-The accompanying machine reports record the actual tested code revision, file
-hashes and environment. Evidence attachment is a separate commit; it does not
+Tested code revision: `e078110b9b0e9dff52ae83666196ea8eac9c2469` (clean worktree).
+The accompanying machine reports record file hashes and environment. Evidence attachment is a separate commit; it does not
 alter the measured implementation. Final PR-head CI must be read from GitHub.
 
 ## 5. Not done / still gated
