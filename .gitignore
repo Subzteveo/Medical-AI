@@ -17,6 +17,7 @@ build/
 .env
 .env.*
 !.env.example
+deploy/*.env
 *.pem
 *.key
 secrets.*

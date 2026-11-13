@@ -55,3 +55,149 @@ jobs:
           python -m compileall -q src
           python -c 'import medical_ai.api, medical_ai.engine, medical_ai.schemas'
           python scripts/verify_package_policies.py
+
+  # Builds the container image and exercises the running container with synthetic
+  # secrets generated at run time. It is a separate job so a container failure
+  # cannot hide the deterministic source checks, and it is not a required check
+  # until the owner adds it. A pass is evidence for this exact head only; it is not
+  # a deployment and does not authorise one.
+  container-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Identify checked revision
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git rev-parse HEAD
+      - name: Build image, start container and probe it
+        run: |
+          set -euo pipefail
+          COMPOSE="sudo docker compose -f deploy/docker-compose.yml"
+
+          # Synthetic, run-time-only secrets. They are masked and never written to the repository.
+          TRACE_KEY="$(openssl rand -base64 48)"
+          SESSION_SECRET="$(openssl rand -base64 48)"
+          INVITE_TOKEN="$(openssl rand -hex 32)"
+          for value in "$TRACE_KEY" "$SESSION_SECRET" "$INVITE_TOKEN"; do
+            echo "::add-mask::$value"
+          done
+
+          cleanup() {
+            status=$?
+            if [ "$status" -ne 0 ]; then
+              echo "--- container state at failure ---"
+              $COMPOSE ps || true
+              $COMPOSE logs --no-color --tail 60 app || true
+            fi
+            $COMPOSE down --volumes --remove-orphans || true
+            exit "$status"
+          }
+          trap cleanup EXIT
+
+          # Mirror the documented host layout: root-owned env file, uid 10001 state directory.
+          sudo install -d -m 0755 /etc/medical-ai
+          sudo install -d -o 10001 -g 10001 -m 0700 /var/lib/medical-ai
+          sudo install -m 0600 /dev/null /etc/medical-ai/medical-ai.env
+          {
+            echo "MEDICAL_AI_TRACE_HMAC_KEY=$TRACE_KEY"
+            echo "MEDICAL_AI_PILOT_SESSION_SECRET=$SESSION_SECRET"
+            echo "MEDICAL_AI_PILOT_ACCESS_FILE=/var/lib/medical-ai/pilot_access.json"
+          } | sudo tee /etc/medical-ai/medical-ai.env >/dev/null
+
+          allowlist="$(mktemp)"
+          INVITE_TOKEN="$INVITE_TOKEN" python3 - "$allowlist" <<'PY'
+          import datetime, hashlib, json, os, sys
+          expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
+          document = {"participants": [{
+              "participant_id": "ci-smoke-participant",
+              "credential_id": "ci-smoke-credential",
+              "token_sha256": hashlib.sha256(os.environ["INVITE_TOKEN"].encode()).hexdigest(),
+              "expires_at": expiry.isoformat(),
+              "revoked": False,
+          }]}
+          with open(sys.argv[1], "w", encoding="utf-8") as handle:
+              json.dump(document, handle)
+          PY
+          sudo install -o 10001 -g 10001 -m 0600 "$allowlist" /var/lib/medical-ai/pilot_access.json
+          rm -f "$allowlist"
+
+          $COMPOSE config --quiet
+          $COMPOSE build app
+          $COMPOSE up -d app
+          cid="$($COMPOSE ps -q app)"
+
+          # 1. /health must answer within 30 seconds.
+          probe_health='import sys, urllib.request; sys.exit(0 if urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=3).status == 200 else 1)'
+          for attempt in $(seq 1 15); do
+            if $COMPOSE exec -T app python -c "$probe_health"; then
+              echo "health endpoint answered on attempt $attempt"
+              break
+            fi
+            if [ "$attempt" -eq 15 ]; then
+              echo "health endpoint did not answer within 30 seconds"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          # 2. Unauthenticated query is refused; a valid invitation opens a session (this also
+          #    proves the mounted state directory and allowlist file are readable and writable).
+          $COMPOSE exec -T -e INVITE_TOKEN="$INVITE_TOKEN" app python - <<'PY'
+          import json, os, sys, urllib.error, urllib.request
+
+          def post(path, body):
+              request = urllib.request.Request(
+                  "http://127.0.0.1:8000" + path,
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type": "application/json"},
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=10) as response:
+                      return response.status
+              except urllib.error.HTTPError as error:
+                  return error.code
+
+          query_status = post("/v1/evidence/query", {"question": "synthetic smoke question", "user_mode": "clinician"})
+          session_status = post("/access/session", {"token": os.environ["INVITE_TOKEN"]})
+          print("unauthenticated query status:", query_status)
+          print("invitation session status:", session_status)
+          sys.exit(0 if (query_status, session_status) == (401, 200) else 1)
+          PY
+
+          # 3. Process identity, read-only root filesystem, no published host port.
+          test "$($COMPOSE exec -T app id -u)" = "10001"
+          if $COMPOSE exec -T app sh -c 'touch /probe-write' 2>/dev/null; then
+            echo "root filesystem is writable"
+            exit 1
+          fi
+          test -z "$(sudo docker port "$cid")"
+
+          # 4. The image healthcheck reports healthy.
+          for attempt in $(seq 1 18); do
+            health="$(sudo docker inspect --format '{{.State.Health.Status}}' "$cid")"
+            echo "container health: $health"
+            [ "$health" = "healthy" ] && break
+            if [ "$attempt" -eq 18 ]; then
+              exit 1
+            fi
+            sleep 5
+          done
+
+          # 5. No synthetic secret may appear in container logs.
+          logs="$(mktemp)"
+          $COMPOSE logs --no-color app > "$logs" 2>&1
+          for value in "$TRACE_KEY" "$SESSION_SECRET" "$INVITE_TOKEN"; do
+            if grep -qF -- "$value" "$logs"; then
+              echo "a synthetic secret appeared in container logs"
+              exit 1
+            fi
+          done
+          rm -f "$logs"
+          echo "container smoke passed for $(git rev-parse HEAD)"

@@ -37,7 +37,7 @@ def main() -> int:
         suffix = path.suffix.lower()
         if ("build" in parts or "dist" in parts or "__pycache__" in parts
                 or any(p.endswith(".egg-info") for p in parts)
-                or suffix in {".sqlite", ".sqlite3", ".db", ".pem", ".key"}
+                or suffix in {".sqlite", ".sqlite3", ".db", ".pem", ".key", ".env"}
                 or path.name == ".env" or path.name.startswith(".env.")):
             failures.append(f"Forbidden tracked artifact: {name}")
             continue
