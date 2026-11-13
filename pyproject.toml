@@ -51,6 +51,7 @@ include = [
   "src/medical_ai/settings.py",
   "src/medical_ai/server.py",
   "src/medical_ai/admin_cli.py",
+  "src/medical_ai/evals/clinical_harm.py",
 ]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
