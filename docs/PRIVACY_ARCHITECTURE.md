@@ -32,7 +32,9 @@ Application-level identity/access control is implemented in engineering candidat
   expanding audit-data retention before operator/retention decisions are approved.
 - `/v1/evidence/query`, `/docs` and `/openapi.json` are protected. The root route
   serves only a login shell before authentication. `/health` is intentionally public
-  and returns bounded liveness/version metadata.
+  and returns bounded liveness/version metadata. `/health/ready` is also public and returns
+  one boolean per dependency (access configuration, session store, trace store, policy
+  digests); it returns no path, secret, participant identifier or exception text.
 - Presentation mode remains separate from identity. Selecting a clinician view does
   not establish that the participant is a GP or other health professional.
 
@@ -52,3 +54,24 @@ ToxSec's source-based review at `fad2ca97207a30d3c5c9f07d341b9e853b118df2` found
 This branch adds conservative input rejection for common email, Australian mobile, address, numeric and name-shaped patterns before invoking a public provider. It also restricts HTTP jurisdiction metadata to values supported by the current UI (`AU`, `US`, `INTERNATIONAL`). The added regression tests inspect mocked connector calls and local trace storage for synthetic input. There is no claim that the detector reliably de-identifies arbitrary text: false negatives, indirect identifiers, uncommon formats and legitimate queries rejected as names remain possible.
 
 **Pilot boundary remains blocked.** No real patient data may be entered. An independently reviewed permitted-input contract, a provider egress inventory, synthetic end-to-end privacy tests, operational log checks and an Australian privacy assessment remain required before considering invited use. This patch does not authorize PHI handling, deployment or release.
+
+## Application log field inventory — 14 November 2026 candidate
+
+`medical-ai-serve` writes one JSON object per line to standard error. A record may contain only these fields:
+
+| Field | Content |
+| --- | --- |
+| `ts` | UTC time, millisecond precision |
+| `level` | `debug`, `info`, `warning` or `error` |
+| `logger` | Python logger name |
+| `event` | Fixed event name (`request.completed`) or the message of a framework logger |
+| `request_id` | uuid4, or a validated token from a trusted proxy |
+| `method` | HTTP method |
+| `path` | Matched route template, or the literal `unmatched`; never the client-supplied path |
+| `status` | HTTP status code |
+| `duration_ms` | Server-side handling time |
+| `error_type` | Exception class name only, on unhandled errors |
+
+Never logged by application code: query strings, request bodies, questions, answers, cookies, authorization values, invitation tokens, participant identifiers, exception messages or tracebacks. uvicorn's access log stays off. The `httpx` and `httpcore` loggers are held at WARNING because connector requests carry search terms in their URLs.
+
+**Limits (unproven or out of scope):** framework and third-party loggers other than the two above write their own message text, which this change does not audit; reverse-proxy and host logs are not covered until C7; log retention, shipping and access are undecided; no PHI-bearing log has been tested against a real deployment. This is an engineering control, not a privacy-compliance claim.

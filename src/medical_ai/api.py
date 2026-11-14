@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
 import os
+import re
+import time
+import uuid
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -29,7 +33,8 @@ from .authority_resolver import AuthorityResolver
 from .trace_store import SQLiteTraceStore
 from .session_store import SessionStoreUnavailable
 from .schemas import EvidenceAnswer
-from .settings import load_settings, trace_db_path
+from .readiness import readiness_checks
+from .settings import SettingsError, load_settings, trace_db_path
 
 VERSION = "0.1.0-alpha2.1-remediation"
 STATIC_DIR = Path(__file__).parent / "static"
@@ -43,6 +48,67 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
+
+REQUEST_ID_HEADER = "X-Request-ID"
+_REQUEST_ID_PATTERN = re.compile(r"[A-Za-z0-9._-]{8,64}")
+_request_log = logging.getLogger("medical_ai.request")
+
+
+def _trusted_proxy_count() -> int:
+    try:
+        return load_settings().server.trusted_proxy_count
+    except SettingsError:
+        return 0
+
+
+def _request_id_for(request: Request) -> str:
+    # A caller-chosen id is honoured only behind a configured trusted proxy and
+    # only when it is a short, header-safe token; otherwise a fresh uuid4 is used.
+    inbound = request.headers.get(REQUEST_ID_HEADER, "")
+    if _trusted_proxy_count() > 0 and _REQUEST_ID_PATTERN.fullmatch(inbound):
+        return inbound
+    return str(uuid.uuid4())
+
+
+def _route_template(request: Request) -> str:
+    # Log the matched route template, never the client-supplied path or query.
+    # Route metadata is not trusted: a failing attribute must never break the
+    # request, so any error is treated as an unmatched route.
+    try:
+        route_path = getattr(request.scope.get("route"), "path", None)
+    except Exception:
+        return "unmatched"
+    return route_path if isinstance(route_path, str) else "unmatched"
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    request_id = _request_id_for(request)
+    started = time.perf_counter()
+
+    def record(status_code: int, *, failed: bool = False) -> None:
+        _request_log.info(
+            "request.completed",
+            exc_info=failed,
+            extra={
+                "event": "request.completed",
+                "request_id": request_id,
+                "method": request.method,
+                "path": _route_template(request),
+                "status": status_code,
+                "duration_ms": round((time.perf_counter() - started) * 1000, 2),
+            },
+        )
+
+    try:
+        response = await call_next(request)
+    except Exception:
+        record(500, failed=True)
+        raise
+    response.headers[REQUEST_ID_HEADER] = request_id
+    record(response.status_code)
+    return response
+
 
 @app.exception_handler(RequestValidationError)
 async def sensitive_validation_error(request: Request, exc: RequestValidationError):
@@ -234,6 +300,18 @@ def logout(request: Request, response: Response):
 @app.get("/health", include_in_schema=False)
 def health():
     return {"status": "ok", "version": VERSION}
+
+
+@app.get("/health/ready", include_in_schema=False)
+def ready():
+    # Public and content-free: booleans per dependency, no paths or participants.
+    checks = readiness_checks()
+    is_ready = all(checks.values())
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if is_ready else status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"status": "ready" if is_ready else "not_ready", "checks": checks},
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/openapi.json", include_in_schema=False)
