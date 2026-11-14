@@ -1,0 +1,33 @@
+# Medical AI evidence workbench - application service only (chunk C3).
+#
+# Status: proposed deployment asset. The TLS edge (Caddy), the systemd unit and
+# the operator README arrive in chunk C7. Nothing here authorises exposing the
+# service publicly: the app publishes no host port and is reachable only from the
+# compose network or by `docker compose exec`.
+#
+# Layout expected on the host (see deploy/medical-ai.env.example):
+#   /etc/medical-ai/medical-ai.env   root:root 0600, never tracked in the repository
+#   /var/lib/medical-ai/             owned by uid/gid 10001, mode 0700, holds the SQLite
+#                                    stores and the pilot allowlist file
+name: medical-ai
+
+services:
+  app:
+    image: medical-ai:${MEDICAL_AI_IMAGE_TAG:-local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    env_file: /etc/medical-ai/medical-ai.env
+    volumes:
+      - /var/lib/medical-ai:/var/lib/medical-ai
+    expose:
+      - "8000"
+    restart: unless-stopped
