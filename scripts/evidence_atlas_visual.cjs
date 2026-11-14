@@ -89,18 +89,18 @@ async function run() {
     assert.equal(await desktop.locator('#query-form').count(), 1);
     assert.equal(await desktop.getByRole('tab').count(), 3);
     await desktop.screenshot({ path: path.join(OUT, 'desktop-search.png'), fullPage: true });
-    await desktop.getByRole('tab', { name: /Inside Medical AI/ }).click();
+    await desktop.getByRole('tab', { name: /How it works/ }).click();
     assert.equal(await desktop.locator('#view-map').isVisible(), true);
     assert.equal(await desktop.locator('.column').count(), 5);
     await desktop.screenshot({ path: path.join(OUT, 'desktop-system-map.png'), fullPage: true });
-    await desktop.getByRole('tab', { name: /Source directory/ }).click();
+    await desktop.getByRole('tab', { name: /Sources/ }).click();
     assert.equal(await desktop.locator('#view-directory').isVisible(), true);
     await desktop.screenshot({ path: path.join(OUT, 'desktop-source-directory.png'), fullPage: true });
-    await desktop.getByRole('tab', { name: /Search evidence/ }).click();
+    await desktop.getByRole('tab', { name: /Search/ }).click();
     await desktop.locator('#question').fill('blocked fixture question');
     await desktop.locator('#submit').click();
     await desktop.locator('#result').waitFor({ state: 'visible' });
-    assert.match(await desktop.locator('#status').innerText(), /PROVENANCE_INCOMPLETE/);
+    assert.match(await desktop.locator('#status').innerText(), /We could not check the source details/);
     assert.equal((await desktop.locator('#answer').innerText()).includes(forbidden), false);
     assert.equal(await desktop.locator('#answer li').count(), 0);
     const failures = [];
@@ -114,7 +114,7 @@ async function run() {
         const state = await desktop.locator('#state-code').innerText();
         if (caseName === 'positive') {
           assert.ok(text.includes(supportedFixture.claims[0].claim_text));
-          assert.equal(state, 'ANSWER_SUPPORTED_WITH_QUALIFICATIONS');
+          assert.equal(state, 'Research found, with important limits');
           assert.ok(await desktop.locator('#sources a').count() > 0);
           assert.equal(await desktop.locator('.passport').count(), supportedFixture.claims.length);
           const passport = desktop.locator('.passport').first();
@@ -122,15 +122,15 @@ async function run() {
           await desktop.keyboard.press('Enter');
           assert.equal(await passport.evaluate(element => element.open), true);
           assert.equal(await passport.locator('mark').first().innerText(), supportedFixture.claims[0].claim_text);
-          assert.ok((await passport.innerText()).includes(supportedFixture.citation_mappings[0].mapping_id));
-          assert.ok((await passport.innerText()).includes('Policy digest: Not supplied'));
+          assert.ok((await passport.innerText()).includes('Original source'));
+          assert.equal((await passport.innerText()).includes('Policy digest'), false);
           await desktop.screenshot({ path: path.join(OUT, 'desktop-evidence-passport.png'), fullPage: true });
         } else {
           assert.equal(text.includes(supportedFixture.claims[0].claim_text), false, 'Invalid claim disclosed');
-          assert.equal(state, 'PROVENANCE_INCOMPLETE', 'Inconsistent response was not withheld');
+          assert.equal(state, 'We could not check the source details', 'Inconsistent response was not withheld');
           assert.equal(await desktop.locator('#sources a').count(), 0);
           assert.equal(await desktop.locator('.passport').count(), 0);
-          assert.ok(await desktop.locator('[data-boundary-state="failed"]').count() > 0);
+          assert.match(await desktop.locator('#boundaries').innerText(), /Source details could not be checked/);
         }
         const unsafe = await desktop.locator('#result a').evaluateAll(links => links.some(link => new URL(link.href).protocol !== 'https:'));
         assert.equal(unsafe, false, 'Unsafe source link retained');
@@ -141,8 +141,9 @@ async function run() {
       await desktop.locator('#question').fill('boundary ' + name);
       await desktop.locator('#submit').click();
       await desktop.waitForFunction(() => !document.getElementById('submit').disabled);
-      assert.equal(await desktop.locator('#state-code').innerText(), fixtures[name].status);
-      for (const state of ['failed', 'unknown', 'not-implemented']) assert.ok(await desktop.locator(`[data-boundary-state="${state}"]`).count() > 0);
+      assert.equal(await desktop.locator('#state-code').innerText(), ({ EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[fixtures[name].status]);
+      assert.match(await desktop.locator('#boundaries').innerText(), /Study quality not assessed/);
+      assert.match(await desktop.locator('#boundaries').innerText(), /Australian medicine rules not checked/);
     }
     assert.deepEqual(browserErrors, []);
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
@@ -150,6 +151,8 @@ async function run() {
     mobile.on('pageerror', e => mobileErrors.push(e.message));
     await mobile.goto('http://127.0.0.1:' + port + '/', { waitUntil: 'networkidle' });
     assert.equal(await mobile.locator('#query-form').isVisible(), true);
+    const questionPosition = await mobile.locator('#question').boundingBox();
+    assert.ok(questionPosition && questionPosition.y < 844, 'Search field is not in the initial mobile view');
     const overflow = await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     assert.equal(overflow, false, 'Mobile horizontal overflow detected');
     await mobile.screenshot({ path: path.join(OUT, 'mobile-search.png'), fullPage: true });
@@ -166,7 +169,7 @@ async function run() {
       }).map(element => element.tagName + '#' + element.id + '.' + element.className).slice(0, 20),
     }));
     assert.equal(passportOverflow.overflow, false, 'Mobile passport overflow detected: ' + passportOverflow.elements.join(', '));
-    await mobile.getByRole('tab', { name: /Inside Medical AI/ }).click();
+    await mobile.getByRole('tab', { name: /How it works/ }).click();
     const mapOverflow = await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     assert.equal(mapOverflow, false, 'Mobile architecture map overflow detected');
     await mobile.screenshot({ path: path.join(OUT, 'mobile-system-map.png'), fullPage: true });
