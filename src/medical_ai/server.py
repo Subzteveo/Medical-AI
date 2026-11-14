@@ -15,46 +15,11 @@ from dataclasses import dataclass, field
 
 import uvicorn
 
-from .access import AccessConfigurationError, load_access_config
-from .authority_resolver import AuthorityResolver
-from .session_store import PilotSessionStore, SessionStoreUnavailable
-from .settings import TRACE_HMAC_KEY_ENV, Settings, SettingsError, load_settings
-from .trace_store import SQLiteTraceStore
+from .logging_config import configure_logging
+from .readiness import access_check, policies_check, session_store_check, trace_store_check
+from .settings import TRACE_HMAC_KEY_ENV, SettingsError, load_settings
 
 APP_IMPORT_STRING = "medical_ai.api:app"
-
-
-def _access_check() -> tuple[bool, int]:
-    try:
-        config = load_access_config()
-    except AccessConfigurationError:
-        return False, 0
-    return True, len(config.participants)
-
-
-def _session_store_check(settings: Settings) -> bool:
-    try:
-        PilotSessionStore(settings.storage.session_db)
-    except SessionStoreUnavailable:
-        return False
-    return True
-
-
-def _trace_store_check(settings: Settings) -> bool:
-    try:
-        SQLiteTraceStore(settings.storage.trace_db)
-    except Exception:
-        return False
-    return True
-
-
-def _policies_check() -> bool:
-    # Compiling the resolver verifies every digest-bound authority policy.
-    try:
-        AuthorityResolver()
-    except Exception:
-        return False
-    return True
 
 
 @dataclass(frozen=True)
@@ -92,7 +57,7 @@ def check_config() -> ConfigReport:
         "access_config": False,
         "session_store": False,
         "trace_store": False,
-        "policies": _policies_check(),
+        "policies": policies_check(),
     }
     try:
         settings = load_settings()
@@ -101,10 +66,10 @@ def check_config() -> ConfigReport:
 
     checks["settings"] = True
     checks["trace_hmac_key"] = settings.trace_hmac_key_configured
-    access_ok, participants = _access_check()
+    access_ok, participants = access_check()
     checks["access_config"] = access_ok
-    checks["session_store"] = _session_store_check(settings)
-    checks["trace_store"] = _trace_store_check(settings)
+    checks["session_store"] = session_store_check(settings)
+    checks["trace_store"] = trace_store_check(settings)
     details: dict[str, str | int | bool] = {
         "host": settings.server.host,
         "port": settings.server.port,
@@ -149,6 +114,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     settings = load_settings()
+    configure_logging(settings.server.log_level)
     uvicorn.run(
         APP_IMPORT_STRING,
         host=settings.server.host,
@@ -160,6 +126,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         access_log=False,
         proxy_headers=False,
         server_header=False,
+        # Structured JSON logging is installed above; uvicorn's own formatters
+        # and access-log configuration must not replace it.
+        log_config=None,
     )
     return 0
 

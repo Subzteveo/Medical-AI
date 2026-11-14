@@ -58,7 +58,8 @@ SQLite is sufficient for the current single-user engineering alpha because only 
 ## API surface
 
 - `GET /` — local browser workbench.
-- `GET /health` — version/status only.
+- `GET /health` — version/status only (liveness).
+- `GET /health/ready` — public readiness: `{status: "ready"|"not_ready", checks: {access_config, session_store, trace_store, policies}}` as booleans; HTTP 503 when any check fails; no paths, secrets or participant data; `Cache-Control: no-store`.
 - `POST /v1/evidence/query` — validated evidence query.
 
 No public trace lookup endpoint exists in alpha2; exposing stored traces requires an access-control decision first.
@@ -66,6 +67,10 @@ No public trace lookup endpoint exists in alpha2; exposing stored traces require
 ### Runtime entry point and settings — 12 November 2026 candidate
 
 `medical-ai-serve` (`src/medical_ai/server.py`) is the supported start command. It runs fail-closed start-up checks and then one uvicorn worker with request access logs off and forwarded headers untrusted. Runtime settings are parsed per call by `src/medical_ai/settings.py`; nothing is cached at import. The pilot allowlist may come from `MEDICAL_AI_PILOT_ACCESS_JSON` or an owner-only file named by `MEDICAL_AI_PILOT_ACCESS_FILE`, never both. One worker is enforced because influence revocation state is in process memory. The API surface above is unchanged.
+
+### Observability — 14 November 2026 candidate
+
+Every response carries an `X-Request-ID` header: a fresh uuid4, or the caller's value only when `MEDICAL_AI_TRUSTED_PROXY_COUNT` is above 0 and the value is a header-safe token of 8–64 characters. One `request.completed` JSON log line is written per request by the `request_context` middleware in `api.py`; the field inventory is in `docs/PRIVACY_ARCHITECTURE.md`. `medical-ai-serve` installs `src/medical_ai/logging_config.py` before starting uvicorn and passes `log_config=None` so uvicorn's own formatters do not replace it.
 
 ## Context → loop → harness → graph: evidence-bound integration candidate (28 October 2026)
 
