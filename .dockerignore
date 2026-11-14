@@ -1,0 +1,9 @@
+# Default-deny build context: only what the image build needs is sent to the daemon.
+**
+!pyproject.toml
+!README.md
+!src
+!deploy/requirements.lock.txt
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info

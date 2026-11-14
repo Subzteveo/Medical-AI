@@ -335,3 +335,75 @@ def test_invalid_evidence_query_never_echoes_rejected_input(configured_access, p
     assert response.status_code == 422
     assert 'SYNTHETIC_PRIVATE_MARKER' not in response.text
     assert response.headers.get('Cache-Control') == 'no-store'
+
+
+# --- C1: allowlist supplied as an out-of-repository file -------------------
+
+@pytest.fixture
+def file_access(monkeypatch, fake_connector, tmp_path):
+    allowlist = tmp_path / "allowlist.json"
+    allowlist.write_text(json.dumps(_access_document()), encoding="utf-8")
+    allowlist.chmod(0o600)
+    monkeypatch.delenv("MEDICAL_AI_PILOT_ACCESS_JSON", raising=False)
+    monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_FILE", str(allowlist))
+    monkeypatch.setenv("MEDICAL_AI_PILOT_SESSION_SECRET", SESSION_SECRET)
+    monkeypatch.setenv("MEDICAL_AI_PILOT_COOKIE_SECURE", "false")
+    monkeypatch.setattr(api, "build_engine", lambda: EvidenceEngine(fake_connector))
+    return allowlist
+
+
+def _bearer_query():
+    return TestClient(api.app).post(
+        "/v1/evidence/query", json=_query_payload(),
+        headers={"Authorization": f"Bearer {VALID_TOKEN}"},
+    )
+
+
+def test_allowlist_file_authenticates_participant(file_access):
+    assert _bearer_query().status_code == 200
+
+
+def test_allowlist_file_changes_apply_without_restart(file_access):
+    assert _bearer_query().status_code == 200
+    file_access.write_text(json.dumps(_access_document(revoked=True)), encoding="utf-8")
+    assert _bearer_query().status_code == 401
+
+
+def test_allowlist_file_with_broad_permissions_fails_closed(file_access):
+    file_access.chmod(0o644)
+    assert _bearer_query().status_code == 503
+
+
+def test_allowlist_file_symlink_fails_closed(file_access, monkeypatch, tmp_path):
+    link = tmp_path / "link.json"
+    link.symlink_to(file_access)
+    monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_FILE", str(link))
+    assert _bearer_query().status_code == 503
+
+
+def test_allowlist_file_missing_or_not_regular_fails_closed(file_access, monkeypatch, tmp_path):
+    monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_FILE", str(tmp_path / "absent.json"))
+    assert _bearer_query().status_code == 503
+    monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_FILE", str(tmp_path))
+    assert _bearer_query().status_code == 503
+
+
+def test_allowlist_file_over_size_limit_fails_closed(file_access):
+    file_access.write_text(" " * (1024 * 1024 + 1), encoding="utf-8")
+    assert _bearer_query().status_code == 503
+
+
+def test_allowlist_json_and_file_together_fail_closed(file_access, monkeypatch):
+    monkeypatch.setenv("MEDICAL_AI_PILOT_ACCESS_JSON", json.dumps(_access_document()))
+    assert _bearer_query().status_code == 503
+
+
+def test_parse_access_document_validates_without_environment():
+    from medical_ai.access import AccessConfigurationError, parse_access_document
+
+    participants = parse_access_document(_access_document())
+    assert [p.participant_id for p in participants] == ["pilot-001"]
+    with pytest.raises(AccessConfigurationError):
+        parse_access_document({"participants": []})
+    with pytest.raises(AccessConfigurationError):
+        parse_access_document({"participants": [], "extra": 1})

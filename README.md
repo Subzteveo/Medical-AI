@@ -83,6 +83,27 @@ Runtime configuration is external to the repository:
 - `MEDICAL_AI_PILOT_COOKIE_SECURE` defaults to `true`. Setting it to `false` is
   for controlled local/test HTTP only, not an external pilot.
 
+### Starting the server — engineering candidate
+
+`medical-ai-serve` (installed with the package) validates configuration and starts a
+single-process server. `medical-ai-serve --check-config` prints a redacted readiness
+report and exits non-zero if any check fails. This is a start command only; it does
+not authorize deployment, pilot invitations or release.
+
+- `MEDICAL_AI_TRACE_HMAC_KEY` is required by the start command and must contain at
+  least 32 bytes.
+- `MEDICAL_AI_PILOT_ACCESS_FILE` may be used instead of `MEDICAL_AI_PILOT_ACCESS_JSON`
+  (set exactly one). The file must be a regular, non-symlinked file readable only by
+  its owner. It is re-read on every request, so edits apply without a restart.
+- `MEDICAL_AI_HOST` (default `127.0.0.1`), `MEDICAL_AI_PORT` (default `8000`),
+  `MEDICAL_AI_LOG_LEVEL` and `MEDICAL_AI_HTTP_TIMEOUT_SECONDS` are optional.
+  `MEDICAL_AI_WORKERS` must be `1`.
+
+`medical-ai-admin` maintains that allowlist file: `invite`, `revoke`, `rotate`,
+`list` and `check`, each with an explicit `--allowlist PATH`. A new token is printed
+once on standard output and is never stored; only its digest is written. The tool is
+engineering tooling and does not authorize issuing invitations.
+
 Allowlist JSON has exactly one top-level field, `participants`. Every entry must
 contain exactly `participant_id`, `credential_id`, `token_sha256`, `expires_at` and
 an explicit boolean `revoked`. Missing, unexpected or duplicate fields fail closed.

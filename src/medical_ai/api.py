@@ -7,7 +7,6 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -30,11 +29,12 @@ from .authority_resolver import AuthorityResolver
 from .trace_store import SQLiteTraceStore
 from .session_store import SessionStoreUnavailable
 from .schemas import EvidenceAnswer
+from .settings import load_settings, trace_db_path
 
 VERSION = "0.1.0-alpha2.1-remediation"
 STATIC_DIR = Path(__file__).parent / "static"
-_default_trace_db = Path.home() / ".medical_ai" / "medical_ai_traces.sqlite3"
-TRACE_DB = str(Path(os.getenv("MEDICAL_AI_TRACE_DB", str(_default_trace_db))).expanduser().resolve())
+# Resolved once at import and never raises; tests and operators may override it.
+TRACE_DB = str(trace_db_path(os.environ))
 
 app = FastAPI(
     title="Medical AI Evidence Workbench",
@@ -52,13 +52,31 @@ async def sensitive_validation_error(request: Request, exc: RequestValidationErr
         "/access/session": "Invalid pilot credential request",
         "/v1/evidence/query": "Invalid evidence query request",
     }
-    if request.url.path in sensitive_paths:
-        return JSONResponse(
-            status_code=422,
-            content={"detail": sensitive_paths[request.url.path]},
-            headers={"Cache-Control": "no-store"},
-        )
-    return await request_validation_exception_handler(request, exc)
+    # ASGI's routing path is not reconstructed from the client-supplied Host.
+    # Either independent routing signal may identify a sensitive endpoint;
+    # neither an absent route nor malformed metadata permits input reflection.
+    scope_path = request.scope.get("path")
+    matched_route = request.scope.get("route")
+    try:
+        matched_path = getattr(matched_route, "path", None)
+    except Exception:
+        # A bad route object must not turn a validation error into a 500 or
+        # allow a fallback that serialises rejected request values.
+        matched_path = None
+
+    detail = "Invalid request"
+    for path in (scope_path, matched_path):
+        if isinstance(path, str) and path in sensitive_paths:
+            detail = sensitive_paths[path]
+            break
+
+    # Fail closed for unknown paths: never delegate to FastAPI's default
+    # RequestValidationError formatter, which includes rejected input.
+    return JSONResponse(
+        status_code=422,
+        content={"detail": detail},
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 ACCESS_PAGE = """<!doctype html>
@@ -139,9 +157,16 @@ def _shared_influence_controller() -> InfluenceController:
 
 
 def build_engine() -> EvidenceEngine:
+    connector_settings = load_settings().connectors
     connectors = {
-        "biomedical_literature": PubMedConnector(email=os.getenv("NCBI_EMAIL"), api_key=os.getenv("NCBI_API_KEY")),
-        "clinical_trial_registry": ClinicalTrialsConnector(),
+        "biomedical_literature": PubMedConnector(
+            email=connector_settings.ncbi_email,
+            api_key=connector_settings.ncbi_api_key,
+            timeout=connector_settings.http_timeout_seconds,
+        ),
+        "clinical_trial_registry": ClinicalTrialsConnector(
+            timeout=connector_settings.http_timeout_seconds,
+        ),
     }
     return EvidenceEngine(
         connectors,
