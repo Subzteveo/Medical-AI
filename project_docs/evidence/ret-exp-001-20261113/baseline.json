@@ -1,0 +1,1600 @@
+{
+  "experiment_id": "RET-EXP-001",
+  "experiment_version": "0.1",
+  "execution_status": "EXECUTED",
+  "quality_status": "UNPROVEN_NOT_A_RELEASE_GATE",
+  "candidate_status": "NOT_IMPLEMENTED",
+  "metric_boundary": "Synthetic pre-authority passage selection; not live retrieval, clinical authority recall, or rendered answers.",
+  "baseline_revision": "f292523c3fd94983b2df48812739dbeba6ac0d06",
+  "repository_head": "e078110b9b0e9dff52ae83666196ea8eac9c2469",
+  "worktree_dirty": false,
+  "generated_at": "2026-11-13T05:33:41.847174+00:00",
+  "elapsed_ms": 3.3835470001122303,
+  "dependency_versions": {
+    "python": "3.12.14",
+    "pydantic": "2.13.4",
+    "pydantic-core": "2.46.4",
+    "PyYAML": "6.0.3"
+  },
+  "execution_file_sha256": {
+    "evals/retrieval/ret-exp-001-v0.1/cases.json": "08dd3ff4a11b4cdd8e37e214b91bd6758648e9644e6d2c77e38263e071f811ca",
+    "evals/retrieval/ret-exp-001-v0.1/freeze.json": "d1f3598dc9dcc3d9fda0af9987513f7e2fad041457e053a9bbc67c4bc9bda418",
+    "project_docs/plans/RET-EXP-001-v0.1.md": "512bd92f0615b79c673cc81b05ff1efed2996df018407614c867d81d851e6c8b",
+    "pyproject.toml": "8a4926d90c1ce0ff2f312f900fd916e9b8952809b9706e0e5871ca111007c904",
+    "src/medical_ai/__init__.py": "358f95da8c697bb56a759a20996cf3451d15821697c085ac6f01a32c161d9a74",
+    "src/medical_ai/evals/__init__.py": "c8dac9ce375e449a0c96d560b81ad104c33aeb425c6efddfbffb306fb6c15b97",
+    "src/medical_ai/evals/lexical_baseline.py": "2615a91e0a122aec55dfeffe76a4f58b656db4fcdc89b12cc7ed01f6e5d6721a",
+    "src/medical_ai/extractor.py": "2119fefd1a315c1c1c93e0964cc1f9132720cfd79307c96c6b07bd4713478f63",
+    "src/medical_ai/policies/__init__.py": "68bfa174a544f63741a42cf9c97a23a31c7ed1f82f1ccfb3ffc06153613803c0",
+    "src/medical_ai/policies/source-policy-v0.1.yaml": "ab17d14748790f6a8678e02f53ba0e4e92b8612ca82cd1ea1ae614aa6abf7dcf",
+    "src/medical_ai/policy_loader.py": "cb7aa752de21df166d4941d4a402f2541d8a9815b4449d3b91182da0be5652a4",
+    "src/medical_ai/provenance.py": "e664764e72b3510d660059bf491273b1339c45c0488bf424df5a155084ec6d3a",
+    "src/medical_ai/schemas.py": "df404077f6dccb6cf41764365daad75c24d5cfeec00a0f28f8d81f735db2f366",
+    "src/medical_ai/source_policy.py": "40dcf3b781a4a741a502a6b4f9458508c941ffac0fb9fe51a45170727f77bf45"
+  },
+  "results": [
+    {
+      "case_id": "RET-DEV-01",
+      "split": "development",
+      "category": "exact_match",
+      "candidate_passage_ids": [
+        "RET-DEV-01-p0",
+        "RET-DEV-01-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-01-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-01-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-01-p0",
+        "RET-DEV-01-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-01-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-01-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_6954e2b415096922",
+          "source_id": "RET-DEV-01-s0",
+          "passage_id": "RET-DEV-01-p0",
+          "text_sha256": "7631a5d1fda756d5e063b7e4364a01442a28f249d09b8221083f2b8040a50dcb"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-02",
+      "split": "development",
+      "category": "whole_abstract",
+      "candidate_passage_ids": [
+        "RET-DEV-02-p0"
+      ],
+      "source_qualification": {
+        "RET-DEV-02-s0": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-02-p0"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-02-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-02-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_69dbd3138069391b",
+          "source_id": "RET-DEV-02-s0",
+          "passage_id": "RET-DEV-02-p0",
+          "text_sha256": "d27bbc387cf58f8c9dfaa3250316ec6f7b2ec6fe20ce50bf10445f4be5b0de5e"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-03",
+      "split": "development",
+      "category": "paraphrase",
+      "candidate_passage_ids": [
+        "RET-DEV-03-p0",
+        "RET-DEV-03-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-03-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-03-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-03-p0",
+        "RET-DEV-03-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-DEV-03-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-04",
+      "split": "development",
+      "category": "abbreviation",
+      "candidate_passage_ids": [
+        "RET-DEV-04-p0",
+        "RET-DEV-04-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-04-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-04-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-04-p0",
+        "RET-DEV-04-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-DEV-04-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-05",
+      "split": "development",
+      "category": "distractor_cutoff",
+      "candidate_passage_ids": [
+        "RET-DEV-05-p0",
+        "RET-DEV-05-p1",
+        "RET-DEV-05-p2",
+        "RET-DEV-05-p3",
+        "RET-DEV-05-p4",
+        "RET-DEV-05-p5",
+        "RET-DEV-05-p6"
+      ],
+      "source_qualification": {
+        "RET-DEV-05-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s1": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s2": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s3": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s4": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s5": "ADMITTED_LITERATURE",
+        "RET-DEV-05-s6": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-05-p0",
+        "RET-DEV-05-p1",
+        "RET-DEV-05-p2",
+        "RET-DEV-05-p3",
+        "RET-DEV-05-p4",
+        "RET-DEV-05-p5",
+        "RET-DEV-05-p6"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-05-p0",
+        "RET-DEV-05-p1",
+        "RET-DEV-05-p2",
+        "RET-DEV-05-p3",
+        "RET-DEV-05-p4",
+        "RET-DEV-05-p5",
+        "RET-DEV-05-p6"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-05-p0",
+        "RET-DEV-05-p1",
+        "RET-DEV-05-p2",
+        "RET-DEV-05-p3",
+        "RET-DEV-05-p4"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_513d5193397c7720",
+          "source_id": "RET-DEV-05-s0",
+          "passage_id": "RET-DEV-05-p0",
+          "text_sha256": "6086fdabe8116e9289e77d56ca7b65398a856423bfabf9dda567912d6f8793a5"
+        },
+        {
+          "evidence_id": "ev_7c4b4628a356dc9c",
+          "source_id": "RET-DEV-05-s1",
+          "passage_id": "RET-DEV-05-p1",
+          "text_sha256": "f6b07971a5c3daeb6943114880a6da21c16a92673d1a99b0e13a7c692af0067e"
+        },
+        {
+          "evidence_id": "ev_5844e069a690b949",
+          "source_id": "RET-DEV-05-s2",
+          "passage_id": "RET-DEV-05-p2",
+          "text_sha256": "e70f647d59766b776751f8d850a42bffbc3b90761c66c5468497b03d4778486d"
+        },
+        {
+          "evidence_id": "ev_144e48ae06eee35e",
+          "source_id": "RET-DEV-05-s3",
+          "passage_id": "RET-DEV-05-p3",
+          "text_sha256": "6848a0258c6d52231085a27ac1530797077d4c61a1f8e26455054c4c113a65a2"
+        },
+        {
+          "evidence_id": "ev_0c7a82753be76581",
+          "source_id": "RET-DEV-05-s4",
+          "passage_id": "RET-DEV-05-p4",
+          "text_sha256": "d2523e593aff1628e5c77a93c660a8bf1ef54f36e204f7af03ef60732f561bfa"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": 7,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-DEV-05-p6"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-06",
+      "split": "development",
+      "category": "missing_candidate",
+      "candidate_passage_ids": [
+        "RET-DEV-06-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-06-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-06-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 0.0,
+      "post_qualification_recall": 0.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [
+        "RET-DEV-06-p0"
+      ],
+      "missing_after_qualification": [
+        "RET-DEV-06-p0"
+      ],
+      "missing_from_selection": [
+        "RET-DEV-06-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-07",
+      "split": "development",
+      "category": "wrong_source_class",
+      "candidate_passage_ids": [
+        "RET-DEV-07-p0",
+        "RET-DEV-07-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-07-s0": "SOURCE_CLASS_NOT_ADMITTED",
+        "RET-DEV-07-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-07-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-07-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-07-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_d1f093b02ad92859",
+          "source_id": "RET-DEV-07-s1",
+          "passage_id": "RET-DEV-07-p1",
+          "text_sha256": "2133be152f1482a63b24d95fe0159645e0902a42a708a24548116a44a2a04b20"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-08",
+      "split": "development",
+      "category": "registry_narrative",
+      "candidate_passage_ids": [
+        "RET-DEV-08-p0",
+        "RET-DEV-08-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-08-s0": "ADMITTED_TRIAL_DISCOVERY",
+        "RET-DEV-08-s1": "ADMITTED_TRIAL_DISCOVERY"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-08-p0",
+        "RET-DEV-08-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-08-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-08-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_e1360a1e8da24a42",
+          "source_id": "RET-DEV-08-s1",
+          "passage_id": "RET-DEV-08-p1",
+          "text_sha256": "e6e16553ced9aa57cb2e01fd886077666a3626dbe0980985ab720a32d4d67235"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-09",
+      "split": "development",
+      "category": "supersession",
+      "candidate_passage_ids": [
+        "RET-DEV-09-p0",
+        "RET-DEV-09-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-09-s0": "SOURCE_SUPERSEDED",
+        "RET-DEV-09-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-09-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-09-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-09-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_d50fe1eac5360807",
+          "source_id": "RET-DEV-09-s1",
+          "passage_id": "RET-DEV-09-p1",
+          "text_sha256": "57cc50de6a99e0bf6a04ed3d7e7f0df4f92a78626d01d04e4bd1303b90dcde8c"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-10",
+      "split": "development",
+      "category": "retraction",
+      "candidate_passage_ids": [
+        "RET-DEV-10-p0",
+        "RET-DEV-10-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-10-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-10-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-10-p0",
+        "RET-DEV-10-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-10-p1",
+        "RET-DEV-10-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-10-p1",
+        "RET-DEV-10-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_d7cd7ccca6bd7f9f",
+          "source_id": "RET-DEV-10-s1",
+          "passage_id": "RET-DEV-10-p1",
+          "text_sha256": "28680c35b31ae68577ef45206a4fefc28dcdadb3509dffc0dd68ddd2dadd85c2"
+        },
+        {
+          "evidence_id": "ev_5038de4f65f2f5dd",
+          "source_id": "RET-DEV-10-s0",
+          "passage_id": "RET-DEV-10-p0",
+          "text_sha256": "a9c60c07b82f3041b797db38fddc895cd770d174154371189b4452ec56cf2d01"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-DEV-10-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-11",
+      "split": "development",
+      "category": "jurisdiction",
+      "candidate_passage_ids": [
+        "RET-DEV-11-p0",
+        "RET-DEV-11-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-11-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-11-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-11-p0",
+        "RET-DEV-11-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-11-p1",
+        "RET-DEV-11-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-11-p1",
+        "RET-DEV-11-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_fffb0e690109d8d3",
+          "source_id": "RET-DEV-11-s1",
+          "passage_id": "RET-DEV-11-p1",
+          "text_sha256": "ee191e437c9d39b4353eb02436433c6d7c429b36a272e100638198d4aecca38f"
+        },
+        {
+          "evidence_id": "ev_4df82174de3c3467",
+          "source_id": "RET-DEV-11-s0",
+          "passage_id": "RET-DEV-11-p0",
+          "text_sha256": "2a7519fca990555595453136f5eb7b876fd5c3302b2a5982189a125f78fc7a56"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-DEV-11-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-12",
+      "split": "development",
+      "category": "conflict_pair",
+      "candidate_passage_ids": [
+        "RET-DEV-12-p0",
+        "RET-DEV-12-p1",
+        "RET-DEV-12-p2"
+      ],
+      "source_qualification": {
+        "RET-DEV-12-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-12-s1": "ADMITTED_LITERATURE",
+        "RET-DEV-12-s2": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-12-p0",
+        "RET-DEV-12-p1",
+        "RET-DEV-12-p2"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-12-p0",
+        "RET-DEV-12-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-12-p0",
+        "RET-DEV-12-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_6748d642315695db",
+          "source_id": "RET-DEV-12-s0",
+          "passage_id": "RET-DEV-12-p0",
+          "text_sha256": "a740e37a11d4fb3ad231f99d7f7b1b7b3c93d0033fbec5f1939abc778a01139e"
+        },
+        {
+          "evidence_id": "ev_4455a59e8babcbd5",
+          "source_id": "RET-DEV-12-s1",
+          "passage_id": "RET-DEV-12-p1",
+          "text_sha256": "07ee0935b673d5c5c0df2b5074e735f723aab3a05050283b60ccae7bcaa13c61"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-13",
+      "split": "development",
+      "category": "population",
+      "candidate_passage_ids": [
+        "RET-DEV-13-p0",
+        "RET-DEV-13-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-13-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-13-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-13-p0",
+        "RET-DEV-13-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-13-p0",
+        "RET-DEV-13-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-13-p0",
+        "RET-DEV-13-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_19380bd9a6079a1a",
+          "source_id": "RET-DEV-13-s0",
+          "passage_id": "RET-DEV-13-p0",
+          "text_sha256": "0256a23261c737683a7fae5bd37650ac2ce326e68b5265ec9a416866f5d9223e"
+        },
+        {
+          "evidence_id": "ev_c2717d3383bf0f2a",
+          "source_id": "RET-DEV-13-s1",
+          "passage_id": "RET-DEV-13-p1",
+          "text_sha256": "315ddb13b98a30ac11c03408889eaa6b3232fa59e086de34bfb3ed48fd3e1f07"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 2,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-DEV-13-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-14",
+      "split": "development",
+      "category": "injection",
+      "candidate_passage_ids": [
+        "RET-DEV-14-p0",
+        "RET-DEV-14-p1"
+      ],
+      "source_qualification": {
+        "RET-DEV-14-s0": "ADMITTED_LITERATURE",
+        "RET-DEV-14-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-14-p0",
+        "RET-DEV-14-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-14-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-14-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_f5f2f0661f643f5c",
+          "source_id": "RET-DEV-14-s1",
+          "passage_id": "RET-DEV-14-p1",
+          "text_sha256": "972837eae8f75b9123d55b90feabddc96d2d1a9b868e8899e17c21a81329adb6"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-DEV-15",
+      "split": "development",
+      "category": "no_evidence",
+      "candidate_passage_ids": [
+        "RET-DEV-15-p0"
+      ],
+      "source_qualification": {
+        "RET-DEV-15-s0": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-DEV-15-p0"
+      ],
+      "ranked_passage_ids": [
+        "RET-DEV-15-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-DEV-15-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_c066d95111abdc7a",
+          "source_id": "RET-DEV-15-s0",
+          "passage_id": "RET-DEV-15-p0",
+          "text_sha256": "a5074682b83823f0de62e9175d1e6e4bda53eac9ed86318004fd1746a516b73a"
+        }
+      ],
+      "candidate_pool_recall": null,
+      "post_qualification_recall": null,
+      "selected_recall_at_5": null,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-DEV-15-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": true,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-01",
+      "split": "held_out_engineering",
+      "category": "exact_match",
+      "candidate_passage_ids": [
+        "RET-HOLD-01-p0",
+        "RET-HOLD-01-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-01-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-01-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-01-p0",
+        "RET-HOLD-01-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-01-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-01-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_b0cee287c0204d91",
+          "source_id": "RET-HOLD-01-s0",
+          "passage_id": "RET-HOLD-01-p0",
+          "text_sha256": "49ee10856dc8253dd9004bb55b5705606640af8ae3ca716fc5ca9e6b853036e9"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-02",
+      "split": "held_out_engineering",
+      "category": "whole_abstract",
+      "candidate_passage_ids": [
+        "RET-HOLD-02-p0"
+      ],
+      "source_qualification": {
+        "RET-HOLD-02-s0": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-02-p0"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-02-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-02-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_470fa4d916dd02fb",
+          "source_id": "RET-HOLD-02-s0",
+          "passage_id": "RET-HOLD-02-p0",
+          "text_sha256": "4fa08877fcb1ff9b687fd921dfd5d7b7cca90db2d19e989c637893be7fcf71f7"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-03",
+      "split": "held_out_engineering",
+      "category": "paraphrase",
+      "candidate_passage_ids": [
+        "RET-HOLD-03-p0",
+        "RET-HOLD-03-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-03-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-03-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-03-p0",
+        "RET-HOLD-03-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-HOLD-03-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-04",
+      "split": "held_out_engineering",
+      "category": "abbreviation",
+      "candidate_passage_ids": [
+        "RET-HOLD-04-p0",
+        "RET-HOLD-04-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-04-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-04-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-04-p0",
+        "RET-HOLD-04-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-HOLD-04-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-05",
+      "split": "held_out_engineering",
+      "category": "distractor_cutoff",
+      "candidate_passage_ids": [
+        "RET-HOLD-05-p0",
+        "RET-HOLD-05-p1",
+        "RET-HOLD-05-p2",
+        "RET-HOLD-05-p3",
+        "RET-HOLD-05-p4",
+        "RET-HOLD-05-p5",
+        "RET-HOLD-05-p6"
+      ],
+      "source_qualification": {
+        "RET-HOLD-05-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s1": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s2": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s3": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s4": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s5": "ADMITTED_LITERATURE",
+        "RET-HOLD-05-s6": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-05-p0",
+        "RET-HOLD-05-p1",
+        "RET-HOLD-05-p2",
+        "RET-HOLD-05-p3",
+        "RET-HOLD-05-p4",
+        "RET-HOLD-05-p5",
+        "RET-HOLD-05-p6"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-05-p0",
+        "RET-HOLD-05-p1",
+        "RET-HOLD-05-p2",
+        "RET-HOLD-05-p3",
+        "RET-HOLD-05-p4",
+        "RET-HOLD-05-p5",
+        "RET-HOLD-05-p6"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-05-p0",
+        "RET-HOLD-05-p1",
+        "RET-HOLD-05-p2",
+        "RET-HOLD-05-p3",
+        "RET-HOLD-05-p4"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_9e74ce7a7a8f5fd4",
+          "source_id": "RET-HOLD-05-s0",
+          "passage_id": "RET-HOLD-05-p0",
+          "text_sha256": "5686c03fdf17e44428dc8109dea01e6010e44b655ab46034d987f96528a0d3b8"
+        },
+        {
+          "evidence_id": "ev_a82ef236e1ddcbb3",
+          "source_id": "RET-HOLD-05-s1",
+          "passage_id": "RET-HOLD-05-p1",
+          "text_sha256": "b6190522e3bbff9a583d7b68dfd51c00f5a2659c47a6e952399bedb112aaabea"
+        },
+        {
+          "evidence_id": "ev_5574cb918e885b88",
+          "source_id": "RET-HOLD-05-s2",
+          "passage_id": "RET-HOLD-05-p2",
+          "text_sha256": "ccbda03401cf3fd1f16186eb85c058f6a7fc77982586c1c1ab656c5008a26a01"
+        },
+        {
+          "evidence_id": "ev_ca29cf8328bea82a",
+          "source_id": "RET-HOLD-05-s3",
+          "passage_id": "RET-HOLD-05-p3",
+          "text_sha256": "8d7986ecdafc699a517edf3ad7be74f76119fffcc0db881cf921d95560a9b03a"
+        },
+        {
+          "evidence_id": "ev_5e85528d26ac6037",
+          "source_id": "RET-HOLD-05-s4",
+          "passage_id": "RET-HOLD-05-p4",
+          "text_sha256": "fe81a8439462213dececf56e900b4cfce518a796a74bbe253b3a0b8d6894e28a"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": 7,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [
+        "RET-HOLD-05-p6"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-06",
+      "split": "held_out_engineering",
+      "category": "missing_candidate",
+      "candidate_passage_ids": [
+        "RET-HOLD-06-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-06-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-06-p1"
+      ],
+      "ranked_passage_ids": [],
+      "selected_passage_ids": [],
+      "selected": [],
+      "candidate_pool_recall": 0.0,
+      "post_qualification_recall": 0.0,
+      "selected_recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [
+        "RET-HOLD-06-p0"
+      ],
+      "missing_after_qualification": [
+        "RET-HOLD-06-p0"
+      ],
+      "missing_from_selection": [
+        "RET-HOLD-06-p0"
+      ],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-07",
+      "split": "held_out_engineering",
+      "category": "wrong_source_class",
+      "candidate_passage_ids": [
+        "RET-HOLD-07-p0",
+        "RET-HOLD-07-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-07-s0": "SOURCE_CLASS_NOT_ADMITTED",
+        "RET-HOLD-07-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-07-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-07-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-07-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_972240ea31370cea",
+          "source_id": "RET-HOLD-07-s1",
+          "passage_id": "RET-HOLD-07-p1",
+          "text_sha256": "2fa8da609f4befc34e38665ed148d9779dda0b4cc30a237308d354469c1558b6"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-08",
+      "split": "held_out_engineering",
+      "category": "registry_narrative",
+      "candidate_passage_ids": [
+        "RET-HOLD-08-p0",
+        "RET-HOLD-08-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-08-s0": "ADMITTED_TRIAL_DISCOVERY",
+        "RET-HOLD-08-s1": "ADMITTED_TRIAL_DISCOVERY"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-08-p0",
+        "RET-HOLD-08-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-08-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-08-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_9d3254c3401f601c",
+          "source_id": "RET-HOLD-08-s1",
+          "passage_id": "RET-HOLD-08-p1",
+          "text_sha256": "a84342c179eea49f69c1e00adbc9aebceef5b3864948ee6b952751641ad847bc"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-09",
+      "split": "held_out_engineering",
+      "category": "supersession",
+      "candidate_passage_ids": [
+        "RET-HOLD-09-p0",
+        "RET-HOLD-09-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-09-s0": "SOURCE_SUPERSEDED",
+        "RET-HOLD-09-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-09-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-09-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-09-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_2aa0b2bcff797f9b",
+          "source_id": "RET-HOLD-09-s1",
+          "passage_id": "RET-HOLD-09-p1",
+          "text_sha256": "a24e4fac24e212f45db70ecbf6a7e582056d2f6f8f32bdbe1b940cb25b95f77c"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-10",
+      "split": "held_out_engineering",
+      "category": "retraction",
+      "candidate_passage_ids": [
+        "RET-HOLD-10-p0",
+        "RET-HOLD-10-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-10-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-10-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-10-p0",
+        "RET-HOLD-10-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-10-p1",
+        "RET-HOLD-10-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-10-p1",
+        "RET-HOLD-10-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_d075ba7b8d157e1f",
+          "source_id": "RET-HOLD-10-s1",
+          "passage_id": "RET-HOLD-10-p1",
+          "text_sha256": "affba461e3b1b6d600bfb17f0f4422bba669c785a06592077b180c8c19838157"
+        },
+        {
+          "evidence_id": "ev_1f0e215ee272e02a",
+          "source_id": "RET-HOLD-10-s0",
+          "passage_id": "RET-HOLD-10-p0",
+          "text_sha256": "864348ef0be0c92c5c9acd63824ad391236dec96f3b9e67ccf9d97f11b9d3a36"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-HOLD-10-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-11",
+      "split": "held_out_engineering",
+      "category": "jurisdiction",
+      "candidate_passage_ids": [
+        "RET-HOLD-11-p0",
+        "RET-HOLD-11-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-11-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-11-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-11-p0",
+        "RET-HOLD-11-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-11-p1",
+        "RET-HOLD-11-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-11-p1",
+        "RET-HOLD-11-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_260ce1316debb0d4",
+          "source_id": "RET-HOLD-11-s1",
+          "passage_id": "RET-HOLD-11-p1",
+          "text_sha256": "22d71e6bc440c651f7b9af2cd23b365d8521ea96bb38f76955303d40ad4ace3d"
+        },
+        {
+          "evidence_id": "ev_34fd937419ebd11e",
+          "source_id": "RET-HOLD-11-s0",
+          "passage_id": "RET-HOLD-11-p0",
+          "text_sha256": "884e8914ed8f838d61728bd2ba88730cc44bd42f7fd1b8b74f6e70bcac19c362"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-HOLD-11-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-12",
+      "split": "held_out_engineering",
+      "category": "conflict_pair",
+      "candidate_passage_ids": [
+        "RET-HOLD-12-p0",
+        "RET-HOLD-12-p1",
+        "RET-HOLD-12-p2"
+      ],
+      "source_qualification": {
+        "RET-HOLD-12-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-12-s1": "ADMITTED_LITERATURE",
+        "RET-HOLD-12-s2": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-12-p0",
+        "RET-HOLD-12-p1",
+        "RET-HOLD-12-p2"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-12-p0",
+        "RET-HOLD-12-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-12-p0",
+        "RET-HOLD-12-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_5df853fa2620ddb6",
+          "source_id": "RET-HOLD-12-s0",
+          "passage_id": "RET-HOLD-12-p0",
+          "text_sha256": "5d6af69f11a145311af43abae76b1f5f90b345d0b18d6b989195dac77455c419"
+        },
+        {
+          "evidence_id": "ev_4806a6cf613ddddd",
+          "source_id": "RET-HOLD-12-s1",
+          "passage_id": "RET-HOLD-12-p1",
+          "text_sha256": "0e2470f02bd139394402dd98096b3dce556ce49240b3ad346b4fbd1e96186f78"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-13",
+      "split": "held_out_engineering",
+      "category": "population",
+      "candidate_passage_ids": [
+        "RET-HOLD-13-p0",
+        "RET-HOLD-13-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-13-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-13-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-13-p0",
+        "RET-HOLD-13-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-13-p0",
+        "RET-HOLD-13-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-13-p0",
+        "RET-HOLD-13-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_e72c1e067620e125",
+          "source_id": "RET-HOLD-13-s0",
+          "passage_id": "RET-HOLD-13-p0",
+          "text_sha256": "c8b6f2e26a7bf95fc9d85c608afdd32b26ee7a0090df99314374cb95edb6f007"
+        },
+        {
+          "evidence_id": "ev_dd47fe036cbbed4a",
+          "source_id": "RET-HOLD-13-s1",
+          "passage_id": "RET-HOLD-13-p1",
+          "text_sha256": "75b7107d6054b5e071d7835fd553031898720c0dcd58e6b9d22c86b53cef823b"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 2,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-HOLD-13-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-14",
+      "split": "held_out_engineering",
+      "category": "injection",
+      "candidate_passage_ids": [
+        "RET-HOLD-14-p0",
+        "RET-HOLD-14-p1"
+      ],
+      "source_qualification": {
+        "RET-HOLD-14-s0": "ADMITTED_LITERATURE",
+        "RET-HOLD-14-s1": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-14-p0",
+        "RET-HOLD-14-p1"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-14-p1"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-14-p1"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_032c6c4d00507745",
+          "source_id": "RET-HOLD-14-s1",
+          "passage_id": "RET-HOLD-14-p1",
+          "text_sha256": "ca8b6898f5f61c587e98df7e52176fc403fc183f54a10b5debeece89691199c3"
+        }
+      ],
+      "candidate_pool_recall": 1.0,
+      "post_qualification_recall": 1.0,
+      "selected_recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "first_relevant_rank": 1,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [],
+      "nonempty_selection_without_relevant_evidence": false,
+      "selection_is_medical_authorization": false
+    },
+    {
+      "case_id": "RET-HOLD-15",
+      "split": "held_out_engineering",
+      "category": "no_evidence",
+      "candidate_passage_ids": [
+        "RET-HOLD-15-p0"
+      ],
+      "source_qualification": {
+        "RET-HOLD-15-s0": "ADMITTED_LITERATURE"
+      },
+      "admitted_passage_ids": [
+        "RET-HOLD-15-p0"
+      ],
+      "ranked_passage_ids": [
+        "RET-HOLD-15-p0"
+      ],
+      "selected_passage_ids": [
+        "RET-HOLD-15-p0"
+      ],
+      "selected": [
+        {
+          "evidence_id": "ev_8e52ca4ec5ea004e",
+          "source_id": "RET-HOLD-15-s0",
+          "passage_id": "RET-HOLD-15-p0",
+          "text_sha256": "3ca4e9dcccc9d89a2ec744887e848f57509701dc55c758f36a1f7293e98af0f3"
+        }
+      ],
+      "candidate_pool_recall": null,
+      "post_qualification_recall": null,
+      "selected_recall_at_5": null,
+      "precision_at_5": 0.0,
+      "first_relevant_rank": null,
+      "missing_from_candidate_pool": [],
+      "missing_after_qualification": [],
+      "missing_from_selection": [],
+      "excluded_selected_ids": [
+        "RET-HOLD-15-p0"
+      ],
+      "nonempty_selection_without_relevant_evidence": true,
+      "selection_is_medical_authorization": false
+    }
+  ],
+  "summaries": {
+    "all": {
+      "cases": 30,
+      "nonempty_gold_cases": 28,
+      "mean_candidate_pool_recall": 0.9285714285714286,
+      "mean_post_qualification_recall": 0.9285714285714286,
+      "mean_selected_recall_at_5": 0.7142857142857143,
+      "mean_precision_at_5": 0.14666666666666667,
+      "cases_with_excluded_selection": 8,
+      "empty_gold_nonempty_selection_cases": 2
+    },
+    "split:development": {
+      "cases": 15,
+      "nonempty_gold_cases": 14,
+      "mean_candidate_pool_recall": 0.9285714285714286,
+      "mean_post_qualification_recall": 0.9285714285714286,
+      "mean_selected_recall_at_5": 0.7142857142857143,
+      "mean_precision_at_5": 0.14666666666666667,
+      "cases_with_excluded_selection": 4,
+      "empty_gold_nonempty_selection_cases": 1
+    },
+    "split:held_out_engineering": {
+      "cases": 15,
+      "nonempty_gold_cases": 14,
+      "mean_candidate_pool_recall": 0.9285714285714286,
+      "mean_post_qualification_recall": 0.9285714285714286,
+      "mean_selected_recall_at_5": 0.7142857142857143,
+      "mean_precision_at_5": 0.14666666666666667,
+      "cases_with_excluded_selection": 4,
+      "empty_gold_nonempty_selection_cases": 1
+    },
+    "category:exact_match": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:whole_abstract": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:paraphrase": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 0.0,
+      "mean_precision_at_5": 0.0,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:abbreviation": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 0.0,
+      "mean_precision_at_5": 0.0,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:distractor_cutoff": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 0.0,
+      "mean_precision_at_5": 0.0,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:missing_candidate": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 0.0,
+      "mean_post_qualification_recall": 0.0,
+      "mean_selected_recall_at_5": 0.0,
+      "mean_precision_at_5": 0.0,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:wrong_source_class": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:registry_narrative": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:supersession": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:retraction": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 2,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:jurisdiction": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 2,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:conflict_pair": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.4,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:population": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 2,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:injection": {
+      "cases": 2,
+      "nonempty_gold_cases": 2,
+      "mean_candidate_pool_recall": 1.0,
+      "mean_post_qualification_recall": 1.0,
+      "mean_selected_recall_at_5": 1.0,
+      "mean_precision_at_5": 0.2,
+      "cases_with_excluded_selection": 0,
+      "empty_gold_nonempty_selection_cases": 0
+    },
+    "category:no_evidence": {
+      "cases": 2,
+      "nonempty_gold_cases": 0,
+      "mean_candidate_pool_recall": null,
+      "mean_post_qualification_recall": null,
+      "mean_selected_recall_at_5": null,
+      "mean_precision_at_5": 0.0,
+      "cases_with_excluded_selection": 2,
+      "empty_gold_nonempty_selection_cases": 2
+    }
+  },
+  "results_sha256": "0c29caa1ddf6621ab566f1a9856dc3f6b216407739e6deef55b36045b6ed7844"
+}

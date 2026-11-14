@@ -75,5 +75,10 @@ Repository text describes intent unless backed by execution evidence. Preserve t
 
 ## Dated, non-canonical coordination handoffs
 
+- [RET-EXP-001 v0.1](plans/RET-EXP-001-v0.1.md) — frozen offline lexical-baseline
+  experiment; [execution evidence](evidence/ret-exp-001-20261113/README.md).
+  Synthetic pre-authority selection only; separate from Alpha3 A4 assurance.
+  No runtime integration, clinical validation or release authority.
+
 - [Pre-Claude engineering handoff — 4 November 2026](PRE_CLAUDE_HANDOFF_2026-11-04.md) — revision-bound review snapshot, blockers, staged plan and next-agent prompt. It is not a substitute for `STATUS.md`, approved requirements, GitHub enforcement or release authority.
 - [Full application build plan — 11 November 2026](plans/2026-11-11-full-app-build-plan.md) and [Kilo Claw audit protocol](plans/KILO_CLAW_AUDIT_PROTOCOL.md) — proposed chunked plan for the self-hosted server, Australian authority adapters, evidence experience and operations, with the per-chunk audit procedure. Nothing in it is implemented; it grants no kernel, deployment or release authority.

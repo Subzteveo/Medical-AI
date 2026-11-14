@@ -1,0 +1,12 @@
+{
+  "tested_revision": "e078110b9b0e9dff52ae83666196ea8eac9c2469",
+  "worktree_clean_for_both_runs": true,
+  "results_identical": true,
+  "summaries_identical": true,
+  "results_sha256": "0c29caa1ddf6621ab566f1a9856dc3f6b216407739e6deef55b36045b6ed7844",
+  "first_report_sha256": "244a4e1c25a09b740a40c43940455998e11e2d0977fac0232b312eb6416d08da",
+  "second_report_sha256": "dfd80aafec16ba78695cec623ddb79dbf82e366ff65fcc33de4babe5c74a5b5d",
+  "second_generated_at": "2026-11-13T05:33:42.081154+00:00",
+  "second_elapsed_ms": 3.583898999977464,
+  "scope": "Host-observed repeatability receipt; not independent audit or clinical validation."
+}
