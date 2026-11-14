@@ -50,6 +50,8 @@ include = [
   "src/medical_ai/authority_resolver.py",
   "src/medical_ai/settings.py",
   "src/medical_ai/server.py",
+  "src/medical_ai/logging_config.py",
+  "src/medical_ai/readiness.py",
   "src/medical_ai/admin_cli.py",
   "src/medical_ai/evals/clinical_harm.py",
   "src/medical_ai/evals/answer_harm_adapter.py",
