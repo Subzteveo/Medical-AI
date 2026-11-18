@@ -77,7 +77,7 @@ def _preexisting_worker_authorize(
         out_queue.put(("error", "release-timeout"))
         return
     second = controller.authorize(_request(downstream="synthetic:worker-after"))
-    out_queue.put(("after", second.allowed)
+    out_queue.put(("after", second.allowed))
 
 
 def test_control_initial_approval_and_local_revocation() -> None:
