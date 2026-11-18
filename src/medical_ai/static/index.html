@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Medical AI Evidence Workbench | Evidence Atlas</title>
+  <title>Medical AI | Search medical research</title>
   <style>
 
 :root{color-scheme:light;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;--ink:#1b302a;--muted:#586e61;--line:#cbd9cf;--bg:#f5f7f1;--white:#fffefa;--green:#155f47;--deep:#0b3c30;--soft:#e9f2e9}
@@ -24,7 +24,7 @@ h1,h2,h3{color:var(--deep)}h1{font:500 clamp(40px,5.8vw,76px)/1.04 Georgia,serif
 .nav{display:flex;gap:27px;border-block:1px solid var(--line);overflow-x:auto}.nav button{white-space:nowrap;border:0;border-bottom:3px solid transparent;background:none;font-size:14px;color:var(--muted);padding:17px 0 13px;font-weight:800}
 .nav button[aria-selected=true]{color:var(--deep);border-color:var(--green)}.view{padding:28px 0 55px}
 .layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
-.rail,.query,.panel,.column,.directory article{background:var(--white);border:1px solid var(--line);border-radius:14px}.rail{padding:23px;position:sticky;top:18px}.rail p,.rail dd{font-size:13px;color:var(--muted)}.rail dl{margin-top:20px}.rail dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:800;margin-top:13px}.rail dd{margin:0}
+.rail,.query,.panel,.column,.directory article{background:var(--white);border:1px solid var(--line);border-radius:14px}.rail{padding:23px;position:sticky;top:18px}.rail p,.rail dd{font-size:14px;color:var(--muted)}.rail dl{margin-top:20px}.rail dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:800;margin-top:13px}.rail dd{margin:0}
 .workspace{display:grid;gap:16px;min-width:0}.query,.panel{padding:clamp(20px,3vw,30px)}.query p{font-size:13px;color:var(--muted)}
 .notice{border:1px solid #e0d4b8;background:#fbf6e9;color:#75551a;border-radius:10px;padding:13px 15px;margin:15px 0;font-size:13px}
 form{display:grid;gap:16px;margin-top:16px}label{font-size:13px;font-weight:750;display:block;margin-bottom:7px}
@@ -33,7 +33,7 @@ textarea{min-height:132px;line-height:1.6;resize:vertical}.row{display:grid;grid
 button[type=submit]{justify-self:start;background:var(--deep);color:white;border:1px solid var(--deep);border-radius:9px;padding:12px 20px;font-weight:800}
 #status{min-height:1.5em;font-weight:750;color:var(--green);margin:5px 0;overflow-wrap:anywhere}.panel{margin:0}.results{display:grid;gap:16px}.state{background:var(--soft);border-left:4px solid var(--green);border-radius:7px;padding:12px 15px;margin:12px 0 15px;font-size:13px}.state code{display:block;overflow-wrap:anywhere;font-weight:800}
 .state.blocked{background:#f7eeec;border-left-color:#963e40}.state.caution{background:#fbf1e1;border-left-color:#b67a24}
-.answer{white-space:pre-wrap;line-height:1.62}.answer li{margin:12px 0}.source{border-top:1px solid #e1e9e3;padding:15px 0}.source:first-child{border-top:0}.meta{font-size:12px;color:var(--muted);overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:750}#trace p{overflow-wrap:anywhere}
+.answer{white-space:pre-wrap;line-height:1.62}.answer li{margin:12px 0}.source{border-top:1px solid #e1e9e3;padding:15px 0}.source:first-child{border-top:0}.meta{font-size:14px;color:var(--muted);overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:750}#trace p{overflow-wrap:anywhere}
 .passport{white-space:normal;border:1px solid var(--line);border-radius:9px;padding:14px;margin:12px 0;overflow-wrap:anywhere}.passport summary{color:var(--deep)}.passport blockquote{margin:12px 0;padding:12px 16px;border-left:3px solid #91afa0;background:var(--soft);white-space:pre-wrap}.passport mark{background:#f1dfac;color:var(--ink)}.passport h3{font-size:16px;margin-bottom:6px}.passport p{margin:8px 0}.boundary-row{padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.boundary-row p{margin:4px 0;font-size:14px}.boundary-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}.boundary-row[data-boundary-state=failed] .boundary-label{color:#8b3434}.boundary-row[data-boundary-state=unknown] .boundary-label{color:#76551a}
 .rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.rules article{padding:18px;background:var(--soft);border:1px solid #d3e2d3;border-radius:11px}.rules strong{display:block;font-size:13px}.rules p{font-size:12px;color:var(--muted);margin:4px 0 0}
 .view-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:19px}.view-head p{font-size:14px;color:var(--muted);max-width:68ch;margin:0}
@@ -44,53 +44,55 @@ button[type=submit]{justify-self:start;background:var(--deep);color:white;border
 .footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted);font-size:12px;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
 @media(max-width:1050px){.diagram{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.hero{display:block}.quote{margin-top:20px}.layout{grid-template-columns:1fr}.rail{position:static}.row,.rules,.directory,.diagram{grid-template-columns:1fr}.topbar .shell{padding-block:12px}}
+@media(max-width:760px){.hero{padding:10px 0 12px}.hero h1{font-size:clamp(30px,9vw,40px);letter-spacing:-1px}.quote{display:none}.view{padding-top:14px}.layout{display:flex;flex-direction:column}.workspace{order:1;width:100%}.rail{order:2;width:100%}.query{padding:16px}textarea{min-height:100px}.topbar .shell{min-height:60px}.topbar .head-actions .chip:first-child{display:none}}
+@media(min-width:761px){.layout{grid-template-columns:minmax(0,1fr) 240px}.workspace{grid-column:1;grid-row:1}.rail{grid-column:2;grid-row:1}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 </style>
 </head>
 <body>
-<a class="skip" href="#view-search">Skip to evidence search</a>
+<a class="skip" href="#question">Skip to the search question</a>
 <div class="topbar"><div class="shell">
-<a href="/" class="brand" id="home-link"><span class="brand-mark" aria-hidden="true">✳</span><span>Medical AI<small>Evidence Atlas · Engineering alpha</small></span></a>
-<div class="head-actions"><span class="chip">AU first · Research & education</span><span class="chip">Invitation only</span><button type="button" class="exit" id="sign-out">Sign out</button></div>
+<a href="/" class="brand" id="home-link"><span class="brand-mark" aria-hidden="true">✳</span><span>Medical AI<small>Research and learning · In development</small></span></a>
+<div class="head-actions"><span class="chip">Research and learning</span><span class="chip">Invitation only</span><button type="button" class="exit" id="sign-out">Sign out</button></div>
 </div></div><main class="shell">
   <header class="hero"><div><span class="eyebrow">Medical research · Evidence before answers</span>
-<h1>Evidence you can inspect.</h1><p>Search source-backed medical information. Follow each authorized claim to the sources and processing decisions that support it.</p>
-</div><div class="quote">“A model is never evidence.”<small>Medical AI governing principle</small></div></header>
+<h1>Find medical research you can check.</h1><p>Search published research, read what it says, and open the original sources.</p>
+</div><div class="quote">“Check the source, not just the answer.”<small>A simpler way to research</small></div></header>
 <nav class="nav" role="tablist" aria-label="Evidence Atlas views">
-<button type="button" role="tab" id="tab-search" data-view="search" aria-controls="view-search" aria-selected="true" tabindex="0">01 / Search evidence</button>
-<button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="false" tabindex="-1">02 / Inside Medical AI</button>
-<button type="button" role="tab" id="tab-directory" data-view="directory" aria-controls="view-directory" aria-selected="false" tabindex="-1">03 / Source directory</button>
+<button type="button" role="tab" id="tab-search" data-view="search" aria-controls="view-search" aria-selected="true" tabindex="0">Search</button>
+<button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="false" tabindex="-1">How it works</button>
+<button type="button" role="tab" id="tab-directory" data-view="directory" aria-controls="view-directory" aria-selected="false" tabindex="-1">Sources</button>
 </nav>
 
 <section class="view" id="view-search" role="tabpanel" aria-labelledby="tab-search">
-<div class="layout"><aside class="rail" aria-label="Research boundaries"><span class="eyebrow">Boundaries</span><h2>Know the limits.</h2>
-<p>General medical learning and research, not a tool for diagnosis, prescribing, patient-specific treatment or emergency triage.</p>
-<dl><dt>AU first</dt><dd>Jurisdiction is explicit, not inferred from foreign evidence.</dd>
-<dt>Evidence authority</dt><dd>The server controls which verified claims can be shown.</dd>
-<dt>Information handling</dt><dd>PHI approval is separate from evidence approval.</dd></dl></aside>
-<div class="workspace"><div class="query"><span class="eyebrow">01 / Search evidence</span><h2>Start with a question.</h2>
-<p>One general question. Visible evidence state. No clinical facts invented for fluency.</p>
+<div class="layout"><aside class="rail" aria-label="Research boundaries"><span class="eyebrow">Important</span><h2>Before you search</h2>
+<p>For learning and research only. Do not use this to diagnose a person, choose treatment, or deal with an emergency.</p>
+<dl><dt>Where research is from</dt><dd>Research from other countries is not automatically guidance for Australia.</dd>
+<dt>Original sources</dt><dd>Only findings that pass the required checks can be shown.</dd>
+<dt>Privacy</dt><dd>Do not enter anyone's personal medical details.</dd></dl></aside>
+<div class="workspace"><div class="query"><span class="eyebrow">Search</span><h2>What would you like to research?</h2>
+<p>Ask about published research or registered studies, not a particular patient.</p>
 <div class="notice" role="note">
-    <strong>Privacy boundary:</strong> do not enter identifying patient information. This build attempts to detect and block patient-specific or identifying wording before public evidence connectors are called, but the detector is heuristic and cannot guarantee de-identification.
+    <strong>Keep personal details out:</strong> Do not enter personal patient details, names or medical record numbers. This tool tries to block private details, but it may miss them.
   </div>
 
   <form id="query-form">
     <div>
-      <label for="question">Medical evidence question</label>
-      <textarea id="question" name="question" required minlength="3" maxlength="4000" placeholder="Example: What evidence exists for exercise reducing blood pressure?"></textarea>
+      <label for="question">Your research question</label>
+      <textarea id="question" name="question" required minlength="3" maxlength="4000" placeholder="For example: What have studies found about walking and sleep?"></textarea>
     </div>
     <div class="row">
       <div>
-        <label for="user-mode">View</label>
+        <label for="user-mode">I am a</label>
         <select id="user-mode" name="user_mode">
-          <option value="clinician">Clinician</option>
+          <option value="clinician">Health professional</option>
           <option value="student">Medical student</option>
           <option value="researcher">Researcher</option>
         </select>
       </div>
       <div>
-        <label for="jurisdiction">Primary jurisdiction</label>
+        <label for="jurisdiction">Region to check</label>
         <select id="jurisdiction" name="jurisdiction">
           <option value="AU">Australia</option>
           <option value="INTERNATIONAL">International</option>
@@ -98,52 +100,63 @@ button[type=submit]{justify-self:start;background:var(--deep);color:white;border
         </select>
       </div>
       <div>
-        <label for="limit">Source limit</label>
+        <label for="limit">Number of sources</label>
         <select id="limit" name="limit">
           <option>3</option><option selected>5</option><option>10</option><option>20</option>
         </select>
       </div>
     </div>
-    <button id="submit" type="submit">Search evidence</button>
+    <button id="submit" type="submit">Search research</button>
   </form>
 
   <div id="status" role="status" aria-live="polite"></div>
   </div><section id="result" class="results" hidden aria-labelledby="answer-heading">
     <div class="panel">
-      <span class="eyebrow">02 / Evidence state</span><h2 id="answer-heading" tabindex="-1">What the evidence supports</h2>
-<div id="state-banner" class="state" hidden>Backend result state <code id="state-code"></code></div>
+      <span class="eyebrow">Your result</span><h2 id="answer-heading" tabindex="-1">What we found</h2>
+<div id="state-banner" class="state" hidden><strong id="state-code"></strong></div>
       <div id="answer" class="answer"></div>
-      <div class="notice" role="note" id="use-notice"><strong>Use notice.</strong> Medical AI is an engineering-alpha evidence tool for medical education, literature and trial discovery, and research support. It does not diagnose, recommend, select or dose treatment for any patient, and it does not replace the clinical judgement of a qualified health professional. Check every claim against its cited source before relying on it. This build is not clinically validated, and no TGA classification or exemption determination has been made.</div>
+      <div class="notice" role="note" id="use-notice"><strong>For research and learning only.</strong> This tool is in development. It does not diagnose, recommend treatment, or replace professional medical judgement. Always read the original source. It has not been clinically validated, and no Australian medical-device approval or exemption has been established.</div>
     </div>
     <div class="panel">
-      <span class="eyebrow">03 / Provenance</span><h2>Admitted sources</h2><p class="meta">HTTPS is a permitted link scheme; it does not verify medical evidence. Registry information supports study discovery, not independent proof of efficacy or safety.</p>
+      <span class="eyebrow">Original sources</span><h2>Where the information came from</h2><p class="meta">Read the original studies before relying on a finding. A registered study does not prove that a treatment works or is safe.</p>
       <div id="sources"></div>
     </div>
     <section class="panel" aria-labelledby="boundaries-heading">
-      <span class="eyebrow">04 / Evidence boundaries</span><h2 id="boundaries-heading">What this answer cannot establish</h2>
-      <p class="meta">Recorded failures, missing assessments and capabilities absent from this build have different meanings.</p>
+      <span class="eyebrow">Important limits</span><h2 id="boundaries-heading">What this result does not tell you</h2>
+      <p class="meta">A quote from a study does not prove the study is reliable or suitable for any particular person.</p>
       <div id="boundaries"></div>
     </section>
     <details class="panel">
-      <summary>05 / Why this answer? · Review trace</summary>
+      <summary>How this search was checked</summary>
       <div id="trace" class="meta"></div>
     </details>
   </section>
-<div class="rules" aria-label="Three governing rules">
-<article><strong>Evidence first</strong><p>Only admissible records can support a medical proposition.</p></article>
-<article><strong>Provenance</strong><p>Inspect source IDs, authority and jurisdiction.</p></article>
-<article><strong>Fail closed</strong><p>Uncertain and blocked states are legitimate outcomes.</p></article>
+<div class="rules" aria-label="Three things to remember">
+<article><strong>Read the source</strong><p>Open the original publication to understand the finding.</p></article>
+<article><strong>Check where it applies</strong><p>Research from elsewhere may not apply in Australia.</p></article>
+<article><strong>Know the limits</strong><p>If the information cannot be checked, we will not show a finding.</p></article>
 </div></div></div></section>
 <section class="view" id="view-map" role="tabpanel" aria-labelledby="tab-map" hidden>
-<div class="view-head"><div><span class="eyebrow">Diagram view · System anatomy</span><h2>What's inside Medical AI</h2><p>Five connected disciplines; this explanatory architecture is not a live monitoring screen.</p></div><span class="chip">Engineering alpha, not clinically validated</span></div>
-<div class="diagram"><article class="column"><span class="eyebrow">01 / STAGE</span><h3>The question</h3><p>Research/education context, jurisdiction and sensitivity</p><dl><dt>User modes</dt><dd>Student, clinician, researcher — presentation modes only</dd><dt>Privacy screen</dt><dd>Heuristic detection before public retrieval; not guaranteed</dd><dt>Intended use</dt><dd>No patient-specific decisions</dd></dl></article><article class="column"><span class="eyebrow">02 / STAGE</span><h3>The sources</h3><p>Admitted evidence requires provenance and source identity</p><dl><dt>PubMed</dt><dd>Current alpha literature adapter</dd><dt>ClinicalTrials.gov</dt><dd>Current trial discovery adapter</dd><dt>AU integrations</dt><dd>TGA, PBS and NCTS planned</dd></dl></article><article class="column"><span class="eyebrow">03 / STAGE</span><h3>Authority gates</h3><p>Information availability never equals permission to influence</p><dl><dt>Evidence gates</dt><dd>Evidence ∧ Provenance ∧ Validation ∧ Safety ∧ Monitoring</dd><dt>Separate PHI authority</dt><dd>Information processing permission remains independent</dd><dt>Revocation</dt><dd>v0.2 dependency-aware control core</dd></dl></article><article class="column"><span class="eyebrow">04 / STAGE</span><h3>Claims & answers</h3><p>Render only the server's authorized evidence claims</p><dl><dt>Claim ledger</dt><dd>Source IDs, verification, jurisdiction and applicability</dd><dt>Abstention</dt><dd>Unknown, conflict and outdated are real states</dd><dt>High consequence</dt><dd>Fails closed without dedicated verification</dd></dl></article><article class="column"><span class="eyebrow">05 / STAGE</span><h3>Control & review</h3><p>A trace enables later investigation; it is not clinical approval</p><dl><dt>Trace</dt><dd>Run ID, source IDs, connectors and safety flags</dd><dt>Evidence Passport</dt><dd>Returned passages, mappings and recorded decisions</dd><dt>Release</dt><dd>Engineering alpha; external clinical release blocked</dd></dl></article></div>
-<div class="infobar"><strong>Influence pathway</strong><p>Model output cannot grant evidence authority; authorization is enforced upstream of the browser.</p><code>Question → Source → Gate → Authorized claim → Review</code></div>
+<div class="view-head"><div><span class="eyebrow">About the search</span><h2>How Medical AI works</h2><p>Every result starts with a source you can open. If information cannot be checked, we will not show a supported finding.</p></div></div>
+<div class="diagram">
+<article class="column"><h3>1. Ask</h3><p>Enter a general research question. Leave out personal medical details.</p></article>
+<article class="column"><h3>2. Find</h3><p>We look in published research or registered study records.</p></article>
+<article class="column"><h3>3. Check</h3><p>The system checks the source and whether the quoted words match. It does not judge study quality.</p></article>
+<article class="column"><h3>4. Read</h3><p>See the wording and open the original study. Important limits stay visible.</p></article>
+<article class="column"><h3>5. Continue</h3><p>If no supported finding can be shown, we explain why instead of making up an answer.</p></article>
+</div>
+<div class="infobar"><strong>What this tool cannot do</strong><p>It does not diagnose, choose treatment, provide emergency help, or confirm that findings apply to a particular person.</p></div>
 </section>
 <section class="view" id="view-directory" role="tabpanel" aria-labelledby="tab-directory" hidden>
-<div class="view-head"><div><span class="eyebrow">Authority and plane directory</span><h2>Not all data is evidence.</h2><p>Existing, planned and out-of-scope capabilities are explicitly separated.</p></div></div>
-<div class="directory"><article><small>Evidence plane · Alpha adapter</small><h3>PubMed / NLM</h3><p>Indexed biomedical literature with bounded extractive source support. Not a clinical practice guideline or validated certainty assessment.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · Alpha adapter</small><h3>ClinicalTrials.gov</h3><p>Trial discovery and registry facts. Sponsor/investigator narrative is not efficacy or safety evidence.</p><span class="pill ">Current adapter</span></article><article><small>Evidence plane · AU integration planned</small><h3>TGA and PBS</h3><p>Australian regulatory/medicine authority integration needs separate connector, validation and licensing controls.</p><span class="pill planned">Not connected</span></article><article><small>Terminology plane · Future</small><h3>SNOMED CT-AU / AMT / NCTS</h3><p>Australian terminologies aid normalization; they do not independently establish therapeutic evidence.</p><span class="pill planned">Not connected</span></article><article><small>Clinical data plane · Out of scope</small><h3>FHIR / SMART</h3><p>Patient and EHR information is not automatically evidence. No patient-record workspace is included.</p><span class="pill planned">No PHI workflow</span></article><article><small>Research data plane · Future</small><h3>OMOP cohorts</h3><p>Observational data requires separate authority and processing approvals.</p><span class="pill planned">Not connected</span></article></div>
+<div class="view-head"><div><span class="eyebrow">Where we search</span><h2>Research sources</h2><p>What you can search now and what is not available yet.</p></div></div>
+<div class="directory">
+<article><small>Available</small><h3>PubMed</h3><p>Find published medical research and read its abstracts. This does not assess the quality of a study.</p><span class="pill">Available for research</span></article>
+<article><small>Available</small><h3>ClinicalTrials.gov</h3><p>Find registered studies. Registration does not prove that treatment works or is safe.</p><span class="pill">Available for study search</span></article>
+<article><small>Not available yet</small><h3>Australian medicines information</h3><p>This version cannot confirm whether a medicine is approved or subsidised in Australia.</p><span class="pill planned">Not available yet</span></article>
+<article><small>Not available yet</small><h3>Australian medical terms</h3><p>Australian medicine names and health terminology are not connected to this search tool.</p><span class="pill planned">Not available yet</span></article>
+</div>
 </section>
-</main><footer class="footer shell"><span>Medical AI · Evidence Atlas · Engineering alpha / no clinical release</span><span>A model is never evidence.</span></footer>
+</main><footer class="footer shell"><span>Medical AI · In development · For research and learning only</span><span>Always check the original source.</span></footer>
 
 <script>
 const form = document.getElementById('query-form');
@@ -175,6 +188,22 @@ const supportedStates = new Set(['ANSWER_SUPPORTED', 'ANSWER_SUPPORTED_WITH_QUAL
 const terminalStates = new Set(['EVIDENCE_INSUFFICIENT', 'EVIDENCE_CONFLICTING', 'SOURCE_OUTDATED',
   'POPULATION_MISMATCH', 'NO_AUTHORITATIVE_SOURCE', 'JURISDICTION_UNCLEAR', 'PROVENANCE_INCOMPLETE',
   'HIGH_CONSEQUENCE_VERIFICATION_FAILED', 'OUTSIDE_VALIDATED_CAPABILITY', 'SOURCE_UNAVAILABLE', 'INFLUENCE_DENIED']);
+const statusTitles = {
+  ANSWER_SUPPORTED: 'Source-backed research found',
+  ANSWER_SUPPORTED_WITH_QUALIFICATIONS: 'Research found, with important limits',
+  EVIDENCE_INSUFFICIENT: 'Not enough information to answer',
+  EVIDENCE_CONFLICTING: 'The sources disagree',
+  SOURCE_OUTDATED: 'The source may be out of date',
+  POPULATION_MISMATCH: 'This research does not match the group asked about',
+  NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source',
+  JURISDICTION_UNCLEAR: 'We could not confirm the relevant region',
+  PROVENANCE_INCOMPLETE: 'We could not check the source details',
+  HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question',
+  OUTSIDE_VALIDATED_CAPABILITY: 'This question is not supported here',
+  SOURCE_UNAVAILABLE: 'Research sources are unavailable right now',
+  INFLUENCE_DENIED: 'We cannot show a supported finding'
+};
+function displayRegion(value) { return ({AU:'Australia', US:'United States', INTERNATIONAL:'International'})[value] || 'Region not provided'; }
 function requireIntegrity(condition) { if (!condition) throw new Error('Response provenance is inconsistent'); }
 function idSet(ids, required = false) {
   requireIntegrity(Array.isArray(ids) && (!required || ids.length > 0));
@@ -290,109 +319,70 @@ function appendText(parent, tag, text, cls) {
 function recorded(value) { return typeof value === 'string' && value.trim() ? value : 'Not supplied'; }
 function passportFact(parent, label, value) { appendText(parent, 'p', `${label}: ${recorded(value)}`, 'meta'); }
 function appendPassport(parent, claim, data) {
-  const passport = appendText(parent, 'details', '', 'passport');
-  appendText(passport, 'summary', 'Evidence Passport · inspect passages and decisions');
-  appendText(passport, 'p', 'This is the recorded response snapshot. Extractive matching and runtime authorization do not establish study quality, clinical suitability or later revocation state.', 'meta');
-  passportFact(passport, 'Claim ID', claim.claim_id);
-  passportFact(passport, 'Recorded verifier outcome', claim.verification_status);
-  passportFact(passport, 'Recorded entailment', claim.entailment_status);
-  passportFact(passport, 'Evidence certainty', claim.evidence_certainty);
-  passportFact(passport, 'Claim jurisdiction', claim.jurisdiction);
+  const details = appendText(parent, 'details', '', 'passport');
+  appendText(details, 'summary', 'Read the supporting passage');
+  appendText(details, 'p', 'These words matched the retrieved record when this search ran. A matching passage does not prove that a study is reliable, still current or applicable to a person.', 'meta');
   const sourceMap = new Map(data.sources.map(source => [source.source_id, source]));
   const passageMap = new Map(data.passages.map(passage => [passage.passage_id, passage]));
-  const unitMap = new Map(data.evidence_objects.map(unit => [unit.evidence_id, unit]));
   for (const mapping of data.citation_mappings.filter(item => item.claim_id === claim.claim_id)) {
-    const source = sourceMap.get(mapping.source_id), unit = unitMap.get(mapping.evidence_id);
-    appendText(passport, 'h3', 'Source and passage mapping');
-    appendSourceLink(passport, source, recorded(source.title));
-    passportFact(passport, 'Source ID', source.source_id);
-    passportFact(passport, 'Source authority (recorded)', source.authority);
-    passportFact(passport, 'Source jurisdiction', source.jurisdiction);
-    passportFact(passport, 'Source version', source.version);
-    passportFact(passport, 'Retrieved at', source.retrieved_at);
-    passportFact(passport, 'Publication date', source.publication_date);
-    passportFact(passport, 'Evidence ID', unit.evidence_id);
-    passportFact(passport, 'Evidence type', unit.evidence_type);
-    passportFact(passport, 'Mapping ID', mapping.mapping_id);
-    passportFact(passport, 'Mapping entailment (recorded)', mapping.entailment_status);
+    const source = sourceMap.get(mapping.source_id);
+    appendText(details, 'h3', 'Original source');
+    appendSourceLink(details, source, source.title);
+    appendText(details, 'p', 'Region: ' + displayRegion(source.jurisdiction), 'meta');
+    appendText(details, 'p', 'Published: ' + recorded(source.publication_date), 'meta');
     for (const pid of mapping.passage_ids) {
       const passage = passageMap.get(pid);
-      passportFact(passport, 'Passage ID', pid);
-      passportFact(passport, 'Section', passage.section);
-      passportFact(passport, 'Locator', passage.locator);
-      appendText(passport, 'p', 'Retrieved passage; the exact claim text is highlighted.', 'meta');
-      const quote = appendText(passport, 'blockquote', '');
+      appendText(details, 'p', 'Section: ' + recorded(passage.section), 'meta');
+      const quote = appendText(details, 'blockquote', '');
       const start = passage.text.indexOf(claim.claim_text);
       quote.appendChild(document.createTextNode(passage.text.slice(0, start)));
       appendText(quote, 'mark', claim.claim_text);
       quote.appendChild(document.createTextNode(passage.text.slice(start + claim.claim_text.length)));
     }
   }
-  const decision = data.influence_decisions.find(d => d.object_id === claim.claim_id && d.status === 'ALLOW');
-  appendText(passport, 'h3', 'Recorded runtime decision');
-  passportFact(passport, 'Decision ID', decision.decision_id);
-  passportFact(passport, 'Decision', decision.status);
-  passportFact(passport, 'Decision time', decision.created_at);
-  passportFact(passport, 'Authorization ID', decision.authorization.authorization_id);
-  passportFact(passport, 'Authorization state at response', decision.authorization.state);
-  passportFact(passport, 'Data plane', decision.evaluated_dimensions.data_plane);
-  passportFact(passport, 'Influence policy version', decision.policy_version);
-  // These fields are absent from the current response contract. Never invent them.
-  passportFact(passport, 'Policy digest', null);
-  passportFact(passport, 'Source admission rule and tier', null);
-  for (const [field, label] of Object.entries({ evidence_authority: 'Evidence authority', information_handling_authority: 'Information-handling authority', provenance: 'Provenance', validation: 'Validation', safety: 'Safety', monitoring: 'Monitoring' })) {
-    passportFact(passport, label + ' (recorded)', decision.evaluated_dimensions[field]);
-  }
-  passportFact(passport, 'Trace ID', data.trace.trace_id);
-  passportFact(passport, 'Response time', data.trace.timestamp);
 }
 
 function renderBoundaries(data, integrity) {
   const panel = document.getElementById('boundaries');
   panel.textContent = '';
-  function row(state, label, explanation) {
-    const item = appendText(panel, 'div', '', 'boundary-row'); item.dataset.boundaryState = state;
-    appendText(item, 'strong', `${state === 'not-implemented' ? 'Not implemented' : state === 'failed' ? 'Failed' : 'Unknown'} · ${label}`, 'boundary-label');
+  function row(label, explanation) {
+    const item = appendText(panel, 'div', '', 'boundary-row');
+    appendText(item, 'strong', label, 'boundary-label');
     appendText(item, 'p', explanation);
   }
   if (!integrity) {
-    row('failed', 'Response integrity', 'Claims, sources, passages or recorded decisions did not form a consistent response. No claim is shown.');
-    row('unknown', 'Gate outcomes', 'The inconsistent response cannot establish which upstream gates passed.');
+    row('Source details could not be checked', 'The information did not match the supporting records. No medical finding is shown.');
+    row('Other checks are unknown', 'We cannot tell which earlier checks were completed because the result was incomplete.');
   } else {
-    const failures = {
-      EVIDENCE_INSUFFICIENT: ['Answer support', 'No supported claim was returned in this run. This does not establish that no evidence exists.'],
-      EVIDENCE_CONFLICTING: ['Conflict check', 'The recorded outcome reports conflicting evidence.'],
-      SOURCE_OUTDATED: ['Source freshness', 'The recorded outcome reports an outdated source.'],
-      POPULATION_MISMATCH: ['Population match', 'The recorded outcome reports a population mismatch.'],
-      NO_AUTHORITATIVE_SOURCE: ['Required source', 'A source required for this question was not available or admitted.'],
-      PROVENANCE_INCOMPLETE: ['Provenance', 'The server could not establish complete output provenance.'],
-      HIGH_CONSEQUENCE_VERIFICATION_FAILED: ['High-consequence verification', 'The required verification did not pass; no claim is shown.'],
-      OUTSIDE_VALIDATED_CAPABILITY: ['Intended-use or privacy routing', 'The request was blocked by the recorded routing outcome.'],
-      SOURCE_UNAVAILABLE: ['Retrieval', 'The required source could not be retrieved for this run.'],
-      INFLUENCE_DENIED: ['Influence authorization', 'The server withheld influence authorization. Inspect recorded reasons in the trace.'],
+    const limits = {
+      EVIDENCE_INSUFFICIENT: ['Not enough support', 'This search did not return a supported finding. It does not mean no research exists.'],
+      EVIDENCE_CONFLICTING: ['Sources disagree', 'The available records showed a disagreement. This is not a complete review of all research.'],
+      SOURCE_OUTDATED: ['Outdated source', 'A source in this search was recorded as outdated.'],
+      POPULATION_MISMATCH: ['Different group', 'The recorded research did not match the group asked about.'],
+      NO_AUTHORITATIVE_SOURCE: ['Source unavailable', 'The source needed for this question was not available here.'],
+      PROVENANCE_INCOMPLETE: ['Source could not be checked', 'Some information needed to check the original source was missing.'],
+      HIGH_CONSEQUENCE_VERIFICATION_FAILED: ['Safety question not checked', 'The extra checks needed for this question are not available.'],
+      OUTSIDE_VALIDATED_CAPABILITY: ['Outside the supported use', 'This question may require personal or treatment advice that the tool cannot provide.'],
+      SOURCE_UNAVAILABLE: ['Research unavailable', 'The required source could not be reached for this search.'],
+      INFLUENCE_DENIED: ['Cannot show a finding', 'The required checks did not allow this information to be displayed.'],
+      JURISDICTION_UNCLEAR: ['Region unclear', 'We could not establish which country’s rules apply.']
     };
-    if (failures[data.status]) row('failed', ...failures[data.status]);
-    if (data.status === 'JURISDICTION_UNCLEAR') row('unknown', 'Jurisdiction', 'The applicable jurisdiction was not established.');
-    if (!data.influence_decisions.length) row('unknown', 'Authority gate outcomes', 'No individual influence decision was supplied for this response; a missing outcome is not a pass.');
-    for (const decision of data.influence_decisions) {
-      for (const [key, label] of Object.entries({ evidence_authority: 'Evidence authority', information_handling_authority: 'Information handling', provenance: 'Provenance', validation: 'Validation', safety: 'Safety', monitoring: 'Monitoring' })) {
-        const value = decision.evaluated_dimensions?.[key];
-        if (['FAIL', 'DENIED', 'REVOKED'].includes(value)) row('failed', label, `Recorded decision ${decision.decision_id}: ${value}.`);
-        else if (!['PASS', 'APPROVED'].includes(value)) row('unknown', label, `Decision ${decision.decision_id} does not record an affirmative outcome for this gate.`);
-      }
-    }
-    row('unknown', 'Clinical certainty and applicability', 'An exact passage match does not establish study quality, GRADE certainty or suitability for a patient. No such assessment is established by this response.');
-    row('unknown', 'Source currency and ongoing monitoring', 'This snapshot does not establish comprehensive retraction review, current source validity or authorization after the response time. Re-run the query to obtain a new snapshot.');
+    if (limits[data.status]) row(...limits[data.status]);
+    if (!data.influence_decisions.length) row('Some checks are not recorded', 'A missing check should not be taken as a successful one.');
+    if (data.influence_decisions.some(decision => decision.status !== 'ALLOW'))
+      row('Result withheld', 'The recorded checks did not permit use of this information.');
+    row('Study quality not assessed', 'Matching words from a source does not show how reliable a study is or whether it applies to a person.');
+    row('May have changed since this search', 'This result does not establish that every source is current or that it will remain available later.');
   }
-  row('not-implemented', 'Australian regulatory and subsidy grounding', 'This build has no TGA or PBS connector. Literature and registry records cannot establish Australian approval or subsidy status.');
-  row('not-implemented', 'Dedicated conflict and population gates', 'This build has no dedicated conflict-resolution or population-mismatch gate. Inspect source populations and disagreements directly; a supported extract does not settle either question.');
-  row('not-implemented', 'Independent high-consequence verification', 'The current extractive runtime has no independent clinical second-verification workflow. Dosing, prescribing and patient-specific treatment selection remain outside its supported scope.');
+  row('Australian medicine rules not checked', 'This version cannot confirm medicine approvals or subsidy arrangements in Australia.');
+  row('Not a complete comparison of studies', 'This tool cannot reliably identify every disagreement or every difference between the people studied.');
+  row('Not for treatment decisions', 'This version cannot verify doses, prescribe medicines or choose treatment for a patient.');
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   submit.disabled = true;
-  statusEl.textContent = 'Searching approved evidence sources…';
+  statusEl.textContent = 'Searching medical research…';
   result.hidden = true;
   answer.textContent = '';
   sources.textContent = '';
@@ -407,34 +397,34 @@ form.addEventListener('submit', async (event) => {
     const response = await fetch('/v1/evidence/query', { credentials:'same-origin', cache:'no-store',
       method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(payload)
     });
-    if (!response.ok) throw new Error(response.status === 401 ? 'Pilot session ended; please sign in again.' : `Request failed (${response.status})`);
+    if (!response.ok) throw new Error(response.status === 401 ? 'Your session ended. Please sign in again.' : 'The search could not be completed. Please try again.');
     const data = await response.json();
     const integrity = validateResponse(data);
     const displayStatus = integrity ? data.status : 'PROVENANCE_INCOMPLETE';
-    statusEl.textContent = `Result state: ${displayStatus}`;
+    statusEl.textContent = statusTitles[displayStatus] || 'Search finished';
     const state = document.getElementById('state-banner');
     state.hidden = false;
-    document.getElementById('state-code').textContent = displayStatus;
+    document.getElementById('state-code').textContent = statusTitles[displayStatus] || 'No result available';
     state.className = 'state ' + (supportedStates.has(displayStatus) ? '' : 'caution');
     // Render structured verified claims rather than raw Markdown text or untrusted HTML.
     answer.textContent = '';
     const passedClaims = integrity && supportedStates.has(data.status) ? data.claims : [];
     if (passedClaims.length === 0) {
       const descriptions = {
-        EVIDENCE_INSUFFICIENT: 'No authorized claim was supported by the available evidence.',
-        EVIDENCE_CONFLICTING: 'The evidence is conflicting; no medical claim is shown.',
-        SOURCE_OUTDATED: 'The available source is outdated; no claim is shown.',
-        POPULATION_MISMATCH: 'The population does not match; no claim is shown.',
-        NO_AUTHORITATIVE_SOURCE: 'No authoritative source was admitted for this question.',
-        JURISDICTION_UNCLEAR: 'Jurisdiction is unclear; no medical claim is shown.',
-        PROVENANCE_INCOMPLETE: 'Required provenance is incomplete; no medical claim is shown.',
-        HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'High-consequence verification failed or is unavailable; no claim is shown.',
-        OUTSIDE_VALIDATED_CAPABILITY: 'This request is outside the validated scope or was blocked to protect privacy.',
-        SOURCE_UNAVAILABLE: 'The required evidence source is unavailable; no claim was invented.',
-        INFLUENCE_DENIED: 'Evidence influence was denied; no claim is shown.'
+        EVIDENCE_INSUFFICIENT: 'There was not enough support in this search to show a finding.',
+        EVIDENCE_CONFLICTING: 'The sources disagree. No medical finding is shown.',
+        SOURCE_OUTDATED: 'The source may be outdated. No finding is shown.',
+        POPULATION_MISMATCH: 'This research does not match the group asked about.',
+        NO_AUTHORITATIVE_SOURCE: 'A suitable original source was not available for this question.',
+        JURISDICTION_UNCLEAR: 'The relevant region was unclear, so no finding is shown.',
+        PROVENANCE_INCOMPLETE: 'We could not check the source details, so no finding is shown.',
+        HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot safely check this treatment or safety question.',
+        OUTSIDE_VALIDATED_CAPABILITY: 'This question is outside the tool’s supported research use.',
+        SOURCE_UNAVAILABLE: 'We could not reach the research source. No answer has been made up.',
+        INFLUENCE_DENIED: 'The required checks did not permit us to show a finding.'
       };
-      appendText(answer, 'p', descriptions[displayStatus] || 'No authorized medical claim was returned.');
-      if (!integrity) appendText(answer, 'p', 'Response integrity failed. Claims and source details were withheld; re-run the query.');
+      appendText(answer, 'p', descriptions[displayStatus] || 'No supported finding could be shown.');
+      if (!integrity) appendText(answer, 'p', 'We could not check this result. No finding is shown. You can try the search again.');
     } else {
       const list = document.createElement('ul');
       const sourceMap = new Map((data.sources || []).map(s => [s.source_id, s]));
@@ -442,39 +432,42 @@ form.addEventListener('submit', async (event) => {
         const item = document.createElement('li');
         const publication = claim.source_ids.length === 1 ? sourceMap.get(claim.source_ids[0]) : null;
         if (publication?.source_type === 'indexed_biomedical_literature') {
-          appendText(item, 'strong', `PubMed abstract (PMID ${publication.record_id}): `);
+          appendText(item, 'strong', 'From published research: ');
         }
         item.appendChild(document.createTextNode(claim.claim_text + ' '));
         (claim.source_ids || []).forEach((sid, idx) => {
           const src = sourceMap.get(sid);
-          appendSourceLink(item, src, src.identifiers?.PMID ? `PMID ${src.identifiers.PMID}` : (src.identifiers?.NCT || src.record_id));
+          appendSourceLink(item, src, 'Open original source');
           if (idx < claim.source_ids.length - 1) item.appendChild(document.createTextNode(' '));
         });
+        appendText(item, 'p', 'This is quoted from a source, not an assessment of study quality or medical advice.', 'meta');
         appendPassport(item, claim, data);
         list.appendChild(item);
       });
       answer.appendChild(list);
     }
     if (!integrity || data.sources.length === 0) {
-      appendText(sources, 'p', 'No admitted source was used for this answer.');
+      appendText(sources, 'p', 'No source was used to support a finding in this search.');
     } else {
       data.sources.forEach(src => {
         const box = document.createElement('div'); box.className = 'source';
         appendSourceLink(box, src, src.title);
-        appendText(box, 'div', `${src.authority} · ${src.source_type} · ${src.jurisdiction}`, 'meta');
-        appendText(box, 'div', Object.entries(src.identifiers).map(([k,v]) => `${k}: ${v}`).join(' · '), 'meta');
+        appendText(box, 'div', `${src.source_type === 'indexed_biomedical_literature' ? 'Published research' : 'Registered study'} · ${displayRegion(src.jurisdiction)}`, 'meta');
+        appendText(box, 'div', `Published: ${recorded(src.publication_date)}`, 'meta');
         sources.appendChild(box);
       });
     }
     renderBoundaries(data, integrity);
     if (integrity) {
-    appendText(trace, 'p', `Trace ID: ${data.trace.trace_id}`);
-    appendText(trace, 'p', `Consequence: ${data.trace.query_plan.consequence_level}; source classes: ${data.trace.query_plan.required_source_classes.join(', ')}`);
-    appendText(trace, 'p', `Connectors: ${data.trace.connectors_used.join(', ') || 'none'}; source IDs: ${data.trace.source_ids.join(', ') || 'none'}`);
-    appendText(trace, 'p', `Safety flags: ${data.trace.safety_flags.join(', ') || 'none'}`);
-    appendText(trace, 'p', `Influence decisions: ${Array.isArray(data.influence_decisions) ? data.influence_decisions.map(d => d.status + (Array.isArray(d.reasons) && d.reasons.length ? ' (' + d.reasons.join(', ') + ')' : '')).join('; ') || 'none' : 'not supplied'}`);
-    appendText(trace, 'p', `Authorization decision IDs: ${(data.trace.authorization_decision_ids || []).join(', ') || 'none'}`);
-    } else appendText(trace, 'p', 'Trace details withheld because response consistency could not be checked.');
+      const searched = new Set(data.trace.connectors_used.map(name =>
+        name === 'biomedical_literature' ? 'PubMed' :
+        name === 'clinical_trial_registry' ? 'ClinicalTrials.gov' : 'Other source'
+      ));
+      appendText(trace, 'p', 'Where we looked: ' + ([...searched].join(', ') || 'No source available'));
+      appendText(trace, 'p', 'These checks happened when the search ran. They do not confirm that every study is reliable or current.');
+    } else {
+      appendText(trace, 'p', 'More details are unavailable because this result could not be checked.');
+    }
     result.hidden = false;
     document.getElementById('answer-heading').focus?.();
   } catch (err) {
