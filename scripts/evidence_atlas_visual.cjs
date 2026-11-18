@@ -130,7 +130,7 @@ async function run() {
           assert.equal(state, 'We could not check the source details', 'Inconsistent response was not withheld');
           assert.equal(await desktop.locator('#sources a').count(), 0);
           assert.equal(await desktop.locator('.passport').count(), 0);
-          assert.match(await desktop.locator('#boundaries').innerText(), /Source details could not be checked/);
+          assert.match(await desktop.locator('#boundaries').innerText(), /Source details could not be checked/i);
         }
         const unsafe = await desktop.locator('#result a').evaluateAll(links => links.some(link => new URL(link.href).protocol !== 'https:'));
         assert.equal(unsafe, false, 'Unsafe source link retained');
@@ -142,8 +142,8 @@ async function run() {
       await desktop.locator('#submit').click();
       await desktop.waitForFunction(() => !document.getElementById('submit').disabled);
       assert.equal(await desktop.locator('#state-code').innerText(), ({ EVIDENCE_INSUFFICIENT: 'Not enough information to answer', HIGH_CONSEQUENCE_VERIFICATION_FAILED: 'We cannot verify this safety-related question', NO_AUTHORITATIVE_SOURCE: 'We could not find a suitable source' })[fixtures[name].status]);
-      assert.match(await desktop.locator('#boundaries').innerText(), /Study quality not assessed/);
-      assert.match(await desktop.locator('#boundaries').innerText(), /Australian medicine rules not checked/);
+      assert.match(await desktop.locator('#boundaries').innerText(), /Study quality not assessed/i);
+      assert.match(await desktop.locator('#boundaries').innerText(), /Australian medicine rules not checked/i);
     }
     assert.deepEqual(browserErrors, []);
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
