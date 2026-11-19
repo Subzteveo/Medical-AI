@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import uuid
 from collections.abc import Iterable
+
+from .revocation_ledger import DurableAuthorityUnavailable, DurableRevocationLedger
 
 from .schemas import (
     AuthorizedClaimView,
@@ -48,6 +51,8 @@ class InfluenceController:
     def __init__(
         self,
         allowed_transitions: Iterable[tuple[DataPlane, DataPlane]] | None = None,
+        *,
+        require_durable: bool = False,
     ) -> None:
         defaults: set[tuple[DataPlane, DataPlane]] = {
             (DataPlane.EVIDENCE, DataPlane.EVIDENCE),
@@ -66,12 +71,68 @@ class InfluenceController:
         self._authorization_revisions: dict[str, int] = {}
         self._dependencies: list[DependencyEdge] = []
         self._downstream_states: dict[str, DownstreamInfluenceState] = {}
+        state_file = os.environ.get("MEDICAL_AI_INFLUENCE_REVOCATION_DB", "").strip()
+        self._durable_required = require_durable or bool(state_file)
+        self._durable_ledger: DurableRevocationLedger | None = None
+        if state_file:
+            try:
+                self._durable_ledger = DurableRevocationLedger(
+                    state_file,
+                    os.environ.get("MEDICAL_AI_INFLUENCE_REVOCATION_HMAC_KEY", "").encode("utf-8"),
+                )
+            except DurableAuthorityUnavailable:
+                # No untrusted/in-memory substitute, including invalid configuration.
+                self._durable_ledger = None
 
     @property
     def decisions(self) -> list[InfluenceDecision]:
         return list(self._decisions.values())
 
     def authorize(
+        self, request: InfluenceRequest, *, claim: ClaimRecord | None = None
+    ) -> InfluenceDecision:
+        """Issue only under a live, transactional durable authority check if required."""
+        if not self._durable_required:
+            return self._authorize_local(request, claim=claim)
+        if self._durable_ledger is None:
+            return self._deny_without_durable_authority(request, claim=claim)
+        try:
+            with self._durable_ledger.transaction() as state:
+                stale, evidence_revoked, information_revoked = state.admission(
+                    request.subject.object_id, request.subject.revision, self.policy_version
+                )
+                if stale or evidence_revoked or information_revoked:
+                    return self._deny_without_durable_authority(
+                        request, claim=claim, stale=stale,
+                        evidence_revoked=evidence_revoked,
+                        information_revoked=information_revoked,
+                    )
+                return self._authorize_local(request, claim=claim)
+        except DurableAuthorityUnavailable:
+            return self._deny_without_durable_authority(request, claim=claim)
+
+    def _deny_without_durable_authority(
+        self,
+        request: InfluenceRequest,
+        *,
+        claim: ClaimRecord | None = None,
+        stale: bool = False,
+        evidence_revoked: bool = False,
+        information_revoked: bool = False,
+    ) -> InfluenceDecision:
+        denied = request.model_copy(deep=True)
+        denied.subject.evidence_authority = (
+            EvidenceAuthorityState.REVOKED
+            if evidence_revoked else EvidenceAuthorityState.UNKNOWN
+        )
+        denied.subject.information_handling_authority = (
+            InformationHandlingAuthorityState.REVOKED
+            if information_revoked else InformationHandlingAuthorityState.UNKNOWN
+        )
+        # Stale revision/policy and unavailable storage both deny every authority.
+        return self._authorize_local(denied, claim=claim)
+
+    def _authorize_local(
         self, request: InfluenceRequest, *, claim: ClaimRecord | None = None
     ) -> InfluenceDecision:
         if claim is not None and (
@@ -200,6 +261,20 @@ class InfluenceController:
 
     def validate_authorized_claim_view(self, view: AuthorizedClaimView) -> None:
         """Revalidate at the point of output against controller-owned live state."""
+        if self._durable_required:
+            if self._durable_ledger is None:
+                raise ValueError("Durable medical authority unavailable")
+            try:
+                with self._durable_ledger.transaction() as authority:
+                    if not authority.check_active(
+                        view.authorization.object_id,
+                        self._authorization_revisions.get(view.authorization.authorization_id, 0),
+                        self.policy_version,
+                        tuple(view.authorization.required_dependency_dimensions),
+                    ):
+                        raise ValueError("Authorization revoked in shared authority ledger")
+            except DurableAuthorityUnavailable as exc:
+                raise ValueError("Durable medical authority unavailable") from exc
         current = self._authorizations.get(view.authorization.authorization_id)
         if current is None or current.state != InfluenceAuthorizationState.ACTIVE:
             raise ValueError("Authorization is revoked or not registered as active")
@@ -347,6 +422,19 @@ class InfluenceController:
                 )
 
     def update_subject(self, subject: InfluenceSubject) -> None:
+        """Never reset a persistent watermark with a locally supplied snapshot."""
+        if not self._durable_required:
+            self._update_subject_local(subject)
+            return
+        if self._durable_ledger is None:
+            raise DurableAuthorityUnavailable("durable medical authority unavailable")
+        with self._durable_ledger.transaction() as state:
+            if not state.advance_revision(subject.object_id, subject.revision, self.policy_version):
+                # Stale replays never replace a controller subject.
+                return
+            self._update_subject_local(subject)
+
+    def _update_subject_local(self, subject: InfluenceSubject) -> None:
         """Apply an authoritative snapshot only when its revision increases."""
         current = self._subjects.get(subject.object_id)
         if current is not None and subject.revision <= current.revision:
@@ -418,6 +506,20 @@ class InfluenceController:
         object_id: str,
         dimension: DependencyDimension,
     ) -> RevocationResult:
+        """Durably commit a dimension tombstone before revocation returns."""
+        if not self._durable_required:
+            return self._revoke_authority_local(object_id, dimension)
+        if self._durable_ledger is None:
+            raise DurableAuthorityUnavailable("durable medical authority unavailable")
+        with self._durable_ledger.transaction() as state:
+            state.revoke(object_id, dimension, self.policy_version)
+            return self._revoke_authority_local(object_id, dimension)
+
+    def _revoke_authority_local(
+        self,
+        object_id: str,
+        dimension: DependencyDimension,
+    ) -> RevocationResult:
         subject = self._subjects.get(object_id)
         if subject is None:
             raise KeyError(f"Unknown influence subject: {object_id}")
@@ -479,4 +581,21 @@ class InfluenceController:
         authorization_id: str,
     ) -> InfluenceAuthorization | None:
         authorization = self._authorizations.get(authorization_id)
-        return authorization.model_copy(deep=True) if authorization is not None else None
+        if authorization is None:
+            return None
+        if self._durable_required and authorization.state == InfluenceAuthorizationState.ACTIVE:
+            active = False
+            if self._durable_ledger is not None:
+                try:
+                    with self._durable_ledger.transaction() as state:
+                        active = state.check_active(
+                            authorization.object_id,
+                            self._authorization_revisions.get(authorization_id, 0),
+                            self.policy_version,
+                            tuple(authorization.required_dependency_dimensions),
+                        )
+                except DurableAuthorityUnavailable:
+                    active = False
+            if not active:
+                return authorization.model_copy(update={"state": InfluenceAuthorizationState.REVOKED})
+        return authorization.model_copy(deep=True)
