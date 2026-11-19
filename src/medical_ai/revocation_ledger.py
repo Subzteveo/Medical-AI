@@ -87,18 +87,21 @@ class DurableRevocationSession:
             (current[1] == 0 or DependencyDimension.EVIDENCE_AUTHORITY not in dimensions) and\n            (current[2] == 0 or DependencyDimension.INFORMATION_HANDLING_AUTHORITY not in dimensions) and\n            current[3] == policy
         )
 
-    def advance_revision(self, object_id: str, revision: int, policy: str) -> None:
+    def advance_revision(self, object_id: str, revision: int, policy: str) -> bool:
         current = self._read(object_id)
         if current is None:
             # No historical state to bypass: a new subject needs independent
             # admission; this operation cannot create an approval.
             raise DurableAuthorityUnavailable("authority subject not enrolled")
         stored, er, ir, stored_policy = current
-        if policy != stored_policy or revision <= stored:
-            raise DurableAuthorityUnavailable("stale revision or changed authority policy")
+        if policy != stored_policy:
+            raise DurableAuthorityUnavailable("changed authority policy")
+        if revision <= stored:
+            return False
         # A higher revision is NOT sufficient proof of legitimate reapproval.
         # Tombstones remain until an independently authorised grant protocol exists.
         self._write(object_id, revision, er, ir, policy)
+        return True
 
     def revoke(self, object_id: str, dimension: DependencyDimension, policy: str) -> None:
         current = self._read(object_id)
