@@ -121,3 +121,36 @@ def test_des04_unconfigured_required_store_denies(monkeypatch: pytest.MonkeyPatc
     monkeypatch.delenv("MEDICAL_AI_INFLUENCE_REVOCATION_DB")
     monkeypatch.delenv("MEDICAL_AI_INFLUENCE_REVOCATION_HMAC_KEY")
     assert not InfluenceController(require_durable=True).authorize(request()).allowed
+
+
+def test_des04_adversarial_tombstone_row_deletion_never_reauthorizes() -> None:
+    """Independent challenge: deleting a row must not recreate its authority."""
+    controlling = InfluenceController()
+    assert controlling.authorize(request()).allowed
+    controlling.revoke_authority(
+        "synthetic:des04:durable", DependencyDimension.EVIDENCE_AUTHORITY
+    )
+    with sqlite3.connect(ledger_path()) as db:
+        db.execute("DELETE FROM authority_state")
+    # If storage is internally self-consistent but a tombstone vanished,
+    # re-enrollment from the previous APPROVED input must still be denied.
+    assert not InfluenceController().authorize(request(proposition="synthetic:deleted-row")).allowed
+
+
+def test_des04_adversarial_backup_rollback_never_reauthorizes() -> None:
+    """Independent challenge: restored old DB bytes must not reset revocations."""
+    controlling = InfluenceController()
+    assert controlling.authorize(request()).allowed
+    old_snapshot = ledger_path().with_name("synthetic_old_authority_backup.sqlite3")
+    with sqlite3.connect(ledger_path()) as source:
+        with sqlite3.connect(old_snapshot) as backup:
+            source.backup(backup)
+    controlling.revoke_authority(
+        "synthetic:des04:durable", DependencyDimension.EVIDENCE_AUTHORITY
+    )
+    for suffix in ("-wal", "-shm"):
+        ledger_path().with_name(ledger_path().name + suffix).unlink(missing_ok=True)
+    os.replace(old_snapshot, ledger_path())
+    assert not InfluenceController().authorize(
+        request(proposition="synthetic:restored-pre-revocation-db")
+    ).allowed
