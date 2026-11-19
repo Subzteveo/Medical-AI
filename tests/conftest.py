@@ -33,13 +33,27 @@ def home_state_untouched():
 
 
 @pytest.fixture(autouse=True)
-def isolated_state_dirs(monkeypatch, tmp_path):
+def isolated_state_dirs(monkeypatch, tmp_path, request):
     """Point the session and trace stores at a per-test temporary directory."""
     import medical_ai.api as api
 
     monkeypatch.setenv("MEDICAL_AI_PILOT_SESSION_DB", str(tmp_path / "pilot_sessions.sqlite3"))
     monkeypatch.setenv("MEDICAL_AI_TRACE_DB", str(tmp_path / "medical_ai_traces.sqlite3"))
     monkeypatch.setattr(api, "TRACE_DB", str(tmp_path / "medical_ai_traces.sqlite3"))
+
+    # Reuse the original DES-04 tests byte-for-byte. A distinct provisioned
+    # durable test database is inherited by real spawned Python processes.
+    # Other fixture suites retain their original independent-controller semantics.
+    monkeypatch.delenv("MEDICAL_AI_INFLUENCE_REVOCATION_DB", raising=False)
+    monkeypatch.delenv("MEDICAL_AI_INFLUENCE_REVOCATION_HMAC_KEY", raising=False)
+    if request.node.path.name.startswith("test_des04_"):
+        from medical_ai.revocation_ledger import DurableRevocationLedger
+
+        state = tmp_path / "synthetic_des04_authority.sqlite3"
+        key = b"DES04-synthetic-test-key-not-for-any-production-use-20261120"
+        DurableRevocationLedger.provision(state, key)
+        monkeypatch.setenv("MEDICAL_AI_INFLUENCE_REVOCATION_DB", str(state))
+        monkeypatch.setenv("MEDICAL_AI_INFLUENCE_REVOCATION_HMAC_KEY", key.decode("ascii"))
 
 
 def synthetic_version_record(
