@@ -218,8 +218,8 @@ class QueryRequest(BaseModel):
 
 @lru_cache(maxsize=1)
 def _shared_influence_controller() -> InfluenceController:
-    """Preserve revocation decisions across requests within one API process."""
-    return InfluenceController()
+    """Require a provisioned durable authority ledger for HTTP influence."""
+    return InfluenceController(require_durable=True)
 
 
 def build_engine() -> EvidenceEngine:
