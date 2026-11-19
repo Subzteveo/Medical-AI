@@ -80,11 +80,11 @@ class DurableRevocationSession:
         stored, er, ir, stored_policy = current
         return revision != stored or policy != stored_policy, er != 0, ir != 0
 
-    def check_active(self, object_id: str, revision: int, policy: str) -> bool:
+    def check_active(\n        self, object_id: str, revision: int, policy: str,\n        dimensions: tuple[DependencyDimension, ...],\n    ) -> bool:
         current = self._read(object_id)
         return bool(
             current is not None and current[0] == revision and
-            current[1] == 0 and current[2] == 0 and current[3] == policy
+            (current[1] == 0 or DependencyDimension.EVIDENCE_AUTHORITY not in dimensions) and\n            (current[2] == 0 or DependencyDimension.INFORMATION_HANDLING_AUTHORITY not in dimensions) and\n            current[3] == policy
         )
 
     def advance_revision(self, object_id: str, revision: int, policy: str) -> None:
